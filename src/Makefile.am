@@ -19,6 +19,7 @@ iconfig_SOURCES = \
 	database.c \
 	base_info.c \
 	users.c \
+	osd.c \
 	iconfig.c \
 	main.c
 
