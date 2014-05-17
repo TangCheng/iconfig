@@ -403,3 +403,22 @@ gboolean ipcam_database_get_user_privilege(IpcamDatabase *database, gchar *usern
     
     return isadmin;
 }
+void ipcam_database_del_user(IpcamDatabase *database, gchar *username)
+{
+    g_return_if_fail(IPCAM_IS_DATABASE(database));
+    GomResource *resource = NULL;
+    GError *error = NULL;
+    
+    resource = ipcam_database_get_resource(database, IPCAM_USERS_TYPE, username);
+    if (resource)
+    {
+        gom_resource_delete_sync(resource, &error);
+        g_object_unref(resource);
+    }
+
+    if (error)
+    {
+        g_print("delete user error: %s\n", error->message);
+        g_error_free(error);
+    }
+}

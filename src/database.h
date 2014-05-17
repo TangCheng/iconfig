@@ -32,5 +32,6 @@ void ipcam_database_set_user_password(IpcamDatabase *database, gchar *username, 
 gchar *ipcam_database_get_user_password(IpcamDatabase *database, gchar *username);
 void ipcam_database_set_user_privilege(IpcamDatabase *database, gchar *username, gboolean isadmin);
 gboolean ipcam_database_get_user_privilege(IpcamDatabase *database, gchar *username);
+void ipcam_database_del_user(IpcamDatabase *database, gchar *username);
 
 #endif /* __DATABASE_H__ */
