@@ -102,14 +102,14 @@ static void ipcam_base_info_class_init(IpcamBaseInfoClass *klass)
 
     GomResourceClass *resource_class = GOM_RESOURCE_CLASS(klass);
     gom_resource_class_set_table(resource_class, "base_info");
-    gom_resource_class_set_primary_key(resource_class, "id");
+    gom_resource_class_set_primary_key(resource_class, "_id");
   
     obj_properties[PROP_ID] =
-        g_param_spec_int("id",
+        g_param_spec_int("_id",
                          "ID",
                          "The ID for the basic information.",
                          0,
-                         65536,
+                         65535,
                          0, // default value
                          G_PARAM_READWRITE);
     obj_properties[PROP_NAME] =
