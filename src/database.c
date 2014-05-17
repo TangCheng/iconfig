@@ -1,5 +1,6 @@
 #include <gom/gom.h>
 #include "database.h"
+#include "base_info.h"
 
 #define DATABASE_PATH_NAME "/data/configuration.sqlite3"
 
@@ -50,7 +51,7 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
     } G_STMT_END
     if (version == 1) {
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS base_info ("
-                     "_id    INTEGER PRIMARY KEY AUTOINCREMENT,"
+                     "id    INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name   TEXT UNIQUE NOT NULL,"
                      "value  TEXT NOT NULL"
                      ");");
@@ -60,7 +61,7 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "VALUES ('comment', '');");
         
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS users ("
-                     "_id       INTEGER PRIMARY KEY AUTOINCREMENT,"
+                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name      TEXT UNIQUE NOT NULL,"
                      "password  TEXT NOT NULL,"
                      "is_admin  BOOLEAN"
@@ -69,7 +70,7 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "VALUES ('admin', 'admin', 'true');");
         
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS osd ("
-                     "_id       INTEGER PRIMARY KEY AUTOINCREMENT,"
+                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name      TEXT UNIQUE NOT NULL,"
                      "is_show   BOOLEAN,"
                      "size      INTEGER,"
@@ -89,7 +90,7 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "VALUES ('bit_rate', 'true', 5, 10, 90, 0);");
 
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS video ("
-                     "_id       INTEGER PRIMARY KEY AUTOINCREMENT,"
+                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name      TEXT UNIQUE NOT NULL,"
                      "value     INTEGER"
                      ");");
@@ -107,7 +108,7 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "VALUES ('bit_rate_value', 300);");
 
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS scene ("
-                     "_id       INTEGER PRIMARY KEY AUTOINCREMENT,"
+                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name      TEXT UNIQUE NOT NULL,"
                      "value     INTEGER"
                      ");");
@@ -115,14 +116,14 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "VALUES ('scenario', 0);");
 
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS network ("
-                     "_id       INTEGER PRIMARY KEY AUTOINCREMENT,"
+                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name      TEXT UNIQUE NOT NULL,"
                      "value     INTEGER"
                      ");");
         EXEC_OR_FAIL("INSERT INTO network (name, value) "
                      "VALUES ('method', 0);");
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS network_static ("
-                     "_id       INTEGER PRIMARY KEY AUTOINCREMENT,"
+                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name      TEXT UNIQUE NOT NULL,"
                      "value     TEXT"
                      ");");
@@ -137,7 +138,7 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
         EXEC_OR_FAIL("INSERT INTO network_static (name, value) "
                      "VALUES ('dns2', '');");
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS network_pppoe ("
-                     "_id       INTEGER PRIMARY KEY AUTOINCREMENT,"
+                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name      TEXT UNIQUE NOT NULL,"
                      "value     TEXT"
                      ");");
@@ -146,7 +147,7 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
         EXEC_OR_FAIL("INSERT INTO network_pppoe (name, value) "
                      "VALUES ('password', '');");
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS network_port ("
-                     "_id       INTEGER PRIMARY KEY AUTOINCREMENT,"
+                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name      TEXT UNIQUE NOT NULL,"
                      "value     INTEGER UNIQUE NOT NULL"
                      ");");
@@ -156,7 +157,7 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "VALUES ('rtsp', 554);");
 
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS datetime ("
-                     "_id       INTEGER PRIMARY KEY AUTOINCREMENT,"
+                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name      TEXT UNIQUE NOT NULL,"
                      "int_value INTEGER,"
                      "str_value TEXT"
@@ -210,3 +211,64 @@ static void ipcam_database_open(IpcamDatabase *database)
         g_error_free(error);
     }
 }
+
+static GomResource *ipcam_database_get_baseinfo_resource(IpcamDatabase *database, gchar *name)
+{
+    IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);
+    GValue value = { 0, };
+    GomFilter *filter;
+    GomResource *resource = NULL;
+    GError *error = NULL;
+
+    g_value_init(&value, G_TYPE_STRING);
+    g_value_set_string(&value, name);
+    filter = gom_filter_new_eq(IPCAM_BASE_INFO_TYPE, "name", &value);
+    g_value_unset(&value);
+    resource = gom_repository_find_one_sync(priv->repository,
+                                            IPCAM_BASE_INFO_TYPE,
+                                            filter,
+                                            &error);
+    if (error != NULL)
+    {
+        g_print("Get base info record error: %s\n", error->message);
+        g_error_free(error);
+    }
+
+    return resource;
+}
+void ipcam_database_set_baseinfo(IpcamDatabase *database, gchar *name, gchar *value)
+{
+    g_return_if_fail(IPCAM_IS_DATABASE(database));
+    GomResource *resource = NULL;
+    GError *error = NULL;
+
+    resource = ipcam_database_get_baseinfo_resource(database, name);
+    if (resource)
+    {
+        g_object_set(resource, "value", value, NULL);
+        gom_resource_save_sync(resource, &error);
+        g_object_unref(resource);
+    }
+
+    if (error)
+    {
+        g_print("save base info error: %s\n", error->message);
+        g_error_free(error);
+    }
+}
+gchar *ipcam_database_get_baseinfo(IpcamDatabase *database, gchar *name)
+{
+    g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
+    GomResource *resource = NULL;
+    gchar *value = NULL;
+
+    resource = ipcam_database_get_baseinfo_resource(database, name);
+    if (resource)
+    {
+        g_object_get(resource, "value", &value, NULL);
+        g_object_unref(resource);
+    }
+    
+    return value;
+}
+
