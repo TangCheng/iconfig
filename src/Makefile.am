@@ -21,6 +21,7 @@ iconfig_SOURCES = \
 	users.c \
 	osd.c \
 	video.c \
+	scene.c \
 	iconfig.c \
 	main.c
 
