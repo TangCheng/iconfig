@@ -212,7 +212,7 @@ static void ipcam_database_open(IpcamDatabase *database)
     }
 }
 
-static GomResource *ipcam_database_get_baseinfo_resource(IpcamDatabase *database, gchar *name)
+static GomResource *ipcam_database_get_resource(IpcamDatabase *database, GType resource_type, gchar *name)
 {
     IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);
     GValue value = { 0, };
@@ -222,15 +222,15 @@ static GomResource *ipcam_database_get_baseinfo_resource(IpcamDatabase *database
 
     g_value_init(&value, G_TYPE_STRING);
     g_value_set_string(&value, name);
-    filter = gom_filter_new_eq(IPCAM_BASE_INFO_TYPE, "name", &value);
+    filter = gom_filter_new_eq(resource_type, "name", &value);
     g_value_unset(&value);
     resource = gom_repository_find_one_sync(priv->repository,
-                                            IPCAM_BASE_INFO_TYPE,
+                                            resource_type,
                                             filter,
                                             &error);
     if (error != NULL)
     {
-        g_print("Get base info record error: %s\n", error->message);
+        g_print("Get record error: %s\n", error->message);
         g_error_free(error);
     }
     g_object_unref(filter);
@@ -243,7 +243,7 @@ void ipcam_database_set_baseinfo(IpcamDatabase *database, gchar *name, gchar *va
     GomResource *resource = NULL;
     GError *error = NULL;
 
-    resource = ipcam_database_get_baseinfo_resource(database, name);
+    resource = ipcam_database_get_resource(database, IPCAM_BASE_INFO_TYPE, name);
     if (resource)
     {
         g_object_set(resource, "value", value, NULL);
@@ -263,7 +263,7 @@ gchar *ipcam_database_get_baseinfo(IpcamDatabase *database, gchar *name)
     GomResource *resource = NULL;
     gchar *value = NULL;
 
-    resource = ipcam_database_get_baseinfo_resource(database, name);
+    resource = ipcam_database_get_resource(database, IPCAM_BASE_INFO_TYPE, name);
     if (resource)
     {
         g_object_get(resource, "value", &value, NULL);
