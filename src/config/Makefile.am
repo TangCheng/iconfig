@@ -4,7 +4,7 @@
 
 AM_CPPFLAGS = \
 	-DPACKAGE_LOCALE_DIR=\""$(localedir)"\" \
-	-DPACKAGE_SRC_DIR=\""$(srcdir)"\" \
+	-DPACKAGE_SRC_DIR=\""$(srcdir)."\" \
 	-DPACKAGE_DATA_DIR=\""$(pkgdatadir)"\" \
 	$(ICONFIG_CFLAGS)
 
@@ -12,17 +12,6 @@ AM_CFLAGS =\
 	 -Wall\
 	 -g
 
-bindir = $(prefix)/iconfig
-bin_PROGRAMS = iconfig
 
-iconfig_SOURCES = \
-	iconfig.c \
-	main.c
-
-iconfig_LDFLAGS = 
-
-iconfig_LDADD = $(ICONFIG_LIBS)
-
-
-SUBDIRS = \
-	config
+conf_datadir = $(prefix)/iconfig/config
+conf_data_DATA = app.yml

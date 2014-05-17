@@ -28,5 +28,6 @@ PKG_CHECK_MODULES(ICONFIG, [gom-1.0 libipcam_base-0.1.0])
 AC_OUTPUT([
 Makefile
 src/Makefile
+src/config/Makefile
 
 ])
