@@ -15,6 +15,7 @@ AM_CFLAGS =\
 bin_PROGRAMS = iconfig
 
 iconfig_SOURCES = \
+	iconfig.c \
 	main.c
 
 iconfig_LDFLAGS = 

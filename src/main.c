@@ -6,9 +6,12 @@
  */
 
 #include <stdio.h>
+#include "iconfig.h"
+
 int main()
 {
-	printf("Hello world\n");
+	IpcamIConfig *iconfig = g_object_new(IPCAM_ICONFIG_TYPE, "name", "iconfig", NULL);
+	ipcam_base_service_start(IPCAM_BASE_SERVICE(iconfig));
 	return (0);
 }
 
