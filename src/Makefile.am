@@ -17,6 +17,7 @@ bin_PROGRAMS = iconfig
 
 iconfig_SOURCES = \
 	database.c \
+	base_info.c \
 	iconfig.c \
 	main.c
 
