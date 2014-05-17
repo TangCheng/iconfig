@@ -233,7 +233,8 @@ static GomResource *ipcam_database_get_baseinfo_resource(IpcamDatabase *database
         g_print("Get base info record error: %s\n", error->message);
         g_error_free(error);
     }
-
+    g_object_unref(filter);
+    
     return resource;
 }
 void ipcam_database_set_baseinfo(IpcamDatabase *database, gchar *name, gchar *value)
