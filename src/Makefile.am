@@ -22,6 +22,10 @@ iconfig_SOURCES = \
 	osd.c \
 	video.c \
 	scene.c \
+	network.c \
+	network_static.c \
+	network_pppoe.c \
+	network_port.c \
 	iconfig.c \
 	main.c
 
