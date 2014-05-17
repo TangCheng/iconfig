@@ -20,6 +20,7 @@ iconfig_SOURCES = \
 	base_info.c \
 	users.c \
 	osd.c \
+	video.c \
 	iconfig.c \
 	main.c
 
