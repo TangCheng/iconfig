@@ -26,6 +26,7 @@ iconfig_SOURCES = \
 	network_static.c \
 	network_pppoe.c \
 	network_port.c \
+	datetime.c \
 	iconfig.c \
 	main.c
 
