@@ -20,7 +20,7 @@ AC_PROG_CC
 
 
 
-PKG_CHECK_MODULES(ICONFIG, [gom-1.0 libipcam_base-0.1.0])
+PKG_CHECK_MODULES(ICONFIG, [gio-2.0 gom-1.0 libipcam_base-0.1.0])
 
 
 

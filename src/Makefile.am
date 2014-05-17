@@ -16,6 +16,7 @@ bindir = $(prefix)/iconfig
 bin_PROGRAMS = iconfig
 
 iconfig_SOURCES = \
+	database.c \
 	iconfig.c \
 	main.c
 
