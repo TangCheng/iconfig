@@ -68,7 +68,7 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "isadmin  BOOLEAN"
                      ");");
         EXEC_OR_FAIL("INSERT INTO users (name, password, isadmin) "
-                     "VALUES ('admin', 'admin', 'true');");
+                     "VALUES ('admin', 'admin', 1);");
         
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS osd ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -80,15 +80,15 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "color     INTEGER"
                      ");");
         EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, x, y, color) "
-                     "VALUES ('datetime', 'true', 5, 10, 20, 0);");
+                     "VALUES ('datetime', 1, 5, 10, 20, 0);");
         EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, x, y, color) "
-                     "VALUES ('device_name', 'true', 5, 10, 10, 0);");
+                     "VALUES ('device_name', 1, 5, 10, 10, 0);");
         EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, x, y, color) "
-                     "VALUES ('comment', 'true', 5, 70, 10, 0);");
+                     "VALUES ('comment', 1, 5, 70, 10, 0);");
         EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, x, y, color) "
-                     "VALUES ('frame_rate', 'true', 5, 10, 80, 0);");
+                     "VALUES ('frame_rate', 1, 5, 10, 80, 0);");
         EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, x, y, color) "
-                     "VALUES ('bit_rate', 'true', 5, 10, 90, 0);");
+                     "VALUES ('bit_rate', 1, 5, 10, 90, 0);");
 
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS video ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -338,6 +338,14 @@ void ipcam_database_set_user_password(IpcamDatabase *database, gchar *username, 
         gom_resource_save_sync(resource, &error);
         g_object_unref(resource);
     }
+    else
+    {
+        resource = g_object_new(IPCAM_USERS_TYPE, "name", username, "password", password, NULL);
+        IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);
+        g_object_set(resource, "repository", priv->repository, NULL);
+        gom_resource_save_sync(resource, &error);
+        g_object_unref(resource);
+    }
 
     if (error)
     {
@@ -359,4 +367,39 @@ gchar *ipcam_database_get_user_password(IpcamDatabase *database, gchar *username
     }
     
     return password;
+}
+void ipcam_database_set_user_privilege(IpcamDatabase *database, gchar *username, gboolean isadmin)
+{
+    g_return_if_fail(IPCAM_IS_DATABASE(database));
+    GomResource *resource = NULL;
+    GError *error = NULL;
+    
+    resource = ipcam_database_get_resource(database, IPCAM_USERS_TYPE, username);
+    if (resource)
+    {
+        g_object_set(resource, "isadmin", isadmin, NULL);
+        gom_resource_save_sync(resource, &error);
+        g_object_unref(resource);
+    }
+
+    if (error)
+    {
+        g_print("save users privilege error: %s\n", error->message);
+        g_error_free(error);
+    }
+}
+gboolean ipcam_database_get_user_privilege(IpcamDatabase *database, gchar *username)
+{
+    g_return_val_if_fail(IPCAM_IS_DATABASE(database), FALSE);
+    GomResource *resource = NULL;
+    gboolean isadmin = FALSE;
+
+    resource = ipcam_database_get_resource(database, IPCAM_USERS_TYPE, username);
+    if (resource)
+    {
+        g_object_get(resource, "isadmin", &isadmin, NULL);
+        g_object_unref(resource);
+    }
+    
+    return isadmin;
 }
