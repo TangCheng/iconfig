@@ -126,4 +126,7 @@ static void ipcam_base_info_class_init(IpcamBaseInfoClass *klass)
 
     g_object_class_install_properties(object_class, N_PROPERTIES, obj_properties);
     gom_resource_class_set_primary_key(resource_class, "id");
+    gom_resource_class_set_unique(resource_class, "name");
+    gom_resource_class_set_notnull(resource_class, "name");
+    gom_resource_class_set_notnull(resource_class, "value");
 }
