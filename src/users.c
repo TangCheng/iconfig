@@ -132,7 +132,7 @@ static void ipcam_users_class_init(IpcamUsersClass *klass)
                             NULL, // default value
                             G_PARAM_READWRITE);
     obj_properties[PROP_IS_ADMIN] =
-        g_param_spec_boolean("is_admin",
+        g_param_spec_boolean("isadmin",
                              "Administrator?",
                              "Is this user administrator?",
                              FALSE,

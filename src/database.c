@@ -1,6 +1,7 @@
 #include <gom/gom.h>
 #include "database.h"
 #include "base_info.h"
+#include "users.h"
 
 #define DATABASE_PATH_NAME "/data/configuration.sqlite3"
 
@@ -64,29 +65,29 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name      TEXT UNIQUE NOT NULL,"
                      "password  TEXT NOT NULL,"
-                     "is_admin  BOOLEAN"
+                     "isadmin  BOOLEAN"
                      ");");
-        EXEC_OR_FAIL("INSERT INTO users (name, password, is_admin) "
+        EXEC_OR_FAIL("INSERT INTO users (name, password, isadmin) "
                      "VALUES ('admin', 'admin', 'true');");
         
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS osd ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name      TEXT UNIQUE NOT NULL,"
-                     "is_show   BOOLEAN,"
+                     "isshow   BOOLEAN,"
                      "size      INTEGER,"
                      "x         INTEGER,"
                      "y         INTEGER,"
                      "color     INTEGER"
                      ");");
-        EXEC_OR_FAIL("INSERT INTO osd (name, is_show, size, x, y, color) "
+        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, x, y, color) "
                      "VALUES ('datetime', 'true', 5, 10, 20, 0);");
-        EXEC_OR_FAIL("INSERT INTO osd (name, is_show, size, x, y, color) "
+        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, x, y, color) "
                      "VALUES ('device_name', 'true', 5, 10, 10, 0);");
-        EXEC_OR_FAIL("INSERT INTO osd (name, is_show, size, x, y, color) "
+        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, x, y, color) "
                      "VALUES ('comment', 'true', 5, 70, 10, 0);");
-        EXEC_OR_FAIL("INSERT INTO osd (name, is_show, size, x, y, color) "
+        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, x, y, color) "
                      "VALUES ('frame_rate', 'true', 5, 10, 80, 0);");
-        EXEC_OR_FAIL("INSERT INTO osd (name, is_show, size, x, y, color) "
+        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, x, y, color) "
                      "VALUES ('bit_rate', 'true', 5, 10, 90, 0);");
 
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS video ("
@@ -237,6 +238,24 @@ static GomResource *ipcam_database_get_resource(IpcamDatabase *database, GType r
     
     return resource;
 }
+static GomResourceGroup *ipcam_database_get_resource_group(IpcamDatabase *database, GType resource_type)
+{
+    IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);;
+    GError *error = NULL;
+    GomResourceGroup *resource_group = NULL;
+
+    resource_group = gom_repository_find_sync(priv->repository,
+                                              resource_type,
+                                              NULL,
+                                              &error);
+    if (error)
+    {
+        g_print("Get record group error: %s\n", error->message);
+        g_error_free(error);
+    }
+    
+    return resource_group;
+}
 void ipcam_database_set_baseinfo(IpcamDatabase *database, gchar *name, gchar *value)
 {
     g_return_if_fail(IPCAM_IS_DATABASE(database));
@@ -272,4 +291,72 @@ gchar *ipcam_database_get_baseinfo(IpcamDatabase *database, gchar *name)
     
     return value;
 }
+GList *ipcam_database_get_users(IpcamDatabase *database)
+{
+    g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
+    GomResourceGroup *resource_group = NULL;
+    GomResource *resource = NULL;
+    guint count = 0;
+    guint i = 0;
+    GList *users_list = NULL;
+    gchar *username;
+    GError *error = NULL;
 
+    resource_group = ipcam_database_get_resource_group(database, IPCAM_USERS_TYPE);
+    if (resource_group)
+    {
+        count = gom_resource_group_get_count(resource_group);
+        gom_resource_group_fetch_sync(resource_group, 0, count, &error);
+        for (i = 0; i < count; i++)
+        {
+            resource = gom_resource_group_get_index(resource_group, i);
+            g_object_get(resource, "name", &username, NULL);
+            users_list = g_list_append(users_list, g_strdup(username));
+            g_free(username);
+        }
+        g_object_unref(resource_group);
+
+        if (error)
+        {
+            g_print("fetch data error: %s\n", error->message);
+            g_error_free(error);
+        }
+    }
+
+    return users_list;
+}
+void ipcam_database_set_user_password(IpcamDatabase *database, gchar *username, gchar *password)
+{
+    g_return_if_fail(IPCAM_IS_DATABASE(database));
+    GomResource *resource = NULL;
+    GError *error = NULL;
+
+    resource = ipcam_database_get_resource(database, IPCAM_USERS_TYPE, username);
+    if (resource)
+    {
+        g_object_set(resource, "password", password, NULL);
+        gom_resource_save_sync(resource, &error);
+        g_object_unref(resource);
+    }
+
+    if (error)
+    {
+        g_print("save users password error: %s\n", error->message);
+        g_error_free(error);
+    }
+}
+gchar *ipcam_database_get_user_password(IpcamDatabase *database, gchar *username)
+{
+    g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
+    GomResource *resource = NULL;
+    gchar *password = NULL;
+
+    resource = ipcam_database_get_resource(database, IPCAM_USERS_TYPE, username);
+    if (resource)
+    {
+        g_object_get(resource, "password", &password, NULL);
+        g_object_unref(resource);
+    }
+    
+    return password;
+}

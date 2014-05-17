@@ -160,7 +160,7 @@ static void ipcam_osd_class_init(IpcamOsdClass *klass)
                             NULL, // default value
                             G_PARAM_READWRITE);
     obj_properties[PROP_IS_SHOW] =
-        g_param_spec_boolean("is_show",
+        g_param_spec_boolean("isshow",
                              "Show?",
                              "Is this content show?",
                              TRUE,

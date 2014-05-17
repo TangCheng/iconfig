@@ -27,5 +27,8 @@ struct _IpcamDatabaseClass
 GType ipcam_database_get_type(void);
 void ipcam_database_set_baseinfo(IpcamDatabase *database, gchar *name, gchar *value);
 gchar *ipcam_database_get_baseinfo(IpcamDatabase *database, gchar *name);
+GList *ipcam_database_get_users(IpcamDatabase *database);
+void ipcam_database_set_user(IpcamDatabase *database, gchar *username, gchar *password);
+gchar *ipcam_database_get_user(IpcamDatabase *database, gchar *username);
 
 #endif /* __DATABASE_H__ */
