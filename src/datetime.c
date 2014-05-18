@@ -126,7 +126,7 @@ static void ipcam_datetime_class_init(IpcamDatetimeClass *klass)
                             NULL, // default value
                             G_PARAM_READWRITE);
     obj_properties[PROP_INT_VALUE] =
-        g_param_spec_int("int_value",
+        g_param_spec_int("intvalue",
                          "Parameter value",
                          "Datetime parameter integer value.",
                          0,
@@ -134,7 +134,7 @@ static void ipcam_datetime_class_init(IpcamDatetimeClass *klass)
                          0, // default value
                          G_PARAM_READWRITE);
     obj_properties[PROP_STR_VALUE] =
-        g_param_spec_string("str_value",
+        g_param_spec_string("strvalue",
                             "Parameter value",
                             "Datetime parameter string value.",
                             NULL, // default value

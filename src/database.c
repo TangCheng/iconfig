@@ -2,6 +2,14 @@
 #include "database.h"
 #include "base_info.h"
 #include "users.h"
+#include "osd.h"
+#include "video.h"
+#include "scene.h"
+#include "network.h"
+#include "network_static.h"
+#include "network_pppoe.h"
+#include "network_port.h"
+#include "datetime.h"
 
 #define DATABASE_PATH_NAME "/data/configuration.sqlite3"
 
@@ -52,7 +60,7 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
     } G_STMT_END
     if (version == 1) {
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS base_info ("
-                     "id    INTEGER PRIMARY KEY AUTOINCREMENT,"
+                     "id     INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name   TEXT UNIQUE NOT NULL,"
                      "value  TEXT NOT NULL"
                      ");");
@@ -63,8 +71,8 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
         
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS users ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name      TEXT UNIQUE NOT NULL,"
-                     "password  TEXT NOT NULL,"
+                     "name     TEXT UNIQUE NOT NULL,"
+                     "password TEXT NOT NULL,"
                      "isadmin  BOOLEAN"
                      ");");
         EXEC_OR_FAIL("INSERT INTO users (name, password, isadmin) "
@@ -72,12 +80,12 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
         
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS osd ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name      TEXT UNIQUE NOT NULL,"
+                     "name     TEXT UNIQUE NOT NULL,"
                      "isshow   BOOLEAN,"
-                     "size      INTEGER,"
-                     "x         INTEGER,"
-                     "y         INTEGER,"
-                     "color     INTEGER"
+                     "size     INTEGER,"
+                     "x        INTEGER,"
+                     "y        INTEGER,"
+                     "color    INTEGER"
                      ");");
         EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, x, y, color) "
                      "VALUES ('datetime', 1, 5, 10, 20, 0);");
@@ -92,8 +100,8 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
 
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS video ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name      TEXT UNIQUE NOT NULL,"
-                     "value     INTEGER"
+                     "name     TEXT UNIQUE NOT NULL,"
+                     "value    INTEGER"
                      ");");
         EXEC_OR_FAIL("INSERT INTO video (name, value) "
                      "VALUES ('profile', 0);");
@@ -110,23 +118,23 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
 
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS scene ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name      TEXT UNIQUE NOT NULL,"
-                     "value     INTEGER"
+                     "name     TEXT UNIQUE NOT NULL,"
+                     "value    INTEGER"
                      ");");
         EXEC_OR_FAIL("INSERT INTO scene (name, value) "
                      "VALUES ('scenario', 0);");
 
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS network ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name      TEXT UNIQUE NOT NULL,"
-                     "value     INTEGER"
+                     "name     TEXT UNIQUE NOT NULL,"
+                     "value    INTEGER"
                      ");");
         EXEC_OR_FAIL("INSERT INTO network (name, value) "
                      "VALUES ('method', 0);");
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS network_static ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name      TEXT UNIQUE NOT NULL,"
-                     "value     TEXT"
+                     "name     TEXT UNIQUE NOT NULL,"
+                     "value    TEXT"
                      ");");
         EXEC_OR_FAIL("INSERT INTO network_static (name, value) "
                      "VALUES ('address', '192.168.0.100');");
@@ -140,8 +148,8 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "VALUES ('dns2', '');");
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS network_pppoe ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name      TEXT UNIQUE NOT NULL,"
-                     "value     TEXT"
+                     "name     TEXT UNIQUE NOT NULL,"
+                     "value    TEXT"
                      ");");
         EXEC_OR_FAIL("INSERT INTO network_pppoe (name, value) "
                      "VALUES ('username', '');");
@@ -149,8 +157,8 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "VALUES ('password', '');");
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS network_port ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name      TEXT UNIQUE NOT NULL,"
-                     "value     INTEGER UNIQUE NOT NULL"
+                     "name     TEXT UNIQUE NOT NULL,"
+                     "value    INTEGER UNIQUE NOT NULL"
                      ");");
         EXEC_OR_FAIL("INSERT INTO network_port (name, value) "
                      "VALUES ('http', 80);");
@@ -159,9 +167,9 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
 
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS datetime ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name      TEXT UNIQUE NOT NULL,"
-                     "int_value INTEGER,"
-                     "str_value TEXT"
+                     "name     TEXT UNIQUE NOT NULL,"
+                     "intvalue INTEGER,"
+                     "strvalue TEXT"
                      ");");
         EXEC_OR_FAIL("INSERT INTO datetime (name, int_value, str_value) "
                      "VALUES ('timezone', 0, '');");
@@ -420,5 +428,299 @@ void ipcam_database_del_user(IpcamDatabase *database, gchar *username)
     {
         g_print("delete user error: %s\n", error->message);
         g_error_free(error);
+    }
+}
+void ipcam_database_set_osd(IpcamDatabase *database,
+                            gchar *name,
+                            gboolean isshow,
+                            guint size,
+                            guint x,
+                            guint y,
+                            guint color)
+{
+    g_return_if_fail(IPCAM_IS_DATABASE(database));
+    GomResource *resource = NULL;
+    GError *error = NULL;
+
+    resource = ipcam_database_get_resource(database, IPCAM_OSD_TYPE, name);
+    if (resource)
+    {
+        g_object_set(resource, "isshow", isshow, "size", size, "x", x, "y", y, "color", color, NULL);
+        gom_resource_save_sync(resource, &error);
+        g_object_unref(resource);
+    }
+
+    if (error)
+    {
+        g_print("set osd record failed: %s\n", error->message);
+        g_error_free(error);
+    }
+}
+gboolean ipcam_database_get_osd(IpcamDatabase *database,
+                                gchar *name,
+                                gboolean *isshow,
+                                guint *size,
+                                guint *x,
+                                guint *y,
+                                guint *color)
+{
+    g_return_val_if_fail(IPCAM_IS_DATABASE(database), FALSE);
+    GomResource *resource = NULL;
+    gboolean ret = FALSE;
+    
+    resource = ipcam_database_get_resource(database, IPCAM_OSD_TYPE, name);
+    if (resource)
+    {
+        g_object_get(resource, "isshow", isshow, "size", size, "x", x, "y", y, "color", color, NULL);
+        g_object_unref(resource);
+        ret = TRUE;
+    }
+    
+    return ret;
+}
+void ipcam_database_set_video(IpcamDatabase *database, gchar *name, guint value)
+{
+    g_return_if_fail(IPCAM_IS_DATABASE(database));
+    GomResource *resource = NULL;
+    GError *error = NULL;
+
+    resource = ipcam_database_get_resource(database, IPCAM_VIDEO_TYPE, name);
+    if (resource)
+    {
+        g_object_set(resource, "value", value, NULL);
+        gom_resource_save_sync(resource, &error);
+        g_object_unref(resource);
+    }
+
+    if (error)
+    {
+        g_print("set video record failed: %s\n", error->message);
+        g_error_free(error);
+    }
+}
+gint ipcam_database_get_video(IpcamDatabase *database, gchar *name)
+{
+    g_return_val_if_fail(IPCAM_IS_DATABASE(database), -1);
+    GomResource *resource = NULL;
+    gint value = -1;
+    
+    resource = ipcam_database_get_resource(database, IPCAM_VIDEO_TYPE, name);
+    if (resource)
+    {
+        g_object_get(resource, "value", &value, NULL);
+        g_object_unref(resource);
+    }
+    
+    return value;
+}
+void ipcam_database_set_scene(IpcamDatabase *database, gchar *name, guint value)
+{
+    g_return_if_fail(IPCAM_IS_DATABASE(database));
+    GomResource *resource = NULL;
+    GError *error = NULL;
+
+    resource = ipcam_database_get_resource(database, IPCAM_SCENE_TYPE, name);
+    if (resource)
+    {
+        g_object_set(resource, "value", value, NULL);
+        gom_resource_save_sync(resource, &error);
+        g_object_unref(resource);
+    }
+
+    if (error)
+    {
+        g_print("set scene record failed: %s\n", error->message);
+        g_error_free(error);
+    }
+}
+gint ipcam_database_get_scene(IpcamDatabase *database, gchar *name)
+{
+    g_return_val_if_fail(IPCAM_IS_DATABASE(database), -1);
+    GomResource *resource = NULL;
+    gint value = -1;
+    
+    resource = ipcam_database_get_resource(database, IPCAM_SCENE_TYPE, name);
+    if (resource)
+    {
+        g_object_get(resource, "value", &value, NULL);
+        g_object_unref(resource);
+    }
+    
+    return value;
+}
+void ipcam_database_set_network(IpcamDatabase *database, gchar *name, guint value)
+{
+    g_return_if_fail(IPCAM_IS_DATABASE(database));
+    GomResource *resource = NULL;
+    GError *error = NULL;
+
+    resource = ipcam_database_get_resource(database, IPCAM_NETWORK_TYPE, name);
+    if (resource)
+    {
+        g_object_set(resource, "value", value, NULL);
+        gom_resource_save_sync(resource, &error);
+        g_object_unref(resource);
+    }
+
+    if (error)
+    {
+        g_print("set network record failed: %s\n", error->message);
+        g_error_free(error);
+    }
+}
+gint ipcam_database_get_network(IpcamDatabase *database, gchar *name)
+{
+    g_return_val_if_fail(IPCAM_IS_DATABASE(database), -1);
+    GomResource *resource = NULL;
+    gint value = -1;
+    
+    resource = ipcam_database_get_resource(database, IPCAM_NETWORK_TYPE, name);
+    if (resource)
+    {
+        g_object_get(resource, "value", &value, NULL);
+        g_object_unref(resource);
+    }
+    
+    return value;
+}
+void ipcam_database_set_network_static(IpcamDatabase *database, gchar *name, gchar *value)
+{
+    g_return_if_fail(IPCAM_IS_DATABASE(database));
+    GomResource *resource = NULL;
+    GError *error = NULL;
+
+    resource = ipcam_database_get_resource(database, IPCAM_NETWORK_STATIC_TYPE, name);
+    if (resource)
+    {
+        g_object_set(resource, "value", value, NULL);
+        gom_resource_save_sync(resource, &error);
+        g_object_unref(resource);
+    }
+
+    if (error)
+    {
+        g_print("set network static record failed: %s\n", error->message);
+        g_error_free(error);
+    }
+}
+gchar *ipcam_database_get_network_static(IpcamDatabase *database, gchar *name)
+{
+    g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
+    GomResource *resource = NULL;
+    gchar *value = NULL;
+    
+    resource = ipcam_database_get_resource(database, IPCAM_NETWORK_STATIC_TYPE, name);
+    if (resource)
+    {
+        g_object_get(resource, "value", &value, NULL);
+        g_object_unref(resource);
+    }
+    
+    return value;
+}
+void ipcam_database_set_network_pppoe(IpcamDatabase *database, gchar *name, gchar *value)
+{
+    g_return_if_fail(IPCAM_IS_DATABASE(database));
+    GomResource *resource = NULL;
+    GError *error = NULL;
+
+    resource = ipcam_database_get_resource(database, IPCAM_NETWORK_PPPOE_TYPE, name);
+    if (resource)
+    {
+        g_object_set(resource, "value", value, NULL);
+        gom_resource_save_sync(resource, &error);
+        g_object_unref(resource);
+    }
+
+    if (error)
+    {
+        g_print("set network pppoe record failed: %s\n", error->message);
+        g_error_free(error);
+    }
+}
+gchar *ipcam_database_get_network_pppoe(IpcamDatabase *database, gchar *name)
+{
+    g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
+    GomResource *resource = NULL;
+    gchar *value = NULL;
+    
+    resource = ipcam_database_get_resource(database, IPCAM_NETWORK_PPPOE_TYPE, name);
+    if (resource)
+    {
+        g_object_get(resource, "value", &value, NULL);
+        g_object_unref(resource);
+    }
+    
+    return value;
+}
+void ipcam_database_set_network_port(IpcamDatabase *database, gchar *name, guint value)
+{
+    g_return_if_fail(IPCAM_IS_DATABASE(database));
+    GomResource *resource = NULL;
+    GError *error = NULL;
+
+    resource = ipcam_database_get_resource(database, IPCAM_NETWORK_PORT_TYPE, name);
+    if (resource)
+    {
+        g_object_set(resource, "value", value, NULL);
+        gom_resource_save_sync(resource, &error);
+        g_object_unref(resource);
+    }
+
+    if (error)
+    {
+        g_print("set network port record failed: %s\n", error->message);
+        g_error_free(error);
+    }
+}
+gint ipcam_database_get_network_port(IpcamDatabase *database, gchar *name)
+{
+    g_return_val_if_fail(IPCAM_IS_DATABASE(database), -1);
+    GomResource *resource = NULL;
+    gint value = -1;
+    
+    resource = ipcam_database_get_resource(database, IPCAM_NETWORK_PORT_TYPE, name);
+    if (resource)
+    {
+        g_object_get(resource, "value", &value, NULL);
+        g_object_unref(resource);
+    }
+    
+    return value;
+}
+void ipcam_database_set_datetime(IpcamDatabase *database, gchar *name, guint int_value, gchar *str_value)
+{
+    g_return_if_fail(IPCAM_IS_DATABASE(database));
+    GomResource *resource = NULL;
+    GError *error = NULL;
+
+    resource = ipcam_database_get_resource(database, IPCAM_DATETIME_TYPE, name);
+    if (resource)
+    {
+        g_object_set(resource, "intvalue", int_value, NULL);
+        if (str_value)
+        {
+            g_object_set(resource, "strvalue", str_value, NULL);
+        }
+        gom_resource_save_sync(resource, &error);
+        g_object_unref(resource);
+    }
+
+    if (error)
+    {
+        g_print("set datetime record failed: %s\n", error->message);
+        g_error_free(error);
+    }
+}
+void ipcam_database_get_datetime(IpcamDatabase *database, gchar *name, guint *int_value, gchar **str_value)
+{
+    g_return_if_fail(IPCAM_IS_DATABASE(database));
+    GomResource *resource = NULL;
+    
+    resource = ipcam_database_get_resource(database, IPCAM_DATETIME_TYPE, name);
+    if (resource)
+    {
+        g_object_get(resource, "intvalue", int_value, "strvalue", str_value, NULL);
+        g_object_unref(resource);
     }
 }
