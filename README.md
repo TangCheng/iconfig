@@ -10,7 +10,7 @@
             version: '1.0'
 		},
         body: {
-            info_name: ['device_name', 'comment']
+            infos: ['device_name', 'comment']
         }
     }
 #### response
@@ -21,8 +21,10 @@
 		    code: '0'
 		},
         body: {
-            info_name: ['device_name', 'comment'],
-			info_value: ['$(device_name)', '$(comment)']
+		    infos: {
+                device_name: 'device_name',
+			    comment: 'comment'
+			}
         }
     }
 ---
@@ -34,8 +36,10 @@
             version: '1.0'
         },
         body: {
-			info_name: ['device_name', 'comment'],
-			info_value: ['$(device_name)', '$(comment)']
+			infos: {
+                device_name: 'device_name',
+			    comment: 'comment'
+			}
 		}
     }
 #### response
