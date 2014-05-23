@@ -1,5 +1,5 @@
 #include "iconfig.h"
-#include "database.h"
+#include "database/database.h"
 
 typedef struct _IpcamIConfigPrivate
 {

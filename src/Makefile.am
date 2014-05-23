@@ -16,17 +16,18 @@ bindir = $(prefix)/iconfig
 bin_PROGRAMS = iconfig
 
 iconfig_SOURCES = \
-	database.c \
-	base_info.c \
-	users.c \
-	osd.c \
-	video.c \
-	scene.c \
-	network.c \
-	network_static.c \
-	network_pppoe.c \
-	network_port.c \
-	datetime.c \
+	database/database.c \
+	database/base_info.c \
+	database/users.c \
+	database/osd.c \
+	database/video.c \
+	database/scene.c \
+	database/network.c \
+	database/network_static.c \
+	database/network_pppoe.c \
+	database/network_port.c \
+	database/datetime.c \
+	ajax/ajax.c \
 	iconfig.c \
 	main.c
 
