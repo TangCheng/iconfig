@@ -29,13 +29,16 @@ iconfig_SOURCES = \
 	database/network_pppoe.c \
 	database/network_port.c \
 	database/datetime.c \
+	ajax/http_response.c \
+	ajax/http_request.c \
+	ajax/http_parser.c \
 	ajax/ajax.c \
 	iconfig.c \
 	main.c
 
 iconfig_LDFLAGS = 
 
-iconfig_LDADD = $(ICONFIG_LIBS)
+iconfig_LDADD = $(ICONFIG_LIBS) -lhttp_parser
 
 
 SUBDIRS = \

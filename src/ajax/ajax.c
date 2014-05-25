@@ -1,5 +1,10 @@
+#include <gio/gio.h>
+#include <string.h>
 #include "ajax.h"
 #include "iconfig.h"
+#include "http_parser.h"
+#include "http_request.h"
+#include "http_response.h"
 
 enum {
   PROP_0,
@@ -23,6 +28,7 @@ G_DEFINE_TYPE_WITH_PRIVATE(IpcamAjax, ipcam_ajax, G_TYPE_OBJECT)
 static GParamSpec *obj_properties[N_PROPERTIES] = {NULL, };
 
 static gpointer ajax_worker(gpointer data);
+static gpointer request_proc(gpointer data);
 
 static void ipcam_ajax_finalize(GObject *object)
 {
@@ -32,7 +38,7 @@ static void ipcam_ajax_finalize(GObject *object)
     g_thread_join(priv->thread);
     g_clear_pointer(&priv->thread, g_thread_unref);
     g_free(priv->address);
-    G_OBJECT_CLASS(ipcam_ajax_parent_class)->finalize(ajax);
+    G_OBJECT_CLASS(ipcam_ajax_parent_class)->finalize(object);
 }
 static void ipcam_ajax_init(IpcamAjax *ajax)
 {
@@ -138,15 +144,70 @@ gboolean ipcam_ajax_get_terminated(IpcamAjax *ajax)
 static gpointer ajax_worker(gpointer data)
 {
     IpcamAjax *ajax = data;
-    //IpcamHttpRequestReader *reader = g_object_new(IPCAM_HTTP_REQUEST_READER_TYPE, NULL);
-    
+    gchar *address;
+    guint port;
+    g_object_get(ajax, "address", &address, "port", &port, NULL);
+    GSocketAddress *socket_address = g_inet_socket_address_new_from_string(address, port);
+    g_free(address);
+    GSocket *server = g_socket_new(G_SOCKET_FAMILY_IPV4,
+                                   G_SOCKET_TYPE_STREAM,
+                                   G_SOCKET_PROTOCOL_TCP,
+                                   NULL);
+    g_socket_set_blocking(server, FALSE);
+    g_socket_bind(server, socket_address, TRUE, NULL);
+    g_socket_listen(server, NULL);
     
     while (!ipcam_ajax_get_terminated(ajax))
     {
-        
+        GSocket *worker = g_socket_accept(server, NULL, NULL);
+        if (worker)
+        {
+            g_socket_set_blocking(worker, TRUE);
+            GObject **data = g_new(GObject *, 2);
+            g_object_get(ajax, "app", &data[0], NULL);
+            data[1] = G_OBJECT(worker);
+            GThread *thread =g_thread_new("request-proc", request_proc, data);
+            g_thread_unref(thread);
+        }
+        else
+        {
+            usleep(500000);
+        }
     }
 
-    //g_object_unref(reader);
+    g_socket_close(server, NULL);
+    g_object_unref(server);
+    g_thread_exit(0);
+    return NULL;
+}
+static gpointer request_proc(gpointer data)
+{
+    GObject **params = data;
+    IpcamIConfig *app = IPCAM_ICONFIG(params[0]);
+    GSocket *worker = G_SOCKET(params[1]);
+    gchar *buffer = g_new(gchar, 2048);
+    gssize len;
+
+    len = g_socket_receive(worker, buffer, 2047, NULL, NULL);
+    if (len > 0)
+    {
+        IpcamHttpParser *parser = g_object_new(IPCAM_HTTP_PARSER_TYPE, NULL);
+        IpcamHttpRequest *request = ipcam_http_parser_get_request(parser, buffer, len);
+        IpcamHttpResponse *response = g_object_new(IPCAM_HTTP_RESPONSE_TYPE, "app", app, "request", request, NULL);
+        gchar *result = ipcam_http_response_get_result(response);
+        if (result)
+        {
+            g_socket_send(worker, result, strlen(result), NULL, NULL);
+        }
+        g_clear_object(&response);
+        g_clear_object(&request);
+        g_clear_object(&parser);
+    }
+
+    g_free(buffer);
+    g_socket_close(worker, NULL);
+    g_clear_object(&worker);
+    g_free(params);
     g_thread_exit(0);
     return NULL;
 }
