@@ -268,7 +268,7 @@ static void ipcam_http_response_prepare_response(IpcamHttpResponse *http_respons
     time_t now;
 
     time(&now);
-    strcpy(priv->header[HEADER_DATE][1], asctime(gmtime(&now)));
+    strftime(priv->header[HEADER_DATE][1], 32, "%a, %d %b %Y %T %Z", gmtime(&now));
     
     snprintf(priv->header[HEADER_CONTENT_LENGTH][1], 32, "%u", content_length);
     memset(priv->response, 0, 1024);
