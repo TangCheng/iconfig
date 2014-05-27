@@ -171,11 +171,11 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "intvalue INTEGER,"
                      "strvalue TEXT"
                      ");");
-        EXEC_OR_FAIL("INSERT INTO datetime (name, int_value, str_value) "
+        EXEC_OR_FAIL("INSERT INTO datetime (name, intvalue, strvalue) "
                      "VALUES ('timezone', 0, '');");
-        EXEC_OR_FAIL("INSERT INTO datetime (name, int_value, str_value) "
+        EXEC_OR_FAIL("INSERT INTO datetime (name, intvalue, strvalue) "
                      "VALUES ('use_ntp', 0, '');");
-        EXEC_OR_FAIL("INSERT INTO datetime (name, int_value, str_value) "
+        EXEC_OR_FAIL("INSERT INTO datetime (name, intvalue, strvalue) "
                      "VALUES ('ntp_server', 0, '');");
         
         return TRUE;
