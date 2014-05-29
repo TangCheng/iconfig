@@ -187,6 +187,11 @@ static TMPL_varlist *ipcam_http_response_get_varlist(IpcamHttpResponse *http_res
         varlist = TMPL_add_var(varlist, "length", str_value, NULL);
         varlist = TMPL_add_var(varlist, "body", priv->body, NULL);
     }
+    else
+    {
+        snprintf(str_value, 16, "%u", 0);
+        varlist = TMPL_add_var(varlist, "length", str_value, NULL);
+    }
     return varlist;
 }
 void ipcam_http_response_write_string(IpcamHttpResponse *http_response, GSocket *socket)
@@ -197,4 +202,5 @@ void ipcam_http_response_write_string(IpcamHttpResponse *http_response, GSocket 
     TMPL_varlist *varlist = ipcam_http_response_get_varlist(http_response);
     TMPL_write("config/ajax.tmpl", NULL, NULL, varlist, out, stderr);
     fclose(out);
+    TMPL_free_varlist(varlist);
 }

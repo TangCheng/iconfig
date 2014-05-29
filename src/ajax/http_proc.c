@@ -22,13 +22,17 @@ G_DEFINE_TYPE_WITH_PRIVATE(IpcamHttpProc, ipcam_http_proc, G_TYPE_OBJECT)
 
 static GParamSpec *obj_properties[N_PROPERTIES] = {NULL, };
 
+static void ipcam_http_proc_error(IpcamHttpProc *http_proc,
+                                  IpcamHttpRequest *http_request,
+                                  IpcamHttpResponse *http_response);
+
 static void ipcam_http_proc_finalize(GObject *object)
 {
     IpcamHttpProcPrivate *priv = ipcam_http_proc_get_instance_private(IPCAM_HTTP_PROC(object));
     GList *item = g_list_first(priv->request_handler_list);
     for (; item; item = g_list_next(item))
     {
-        g_object_unref(item->data);
+        g_clear_object(&item->data);
     }
     g_list_free(priv->request_handler_list);
     G_OBJECT_CLASS(ipcam_http_proc_parent_class)->finalize(object);
@@ -107,9 +111,21 @@ IpcamHttpResponse *ipcam_http_proc_get_response(IpcamHttpProc *http_proc, IpcamH
     {
         if (ipcam_http_request_handler_dispatch(item->data, http_request, response))
         {
-            break;
+            return response;
         }
     }
-    
+    ipcam_http_proc_error(http_proc, http_request, response);
     return response;
+}
+static void ipcam_http_proc_error(IpcamHttpProc *http_proc,
+                                  IpcamHttpRequest *http_request,
+                                  IpcamHttpResponse *http_response)
+{
+    guint major, minor;
+    g_object_get(http_request, "http-major", &major, "http-minor", &minor, NULL);
+    g_object_set(http_response,
+                 "http-major", major,
+                 "http-minor", minor,
+                 "status", 400,
+                 NULL);
 }
