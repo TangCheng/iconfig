@@ -36,6 +36,7 @@ iconfig_SOURCES = \
 	ajax/http_proc.c \
 	ajax/http_parser.c \
 	ajax/ajax.c \
+	ctemplate.c \
 	iconfig.c \
 	main.c
 

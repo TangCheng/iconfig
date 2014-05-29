@@ -3,6 +3,7 @@
 
 #include <glib.h>
 #include <glib-object.h>
+#include <gio/gio.h>
 
 #define IPCAM_HTTP_RESPONSE_TYPE (ipcam_http_response_get_type())
 #define IPCAM_HTTP_RESPONSE(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), IPCAM_HTTP_RESPONSE_TYPE, IpcamHttpResponse))
@@ -25,6 +26,6 @@ struct _IpcamHttpResponseClass
 };
 
 GType ipcam_http_response_get_type(void);
-gchar *ipcam_http_response_get_string(IpcamHttpResponse *http_response);
+void ipcam_http_response_write_string(IpcamHttpResponse *http_response, GSocket *socket);
 
 #endif /* __HTTP_RESPONSE_H__ */

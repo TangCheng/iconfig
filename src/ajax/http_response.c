@@ -1,4 +1,7 @@
+#include <stdio.h>
+#include <ctemplate.h>
 #include <time.h>
+#include <string.h>
 #include "http_response.h"
 
 enum
@@ -22,8 +25,6 @@ typedef struct _IpcamHttpResponsePrivate
 G_DEFINE_TYPE_WITH_PRIVATE(IpcamHttpResponse, ipcam_http_response, G_TYPE_OBJECT)
 
 static GParamSpec *obj_properties[N_PROPERTIES] = {NULL, };
-
-static void ipcam_http_response_prepare_response(IpcamHttpResponse *http_response);
 
 static void ipcam_http_response_finalize(GObject *object)
 {
@@ -143,12 +144,57 @@ static void ipcam_http_response_class_init(IpcamHttpResponseClass *klass)
 
     g_object_class_install_properties(object_class, N_PROPERTIES, obj_properties);
 }
-gchar *ipcam_http_response_get_string(IpcamHttpResponse *http_response)
-{    
-/*    time(&now);
-    strftime(priv->header[HEADER_DATE][1], 32, "%a, %d %b %Y %T %Z", gmtime(&now));
-*/
-    return NULL;
+static TMPL_varlist *ipcam_http_response_get_varlist(IpcamHttpResponse *http_response)
+{
+    IpcamHttpResponsePrivate *priv = ipcam_http_response_get_instance_private(http_response);
+    time_t now;
+    TMPL_varlist *varlist = NULL;
+    gchar str_value[32];
+
+    snprintf(str_value, 16, "%u", priv->http_major);
+    varlist = TMPL_add_var(varlist, "major", str_value, NULL);
+    snprintf(str_value, 16, "%u", priv->http_minor);
+    varlist = TMPL_add_var(varlist, "minor", str_value, NULL);
+    snprintf(str_value, 16, "%u", priv->status);
+    varlist = TMPL_add_var(varlist, "code", str_value, NULL);
+    switch (priv->status)
+    {
+    case 200:
+        varlist = TMPL_add_var(varlist, "status", "OK", NULL);
+        break;
+    case 400:
+        varlist = TMPL_add_var(varlist, "status", "Bad Request", NULL);
+        break;
+    case 403:
+        varlist = TMPL_add_var(varlist, "status", "Forbidden", NULL);
+        break;
+    case 404:
+        varlist = TMPL_add_var(varlist, "status", "Not Found", NULL);
+        break;
+    case 500:
+        varlist = TMPL_add_var(varlist, "status", "Internal Server Error", NULL);
+        break;
+    default:
+        varlist = TMPL_add_var(varlist, "satus", "Unkonwn Status", NULL);
+        break;
+    }
+    time(&now);
+    strftime(str_value, 32, "%a, %d %b %Y %T %Z", gmtime(&now));
+    varlist = TMPL_add_var(varlist, "datetime", str_value, NULL);
+    if (priv->body)
+    {
+        snprintf(str_value, 16, "%u", (guint)strlen(priv->body));
+        varlist = TMPL_add_var(varlist, "length", str_value, NULL);
+        varlist = TMPL_add_var(varlist, "body", priv->body, NULL);
+    }
+    return varlist;
 }
-
-
+void ipcam_http_response_write_string(IpcamHttpResponse *http_response, GSocket *socket)
+{
+    g_return_if_fail(IPCAM_IS_HTTP_RESPONSE(http_response));
+    
+    FILE *out = fdopen(g_socket_get_fd(socket), "a");
+    TMPL_varlist *varlist = ipcam_http_response_get_varlist(http_response);
+    TMPL_write("config/ajax.tmpl", NULL, NULL, varlist, out, stderr);
+    fclose(out);
+}

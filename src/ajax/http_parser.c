@@ -3,15 +3,6 @@
 #include <string.h>
 #include "http_parser.h"
 
-static gchar *method[] =
-{
-    "DELETE",
-    "GET",
-    "HEAD",
-    "POST",
-    "PUT",
-};
-
 G_DEFINE_TYPE(IpcamHttpParser, ipcam_http_parser, G_TYPE_OBJECT)
 
 static http_parser* ipcam_http_parser_parser_init(enum http_parser_type type);
@@ -115,7 +106,9 @@ static int ipcam_http_parser_headers_complete_cb (http_parser *p)
 {
     IpcamHttpRequest *request = IPCAM_HTTP_REQUEST(p->data);
     g_object_set(request,
-                 "method", method[p->method],
+                 "http-major", p->http_major,
+                 "http-minor", p->http_minor,
+                 "method", p->method,
                  "keep-alive", http_should_keep_alive(p),
                  NULL);
     return 0;

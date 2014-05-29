@@ -198,9 +198,7 @@ static gpointer request_proc(gpointer data)
         IpcamHttpResponse *response = ipcam_http_proc_get_response(proc, request);
         if (response)
         {
-            gchar *result = ipcam_http_response_get_string(response);
-            g_socket_send(worker, result, strlen(result), NULL, NULL);
-            g_free(result);
+            ipcam_http_response_write_string(response, worker);
         }
         g_clear_object(&response);
         g_clear_object(&proc);
