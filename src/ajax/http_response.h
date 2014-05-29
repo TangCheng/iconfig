@@ -25,6 +25,6 @@ struct _IpcamHttpResponseClass
 };
 
 GType ipcam_http_response_get_type(void);
-gchar *ipcam_http_response_get_result(IpcamHttpResponse *http_response);
+gchar *ipcam_http_response_get_string(IpcamHttpResponse *http_response);
 
 #endif /* __HTTP_RESPONSE_H__ */

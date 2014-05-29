@@ -4,6 +4,7 @@
 #include "iconfig.h"
 #include "http_parser.h"
 #include "http_request.h"
+#include "http_proc.h"
 #include "http_response.h"
 
 enum {
@@ -193,13 +194,16 @@ static gpointer request_proc(gpointer data)
     {
         IpcamHttpParser *parser = g_object_new(IPCAM_HTTP_PARSER_TYPE, NULL);
         IpcamHttpRequest *request = ipcam_http_parser_get_request(parser, buffer, len);
-        IpcamHttpResponse *response = g_object_new(IPCAM_HTTP_RESPONSE_TYPE, "app", app, "request", request, NULL);
-        gchar *result = ipcam_http_response_get_result(response);
-        if (result)
+        IpcamHttpProc *proc = g_object_new(IPCAM_HTTP_PROC_TYPE, "app", app, NULL);
+        IpcamHttpResponse *response = ipcam_http_proc_get_response(proc, request);
+        if (response)
         {
+            gchar *result = ipcam_http_response_get_string(response);
             g_socket_send(worker, result, strlen(result), NULL, NULL);
+            g_free(result);
         }
         g_clear_object(&response);
+        g_clear_object(&proc);
         g_clear_object(&request);
         g_clear_object(&parser);
     }
