@@ -24,5 +24,6 @@ struct _IpcamIConfigClass
 };
 
 GType ipcam_iconfig_get_type(void);
+gchar *ipcam_iconfig_get_base_info(IpcamIConfig *iconfig, GList *infos);
 
 #endif /* __ICONFIG_H__ */

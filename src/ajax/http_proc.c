@@ -109,6 +109,7 @@ IpcamHttpResponse *ipcam_http_proc_get_response(IpcamHttpProc *http_proc, IpcamH
     GList *item = g_list_first(priv->request_handler_list);
     for (; item; item = g_list_next(item))
     {
+        g_object_set(item->data, "app", priv->iconfig, NULL);
         if (ipcam_http_request_handler_dispatch(item->data, http_request, response))
         {
             return response;

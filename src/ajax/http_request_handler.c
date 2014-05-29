@@ -84,7 +84,7 @@ static void ipcam_http_request_handler_class_init(IpcamHttpRequestHandlerClass *
                             "application",
                             "application.",
                             IPCAM_ICONFIG_TYPE,
-                            G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
+                            G_PARAM_READWRITE);
 
     g_object_class_install_properties(object_class, N_PROPERTIES, obj_properties);
 }
