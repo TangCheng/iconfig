@@ -1,3 +1,4 @@
+#include <http_parser.h>
 #include "http_request.h"
 
 enum
@@ -20,9 +21,9 @@ typedef struct _IpcamHttpRequestPrivate
     gchar *url;
     gchar *path;
     gchar *query_string;
-    gchar *method;
-    gchar *http_major;
-    gchar *http_minor;
+    enum http_method method;
+    guint http_major;
+    guint http_minor;
     gchar *status_code;
     gboolean keep_alive;
     gchar *body;
@@ -41,9 +42,6 @@ static void ipcam_http_request_finalize(GObject *object)
     g_free(priv->url);
     g_free(priv->path);
     g_free(priv->query_string);
-    g_free(priv->method);
-    g_free(priv->http_major);
-    g_free(priv->http_minor);
     g_free(priv->status_code);
     g_free(priv->body);
     g_free(priv->header_field);
@@ -86,17 +84,17 @@ static void ipcam_http_request_get_property(GObject    *object,
         break;
     case PROP_METHOD:
         {
-            g_value_set_string(value, priv->method);
+            g_value_set_int(value, priv->method);
         }
         break;
     case PROP_HTTP_MAJOR:
         {
-            g_value_set_string(value, priv->http_major);
+            g_value_set_int(value, priv->http_major);
         }
         break;
     case PROP_HTTP_MINOR:
         {
-            g_value_set_string(value, priv->http_minor);
+            g_value_set_int(value, priv->http_minor);
         }
         break;
     case PROP_STATUS_CODE:
@@ -148,20 +146,17 @@ static void ipcam_http_request_set_property(GObject      *object,
         break;
     case PROP_METHOD:
         {
-            g_free(priv->method);
-            priv->method = g_value_dup_string(value);
+            priv->method = g_value_get_int(value);
         }
         break;
     case PROP_HTTP_MAJOR:
         {
-            g_free(priv->http_major);
-            priv->http_major = g_value_dup_string(value);
+            priv->http_major = g_value_get_int(value);
         }
         break;
     case PROP_HTTP_MINOR:
         {
-            g_free(priv->http_minor);
-            priv->http_minor = g_value_dup_string(value);
+            priv->http_minor = g_value_get_int(value);
         }
         break;
     case PROP_STATUS_CODE:
@@ -212,23 +207,29 @@ static void ipcam_http_request_class_init(IpcamHttpRequestClass *klass)
                             NULL, // default value
                             G_PARAM_READWRITE);
     obj_properties[PROP_METHOD] =
-        g_param_spec_string("method",
-                            "method",
-                            "method",
-                            NULL, // default value
-                            G_PARAM_READWRITE);
+        g_param_spec_int("method",
+                         "method",
+                         "method",
+                         HTTP_DELETE,
+                         HTTP_PURGE,
+                         HTTP_GET, // default value
+                         G_PARAM_READWRITE);
     obj_properties[PROP_HTTP_MAJOR] =
-        g_param_spec_string("http-major",
-                            "http major",
-                            "http major",
-                            NULL, // default value
-                            G_PARAM_READWRITE);
+        g_param_spec_int("http-major",
+                         "http major",
+                         "http major",
+                         1,
+                         10,
+                         1, // default value
+                         G_PARAM_READWRITE);
     obj_properties[PROP_HTTP_MINOR] =
-        g_param_spec_string("http-minor",
-                            "http minor",
-                            "http minor",
-                            NULL, // default value
-                            G_PARAM_READWRITE);
+        g_param_spec_int("http-minor",
+                         "http-minor",
+                         "http minor",
+                         0,
+                         10,
+                         1,// default value
+                         G_PARAM_READWRITE);
     obj_properties[PROP_STATUS_CODE] =
         g_param_spec_string("status-code",
                             "status code",

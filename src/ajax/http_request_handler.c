@@ -87,8 +87,6 @@ static void ipcam_http_request_handler_class_init(IpcamHttpRequestHandlerClass *
                             G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 
     g_object_class_install_properties(object_class, N_PROPERTIES, obj_properties);
-
-    klass->handler = NULL;
 }
 gboolean ipcam_http_request_handler_dispatch(IpcamHttpRequestHandler *http_request_handler,
                                              IpcamHttpRequest *http_request,
@@ -104,7 +102,7 @@ gboolean ipcam_http_request_handler_dispatch(IpcamHttpRequestHandler *http_reque
     if (path == NULL) {
         return ret;
     }
-    guint method;
+    enum http_method method;
     g_object_get(http_request, "method", &method, NULL);
     
     IpcamHttpRequestHandlerPrivate *priv =
@@ -112,18 +110,13 @@ gboolean ipcam_http_request_handler_dispatch(IpcamHttpRequestHandler *http_reque
     GList *item = g_list_first(priv->handler_list);
     for (; item != NULL; item = g_list_next(item)) {
         handler_data *handler = item->data;
-        if (handler->method & method) {
+        if (handler->method == method) {
             regmatch_t *matches = g_new(regmatch_t, handler->n_match);
             int m = regexec(&handler->regex, path, handler->n_match, matches, 0);
             if (m == 0) {
-                IpcamHttpRequestHandlerClass *klass =
-                    IPCAM_HTTP_REQUEST_HANDLER_GET_CLASS(http_request_handler);
-                if (klass->handler)
-                {
-                    ret = klass->handler(http_request_handler, http_request, http_response);
-                    g_free(matches);
-                    break;
-                }
+                ret = handler->func(http_request_handler, http_request, http_response);
+                g_free(matches);
+                break;
             }
             g_free(matches);
         }

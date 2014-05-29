@@ -2,7 +2,7 @@
 #define __HTTP_REQUEST_HANDLER_H__
 
 #include <regex.h>
-
+#include <http_parser.h>
 #include "http_request.h"
 #include "http_response.h"
 
@@ -24,26 +24,28 @@ struct _IpcamHttpRequestHandler
 struct _IpcamHttpRequestHandlerClass
 {
     GObjectClass parent_class;
-    gboolean (*handler)(IpcamHttpRequestHandler *, IpcamHttpRequest *, IpcamHttpResponse *);
 };
 
 typedef struct _IpcamHttpRequestHandlerData
 {
-    guint method;
+    gboolean (*func)(IpcamHttpRequestHandler *, IpcamHttpRequest *, IpcamHttpResponse *);
+    enum http_method method;
     gchar *regex_str;
     regex_t regex;
     gssize n_match;
 } IpcamHttpRequestHandlerData;
 typedef IpcamHttpRequestHandlerData handler_data;
 
-#define START_HANDLER(NAME, METHOD, REGEX, RESULT, NUM, MATCHES) \
-static void ipcam_http_proc_##NAME##_func(IpcamHttpResponse *, regmatch_t[]); \
-handler NAME##_data = {ipcam_http_proc_##NAME##_func, METHOD, REGEX, {0}, NUM}; \
-handler *NAME = &NAME##_data; \
-static void ipcam_http_proc_##NAME##_func(IpcamHttpResponse *RESULT, regmatch_t MATCHES[]) { \
-    IpcamHttpResponse *response = RESULT;
+#define START_HANDLER(NAME, METHOD, REGEX, REQUEST, RESULT, NUM, MATCHES) \
+static gboolean ipcam_http_##NAME##_func(IpcamHttpRequestHandler *, IpcamHttpRequest *, IpcamHttpResponse *); \
+handler_data NAME##_data = {ipcam_http_##NAME##_func, METHOD, REGEX, {0}, NUM}; \
+handler_data *NAME = &NAME##_data; \
+static gboolean ipcam_http_##NAME##_func(IpcamHttpRequestHandler *NAME, IpcamHttpRequest *REQUEST, IpcamHttpResponse *RESULT) { \
+    gboolean ret = FALSE;
+
 
 #define END_HANDLER \
+    return ret; \
 }
 
 GType ipcam_http_request_handler_get_type(void);
