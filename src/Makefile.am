@@ -2,6 +2,8 @@
 
 ## Created by Anjuta
 
+AUTOMAKE_OPTIONS = subdir-objects
+
 AM_CPPFLAGS = \
 	-DPACKAGE_LOCALE_DIR=\""$(localedir)"\" \
 	-DPACKAGE_SRC_DIR=\""$(srcdir)"\" \
@@ -16,23 +18,31 @@ bindir = $(prefix)/iconfig
 bin_PROGRAMS = iconfig
 
 iconfig_SOURCES = \
-	database.c \
-	base_info.c \
-	users.c \
-	osd.c \
-	video.c \
-	scene.c \
-	network.c \
-	network_static.c \
-	network_pppoe.c \
-	network_port.c \
-	datetime.c \
+	database/database.c \
+	database/base_info.c \
+	database/users.c \
+	database/osd.c \
+	database/video.c \
+	database/scene.c \
+	database/network.c \
+	database/network_static.c \
+	database/network_pppoe.c \
+	database/network_port.c \
+	database/datetime.c \
+	ajax/http_response.c \
+	ajax/http_request.c \
+	ajax/http_request_handler.c \
+	ajax/http_base_info_handler.c \
+	ajax/http_proc.c \
+	ajax/http_parser.c \
+	ajax/ajax.c \
+	ctemplate.c \
 	iconfig.c \
 	main.c
 
 iconfig_LDFLAGS = 
 
-iconfig_LDADD = $(ICONFIG_LIBS)
+iconfig_LDADD = $(ICONFIG_LIBS) -lhttp_parser
 
 
 SUBDIRS = \
