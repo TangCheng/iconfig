@@ -97,3 +97,21 @@ gchar *ipcam_iconfig_get_base_info(IpcamIConfig *iconfig, GList *infos)
     g_object_unref(builder);
     return string;
 }
+void ipcam_iconfig_set_base_info(IpcamIConfig *iconfig, GHashTable *infos)
+{
+    g_return_if_fail(IPCAM_IS_ICONFIG(iconfig));
+    IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
+    gchar *value = NULL;
+
+    value = g_hash_table_lookup(infos, "device_name");
+    if (value)
+    {
+        ipcam_database_set_baseinfo(priv->database, "device_name", value);
+    }
+
+    value = g_hash_table_lookup(infos, "comment");
+    if (value)
+    {
+        ipcam_database_set_baseinfo(priv->database, "comment", value);
+    }
+}

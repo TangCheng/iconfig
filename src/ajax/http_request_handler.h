@@ -2,6 +2,7 @@
 #define __HTTP_REQUEST_HANDLER_H__
 
 #include <http_parser.h>
+#include <json-glib/json-glib.h>
 #include "http_request.h"
 #include "http_response.h"
 
