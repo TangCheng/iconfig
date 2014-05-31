@@ -157,6 +157,8 @@ static gpointer ajax_worker(gpointer data)
     g_socket_set_blocking(server, FALSE);
     g_socket_bind(server, socket_address, TRUE, NULL);
     g_socket_listen(server, NULL);
+    GMutex mutex;
+    g_mutex_init(&mutex);
     
     while (!ipcam_ajax_get_terminated(ajax))
     {
@@ -164,9 +166,10 @@ static gpointer ajax_worker(gpointer data)
         if (worker)
         {
             g_socket_set_blocking(worker, TRUE);
-            GObject **data = g_new(GObject *, 2);
+            GObject **data = g_new(GObject *, 3);
             g_object_get(ajax, "app", &data[0], NULL);
             data[1] = G_OBJECT(worker);
+            data[2] = &mutex;
             GThread *thread =g_thread_new("request-proc", request_proc, data);
             g_thread_unref(thread);
         }
@@ -176,6 +179,7 @@ static gpointer ajax_worker(gpointer data)
         }
     }
 
+    g_mutex_clear(&mutex);
     g_socket_close(server, NULL);
     g_object_unref(server);
     g_thread_exit(0);
@@ -188,6 +192,7 @@ static gpointer request_proc(gpointer data)
     GSocket *worker = G_SOCKET(params[1]);
     gchar *buffer = g_new(gchar, 2048);
     gssize len;
+    GMutex *mutex = params[2];
 
     len = g_socket_receive(worker, buffer, 2047, NULL, NULL);
     if (len > 0)
@@ -198,7 +203,9 @@ static gpointer request_proc(gpointer data)
         IpcamHttpResponse *response = ipcam_http_proc_get_response(proc, request);
         if (response)
         {
+            g_mutex_lock(mutex);
             ipcam_http_response_write_string(response, worker);
+            g_mutex_unlock(mutex);
         }
         g_clear_object(&response);
         g_clear_object(&proc);
