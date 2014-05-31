@@ -31,6 +31,7 @@ iconfig_SOURCES = \
 	database/datetime.c \
 	ajax/http_response.c \
 	ajax/http_request.c \
+	ajax/http_query_string_parser.c \
 	ajax/http_request_handler.c \
 	ajax/http_base_info_handler.c \
 	ajax/http_proc.c \
