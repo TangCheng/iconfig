@@ -1,7 +1,6 @@
 #ifndef __HTTP_REQUEST_HANDLER_H__
 #define __HTTP_REQUEST_HANDLER_H__
 
-#include <regex.h>
 #include <http_parser.h>
 #include "http_request.h"
 #include "http_response.h"
@@ -30,15 +29,13 @@ typedef struct _IpcamHttpRequestHandlerData
 {
     gboolean (*func)(IpcamHttpRequestHandler *, IpcamHttpRequest *, IpcamHttpResponse *);
     enum http_method method;
-    gchar *regex_str;
-    regex_t regex;
-    gssize n_match;
+    gchar *path;
 } IpcamHttpRequestHandlerData;
 typedef IpcamHttpRequestHandlerData handler_data;
 
-#define START_HANDLER(NAME, METHOD, REGEX, REQUEST, RESULT, NUM, MATCHES) \
+#define START_HANDLER(NAME, METHOD, PATH, REQUEST, RESULT) \
 static gboolean ipcam_http_##NAME##_func(IpcamHttpRequestHandler *, IpcamHttpRequest *, IpcamHttpResponse *); \
-handler_data NAME##_data = {ipcam_http_##NAME##_func, METHOD, REGEX, {0}, NUM}; \
+handler_data NAME##_data = {ipcam_http_##NAME##_func, METHOD, PATH}; \
 handler_data *NAME = &NAME##_data; \
 static gboolean ipcam_http_##NAME##_func(IpcamHttpRequestHandler *NAME, IpcamHttpRequest *REQUEST, IpcamHttpResponse *RESULT) { \
     gboolean ret = FALSE;

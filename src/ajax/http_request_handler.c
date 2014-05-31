@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+#include <string.h>
 #include "http_request_handler.h"
 #include "iconfig.h"
 
@@ -22,12 +24,6 @@ static void ipcam_http_request_handler_finalize(GObject *object)
 {
     IpcamHttpRequestHandlerPrivate *priv =
         ipcam_http_request_handler_get_instance_private(IPCAM_HTTP_REQUEST_HANDLER(object));
-    GList *item = g_list_first(priv->handler_list);
-    for (; item; item = g_list_next(item))
-    {
-        handler_data *handler = item->data;
-        regfree(&handler->regex);
-    }
     g_list_free(priv->handler_list);
     G_OBJECT_CLASS(ipcam_http_request_handler_parent_class)->finalize(object);
 }
@@ -111,14 +107,11 @@ gboolean ipcam_http_request_handler_dispatch(IpcamHttpRequestHandler *http_reque
     for (; item != NULL; item = g_list_next(item)) {
         handler_data *handler = item->data;
         if (handler->method == method) {
-            regmatch_t *matches = g_new(regmatch_t, handler->n_match);
-            int m = regexec(&handler->regex, path, handler->n_match, matches, 0);
-            if (m == 0) {
+            gchar *m = strcasestr(path, handler->path);
+            if (m) {
                 ret = handler->func(http_request_handler, http_request, http_response);
-                g_free(matches);
                 break;
             }
-            g_free(matches);
         }
     }
     g_free(path);
@@ -130,6 +123,5 @@ void ipcam_http_request_handler_register(IpcamHttpRequestHandler *http_request_h
     g_return_if_fail(IPCAM_IS_HTTP_REQUEST_HANDLER(http_request_handler));
     IpcamHttpRequestHandlerPrivate *priv =
         ipcam_http_request_handler_get_instance_private(http_request_handler);
-    regcomp(&handler->regex, handler->regex_str, 0);
     priv->handler_list = g_list_append(priv->handler_list, handler);
 }

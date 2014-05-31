@@ -5,7 +5,7 @@
 
 G_DEFINE_TYPE(IpcamHttpBaseInfoHandler, ipcam_http_base_info_handler, IPCAM_HTTP_REQUEST_HANDLER_TYPE)
 
-START_HANDLER(get_base_info, HTTP_GET, "/api/1.0/base_info.json", http_request, http_response, 0, matches)
+START_HANDLER(get_base_info, HTTP_GET, "/api/1.0/base_info.json", http_request, http_response)
 {
     guint major, minor;
     g_object_get(http_request, "http-major", &major, "http-minor", &minor, NULL);
@@ -27,7 +27,7 @@ START_HANDLER(get_base_info, HTTP_GET, "/api/1.0/base_info.json", http_request, 
 }
 END_HANDLER
 
-START_HANDLER(put_base_info, HTTP_PUT, "/api/1.0/base_info.json", http_request, http_response, 0, matches)
+START_HANDLER(put_base_info, HTTP_PUT, "/api/1.0/base_info.json", http_request, http_response)
 {
     guint major, minor;
     g_object_get(http_request, "http-major", &major, "http-minor", &minor, NULL);
