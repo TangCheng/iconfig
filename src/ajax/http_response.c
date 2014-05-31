@@ -1,4 +1,7 @@
 #include <stdio.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
 #include <ctemplate.h>
 #include <time.h>
 #include <string.h>
@@ -197,10 +200,27 @@ static TMPL_varlist *ipcam_http_response_get_varlist(IpcamHttpResponse *http_res
 void ipcam_http_response_write_string(IpcamHttpResponse *http_response, GSocket *socket)
 {
     g_return_if_fail(IPCAM_IS_HTTP_RESPONSE(http_response));
-    
+    struct stat statbuf;
     FILE *out = fdopen(g_socket_get_fd(socket), "a");
+    int fd_template = open("config/ajax.tmpl", O_RDONLY);
+    if (fd_template < 0)
+    {
+        fclose(out);
+        return;
+    }
+    fstat(fd_template, &statbuf);
     TMPL_varlist *varlist = ipcam_http_response_get_varlist(http_response);
-    TMPL_write("config/ajax.tmpl", NULL, NULL, varlist, out, stderr);
+    gchar *template = mmap(0, statbuf.st_size, PROT_READ, MAP_SHARED, fd_template, 0);
+    if (template != MAP_FAILED)
+    {
+        TMPL_write(NULL, template, NULL, varlist, out, stderr);
+        munmap(template, statbuf.st_size);
+    }
+    else
+    {
+        TMPL_write("config/ajax.tmpl", NULL, NULL, varlist, out, stderr);
+    }
+    close(fd_template);
     fclose(out);
     TMPL_free_varlist(varlist);
 }
