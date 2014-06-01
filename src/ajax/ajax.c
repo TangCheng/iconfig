@@ -24,6 +24,13 @@ typedef struct _IPcamAjaxPrivate
     volatile gboolean terminated;
 } IpcamAjaxPrivate;
 
+typedef struct _IpcamAjaxWorkerData
+{
+    IpcamIConfig *iconfig;
+    GSocket *socket;
+    GMutex *mutex;
+} IpcamAjaxWorkerData;
+
 G_DEFINE_TYPE_WITH_PRIVATE(IpcamAjax, ipcam_ajax, G_TYPE_OBJECT)
 
 static GParamSpec *obj_properties[N_PROPERTIES] = {NULL, };
@@ -166,10 +173,10 @@ static gpointer ajax_worker(gpointer data)
         if (worker)
         {
             g_socket_set_blocking(worker, TRUE);
-            GObject **data = g_new(GObject *, 3);
-            g_object_get(ajax, "app", &data[0], NULL);
-            data[1] = G_OBJECT(worker);
-            data[2] = &mutex;
+            IpcamAjaxWorkerData *data = g_new(IpcamAjaxWorkerData, 1);
+            g_object_get(ajax, "app", &data->iconfig, NULL);
+            data->socket = worker;
+            data->mutex = &mutex;
             GThread *thread =g_thread_new("request-proc", request_proc, data);
             g_thread_unref(thread);
         }
@@ -187,12 +194,12 @@ static gpointer ajax_worker(gpointer data)
 }
 static gpointer request_proc(gpointer data)
 {
-    GObject **params = data;
-    IpcamIConfig *app = IPCAM_ICONFIG(params[0]);
-    GSocket *worker = G_SOCKET(params[1]);
+    IpcamAjaxWorkerData *params = data;
+    IpcamIConfig *app = params->iconfig;
+    GSocket *worker = params->socket;
+    GMutex *mutex = params->mutex;
     gchar *buffer = g_new(gchar, 2048);
     gssize len;
-    GMutex *mutex = params[2];
 
     len = g_socket_receive(worker, buffer, 2047, NULL, NULL);
     if (len > 0)
