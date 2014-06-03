@@ -5,6 +5,7 @@
 #include <ctemplate.h>
 #include <time.h>
 #include <string.h>
+#include <json-glib/json-glib.h>
 #include "http_response.h"
 
 enum
@@ -196,6 +197,29 @@ static TMPL_varlist *ipcam_http_response_get_varlist(IpcamHttpResponse *http_res
         varlist = TMPL_add_var(varlist, "length", str_value, NULL);
     }
     return varlist;
+}
+void ipcam_http_response_success(IpcamHttpResponse *http_response, gboolean success)
+{
+    g_return_if_fail(IPCAM_IS_HTTP_RESPONSE(http_response));
+    JsonBuilder *builder = json_builder_new();
+    JsonGenerator *generator = json_generator_new();
+
+    json_builder_begin_object(builder);
+    json_builder_set_member_name(builder, "success");
+    json_builder_add_boolean_value(builder, success);
+    json_builder_end_object(builder);
+
+    JsonNode *root = json_builder_get_root(builder);
+    json_generator_set_root(generator, root);
+    json_generator_set_pretty(generator, FALSE);
+    
+    const gchar *string = json_generator_to_data(generator, NULL);
+    json_node_free(root);
+    g_object_unref(generator);
+    g_object_unref(builder);
+
+    g_object_set(http_response, "body", string, NULL);
+    g_free(string);
 }
 void ipcam_http_response_write_string(IpcamHttpResponse *http_response, GSocket *socket)
 {

@@ -17,6 +17,7 @@ START_HANDLER(get_base_info, HTTP_GET, "/api/1.0/base_info.json", http_request, 
     gchar *query_string = NULL;
     GList *infos_list = NULL;
     GHashTable *query_hash = NULL;
+    gboolean success = FALSE;
     
     g_object_get(http_request, "http-major", &major, "http-minor", &minor, NULL);
     g_object_set(http_response,
@@ -42,10 +43,15 @@ START_HANDLER(get_base_info, HTTP_GET, "/api/1.0/base_info.json", http_request, 
                 g_object_set(http_response,
                              "status", 200,
                              NULL);
+                success = TRUE;
             }
         }
         g_free(query_string);
         g_clear_object(&parser);
+    }
+    if (!success)
+    {
+        ipcam_http_response_success(http_response, success);
     }
     ret = TRUE;
 }
@@ -57,6 +63,7 @@ START_HANDLER(put_base_info, HTTP_PUT, "/api/1.0/base_info.json", http_request, 
     gchar *body = NULL;
     IpcamIConfig *iconfig;
     GHashTable *infos_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, destroy_data);
+    gboolean success = FALSE;
     g_object_get(http_request, "http-major", &major, "http-minor", &minor, NULL);
     g_object_set(http_response,
                  "http-major", major,
@@ -87,10 +94,12 @@ START_HANDLER(put_base_info, HTTP_PUT, "/api/1.0/base_info.json", http_request, 
             g_object_set(http_response,
                          "status", 200,
                          NULL);
+            success = TRUE;
         }
         g_object_unref(parser);
         g_free(body);
     }
+    ipcam_http_response_success(http_response, success);
     g_hash_table_destroy(infos_hash);
     ret = TRUE;
 }
