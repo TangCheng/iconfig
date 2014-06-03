@@ -198,7 +198,7 @@ static gpointer request_proc(gpointer data)
     IpcamIConfig *app = params->iconfig;
     GSocket *worker = params->socket;
     GMutex *mutex = params->mutex;
-    gchar *buffer = g_new(gchar, 2048);
+    gchar *buffer = g_new0(gchar, 2048);
     gssize len;
 
     len = g_socket_receive(worker, buffer, 2047, NULL, NULL);
