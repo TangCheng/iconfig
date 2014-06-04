@@ -56,6 +56,7 @@ static void ipcam_iconfig_before_start(IpcamIConfig *iconfig)
     infos_list = g_list_append(infos_list, "device_name");
     gchar *infos = ipcam_iconfig_get_base_info(iconfig, infos_list);
     g_free(infos);
+    g_list_free(infos_list);
 }
 static void ipcam_iconfig_in_loop(IpcamIConfig *iconfig)
 {
