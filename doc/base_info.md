@@ -26,7 +26,7 @@ PUT|infos|是|object: {'device_name':'ipcam','comment':'my content'}|要设置�
 无
 
 ### 调用样例
-GET http://x.x.x.x/api/1.0/base_info.json?infos%5B%5D=device_name&infos%5B%5D=comment
+GET http://x.x.x.x/api/1.0/base_info.json?infos%5B%5D=device_name&infos%5B%5D=comment  
 PUT http://x.x.x.x/api/1.0/base_info.json json_data
 
 ### 返回结果
