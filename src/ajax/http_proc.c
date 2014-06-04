@@ -103,7 +103,14 @@ IpcamHttpResponse *ipcam_http_proc_get_response(IpcamHttpProc *http_proc, IpcamH
     g_return_val_if_fail(IPCAM_IS_HTTP_PROC(http_proc), NULL);
     g_return_val_if_fail(IPCAM_IS_HTTP_REQUEST(http_request), NULL);
 
+    guint major, minor;
     IpcamHttpResponse *response = g_object_new(IPCAM_HTTP_RESPONSE_TYPE, NULL);
+    g_object_get(http_request, "http-major", &major, "http-minor", &minor, NULL);
+    g_object_set(response,
+                 "http-major", major,
+                 "http-minor", minor,
+                 "status", 500,
+                  NULL);
 
     IpcamHttpProcPrivate *priv = ipcam_http_proc_get_instance_private(http_proc);
     GList *item = g_list_first(priv->request_handler_list);

@@ -11,20 +11,12 @@ static void destroy_data(gpointer data);
 
 START_HANDLER(get_base_info, HTTP_GET, "/api/1.0/base_info.json", http_request, http_response)
 {
-    guint major, minor;
     IpcamIConfig *iconfig;
     IpcamHttpQueryStringParser *parser;
     gchar *query_string = NULL;
     GList *infos_list = NULL;
     GHashTable *query_hash = NULL;
     gboolean success = FALSE;
-    
-    g_object_get(http_request, "http-major", &major, "http-minor", &minor, NULL);
-    g_object_set(http_response,
-                 "http-major", major,
-                 "http-minor", minor,
-                 "status", 500,
-                  NULL);
     
     g_object_get(get_base_info, "app", &iconfig, NULL);
     g_object_get(http_request, "query-string", &query_string, NULL);
@@ -59,17 +51,11 @@ END_HANDLER
 
 START_HANDLER(put_base_info, HTTP_PUT, "/api/1.0/base_info.json", http_request, http_response)
 {
-    guint major, minor;
     gchar *body = NULL;
     IpcamIConfig *iconfig;
     GHashTable *infos_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, destroy_data);
     gboolean success = FALSE;
-    g_object_get(http_request, "http-major", &major, "http-minor", &minor, NULL);
-    g_object_set(http_response,
-                 "http-major", major,
-                 "http-minor", minor,
-                 "status", 500,
-                 NULL);
+
     g_object_get(put_base_info, "app", &iconfig, NULL);
     g_object_get(http_request, "body", &body, NULL);
     if (body)
