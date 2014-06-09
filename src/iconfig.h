@@ -26,5 +26,8 @@ struct _IpcamIConfigClass
 GType ipcam_iconfig_get_type(void);
 gchar *ipcam_iconfig_get_base_info(IpcamIConfig *iconfig, GList *infos);
 void ipcam_iconfig_set_base_info(IpcamIConfig *iconfig, GHashTable *infos);
+gchar *ipcam_iconfig_get_osd(IpcamIConfig *iconfig, GList *infos);
+void ipcam_iconfig_set_osd(IpcamIConfig *iconfig, gchar *name, gboolean isshow,
+                           guint size, guint x, guint y, guint color);
 
 #endif /* __ICONFIG_H__ */

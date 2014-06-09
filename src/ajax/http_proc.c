@@ -3,6 +3,7 @@
 #include "http_proc.h"
 #include "http_request_handler.h"
 #include "http_base_info_handler.h"
+#include "http_osd_handler.h"
 #include "iconfig.h"
 
 enum
@@ -40,9 +41,11 @@ static void ipcam_http_proc_finalize(GObject *object)
 static void ipcam_http_proc_init(IpcamHttpProc *self)
 {
     IpcamHttpProcPrivate *priv = ipcam_http_proc_get_instance_private(self);
-    IpcamHttpRequestHandler *base_info_handler =
-        g_object_new(IPCAM_HTTP_BASE_INFO_HANDLER_TYPE, "app", priv->iconfig, NULL);
-    priv->request_handler_list = g_list_append(priv->request_handler_list, base_info_handler);
+    IpcamHttpRequestHandler *req_handler;
+    req_handler = g_object_new(IPCAM_HTTP_BASE_INFO_HANDLER_TYPE, "app", priv->iconfig, NULL);
+    priv->request_handler_list = g_list_append(priv->request_handler_list, req_handler);
+    req_handler = g_object_new(IPCAM_HTTP_OSD_HANDLER_TYPE, "app", priv->iconfig, NULL);
+    priv->request_handler_list = g_list_append(priv->request_handler_list, req_handler);
 }
 static void ipcam_http_proc_get_property(GObject    *object,
                                          guint       property_id,

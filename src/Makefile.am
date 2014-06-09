@@ -39,7 +39,8 @@ iconfig_SOURCES = \
 	ajax/ajax.c \
 	ctemplate.c \
 	iconfig.c \
-	main.c
+	main.c \
+	ajax/http_osd_handler.c
 
 iconfig_LDFLAGS = 
 

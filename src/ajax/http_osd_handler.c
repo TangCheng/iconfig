@@ -53,6 +53,7 @@ START_HANDLER(put_osd, HTTP_PUT, "/api/1.0/osd.json", http_request, http_respons
 {
     gchar *body = NULL;
     IpcamIConfig *iconfig;
+	GList *osds;
     GHashTable *infos_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, destroy_data);
     gboolean success = FALSE;
 
@@ -61,24 +62,35 @@ START_HANDLER(put_osd, HTTP_PUT, "/api/1.0/osd.json", http_request, http_respons
     if (body)
     {
         JsonParser *parser = json_parser_new();
-        JsonNode *jbody;
-        gchar *value = NULL;
+        JsonNode *jbody, *josd;
+		JsonArray *array;
+		JsonObject *obj;
 		GError *err = NULL;
         if (json_parser_load_from_data(parser, body, -1, &err))
         {
-            jbody = json_parser_get_root(parser);
-            value = json_get_value(jbody, "$.infos.device_name");
-            if (value)
-            {
-                g_hash_table_insert(infos_hash, "device_name", value);
-            }
-            value = json_get_value(jbody, "$.infos.comment");
-            if (value)
-            {
-                g_hash_table_insert(infos_hash, "comment", value);
-            }
-			ipcam_iconfig_set_osd(iconfig, infos_hash);
-            g_object_set(http_response,
+	        const gchar *name = NULL;
+			gboolean isshow;
+			guint size;
+			guint x, y;
+			guint color;
+			int i;
+
+			jbody = json_parser_get_root(parser);
+			josd = json_path_query("$.osds[*]", jbody, NULL);
+			array = json_node_get_array(josd);
+			for (i = 0; i < json_array_get_length(array); i++)
+			{
+				obj = json_array_get_object_element(array, i);
+				name = json_object_get_string_member(obj, "name");
+				isshow = json_object_get_boolean_member(obj, "isshow");
+				size = json_object_get_int_member(obj, "size");
+				x = json_object_get_int_member(obj, "x");
+				y = json_object_get_int_member(obj, "y");
+				color = json_object_get_int_member(obj, "color");
+				ipcam_iconfig_set_osd(iconfig, name, isshow, size, x, y, color);
+			}
+
+			g_object_set(http_response,
                          "status", 200,
                          NULL);
             success = TRUE;
