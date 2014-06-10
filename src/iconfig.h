@@ -31,5 +31,7 @@ void ipcam_iconfig_set_osd(IpcamIConfig *iconfig, const gchar *name, gboolean is
                            guint size, guint x, guint y, guint color);
 gchar *ipcam_iconfig_get_video_param(IpcamIConfig *iconfig, GList *params);
 void ipcam_iconfig_set_video_param(IpcamIConfig *iconfig, const char *name, gint value);
+gchar *ipcam_iconfig_get_scene(IpcamIConfig *iconfig, GList *infos);
+void ipcam_iconfig_set_scene(IpcamIConfig *iconfig, const gchar *name, gint value);
 
 #endif /* __ICONFIG_H__ */

@@ -69,6 +69,12 @@ static void ipcam_iconfig_before_start(IpcamIConfig *iconfig)
     gchar *vid_param = ipcam_iconfig_get_video_param(iconfig, list);
     g_free(vid_param);
     g_list_free(list);
+
+    list = NULL;
+    list = g_list_append(list, "scenario");
+    gchar *scenes = ipcam_iconfig_get_scene(iconfig, list);
+    g_free(scenes);
+    g_list_free(list);
 }
 
 static void ipcam_iconfig_in_loop(IpcamIConfig *iconfig)
@@ -241,4 +247,49 @@ void ipcam_iconfig_set_video_param(IpcamIConfig *iconfig, const gchar *name, gin
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
 
 	ipcam_database_set_video(priv->database, (gchar *)name, value);
+}
+
+gchar *ipcam_iconfig_get_scene(IpcamIConfig *iconfig, GList *infos)
+{
+    g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), NULL);
+    IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
+
+    JsonBuilder *builder = json_builder_new();
+    JsonBuilder *infos_builder = json_builder_new();
+    JsonGenerator *generator = json_generator_new();
+    GList *item = g_list_first(infos);
+    guint value;
+
+    json_builder_begin_object(builder);
+    for (; item; item = g_list_next(item))
+    {
+        json_builder_set_member_name(builder, item->data);
+        value = ipcam_database_get_scene(priv->database, item->data);
+        json_builder_add_int_value(builder, value);
+    }
+    json_builder_end_object(builder);
+
+    json_builder_begin_object(infos_builder);
+    json_builder_set_member_name(infos_builder, "scene");
+    JsonNode *root = json_builder_get_root(builder);
+    json_builder_add_value(infos_builder, root);
+    json_builder_end_object(infos_builder);
+    JsonNode *infos_root = json_builder_get_root(infos_builder);
+    json_generator_set_root(generator, infos_root);
+    json_generator_set_pretty(generator, FALSE);
+    
+    const gchar *string = json_generator_to_data(generator, NULL);
+    json_node_free(infos_root);
+    g_object_unref(generator);
+    g_object_unref(infos_builder);
+    g_object_unref(builder);
+    return (gchar *)string;
+}
+
+void ipcam_iconfig_set_scene(IpcamIConfig *iconfig, const gchar *name, gint value)
+{
+    g_return_if_fail(IPCAM_IS_ICONFIG(iconfig));
+    IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
+
+	ipcam_database_set_scene(priv->database, (gchar *)name, value);
 }
