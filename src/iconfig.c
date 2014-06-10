@@ -33,14 +33,14 @@ static void ipcam_iconfig_class_init(IpcamIConfigClass *klass)
     object_class->finalize = &ipcam_iconfig_finalize;
     
     IpcamBaseServiceClass *base_service_class = IPCAM_BASE_SERVICE_CLASS(klass);
-    base_service_class->before = &ipcam_iconfig_before_start;
-    base_service_class->in_loop = &ipcam_iconfig_in_loop;
+    base_service_class->before = ipcam_iconfig_before_start;
+    base_service_class->in_loop = ipcam_iconfig_in_loop;
 }
 static void ipcam_iconfig_before_start(IpcamIConfig *iconfig)
 {
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
-    gchar *ajax_addr = ipcam_base_app_get_config(IPCAM_BASE_APP(iconfig), "ajax:address");
-    gchar *port = ipcam_base_app_get_config(IPCAM_BASE_APP(iconfig), "ajax:port");
+    const gchar *ajax_addr = ipcam_base_app_get_config(IPCAM_BASE_APP(iconfig), "ajax:address");
+    const gchar *port = ipcam_base_app_get_config(IPCAM_BASE_APP(iconfig), "ajax:port");
     if (ajax_addr != NULL && port != NULL)
     {
         priv->ajax = g_object_new(IPCAM_AJAX_TYPE,
@@ -182,12 +182,11 @@ gchar *ipcam_iconfig_get_osd(IpcamIConfig *iconfig, GList *infos)
     return string;
 }
 
-void ipcam_iconfig_set_osd(IpcamIConfig *iconfig, gchar *name, gboolean isshow,
+void ipcam_iconfig_set_osd(IpcamIConfig *iconfig, const gchar *name, gboolean isshow,
                            guint size, guint x, guint y, guint color)
 {
     g_return_if_fail(IPCAM_IS_ICONFIG(iconfig));
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
-    gchar *value = NULL;
 
 	ipcam_database_set_osd(priv->database, name, isshow, size, x, y, color);
 }

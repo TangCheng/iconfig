@@ -6,7 +6,6 @@
 
 G_DEFINE_TYPE(IpcamHttpOsdHandler, ipcam_http_osd_handler, IPCAM_HTTP_REQUEST_HANDLER_TYPE)
 
-static gchar *json_get_value(JsonNode *json, const gchar *key);
 static void destroy_data(gpointer data);
 
 START_HANDLER(get_osd, HTTP_GET, "/api/1.0/osd.json", http_request, http_response)
@@ -53,7 +52,6 @@ START_HANDLER(put_osd, HTTP_PUT, "/api/1.0/osd.json", http_request, http_respons
 {
     gchar *body = NULL;
     IpcamIConfig *iconfig;
-	GList *osds;
     GHashTable *infos_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, destroy_data);
     gboolean success = FALSE;
 
@@ -90,13 +88,15 @@ START_HANDLER(put_osd, HTTP_PUT, "/api/1.0/osd.json", http_request, http_respons
 				ipcam_iconfig_set_osd(iconfig, name, isshow, size, x, y, color);
 			}
 
+			json_node_free(josd);
+
 			g_object_set(http_response,
                          "status", 200,
                          NULL);
             success = TRUE;
         }
         g_object_unref(parser);
-        g_free(body);
+		g_free(body);
     }
     ipcam_http_response_success(http_response, success);
     g_hash_table_destroy(infos_hash);
@@ -114,18 +114,6 @@ static void ipcam_http_osd_handler_class_init(IpcamHttpOsdHandlerClass *klass)
 {
 }
 
-static gchar *json_get_value(JsonNode *json, const gchar *key)
-{
-    gchar *str = NULL;
-    JsonNode *jattr = json_path_query(key, json, NULL);
-    JsonArray *array = json_node_get_array(jattr);
-    if (json_array_get_length(array) > 0)
-    {
-        str = g_strdup(json_array_get_string_element(array, 0));
-    }
-    json_node_free(jattr);
-    return str;
-}
 static void destroy_data(gpointer data)
 {
     g_free(data);
