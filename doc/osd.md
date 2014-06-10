@@ -19,8 +19,8 @@ PUT
 ### 请求参数
  请求|参数|必选|类型及范围|说明
 ---|---|:-:|---|---|---
-GET|osd_name|是|array: ['datetime', 'device_name', 'comment', 'frame_rate', 'bit_rate']|需要查询的基本OSD的名称
-PUT|osd|是|object: {'osd_name':'datetime','isshow':true,'size':5,'x':10,'y':20,'color':0}|要设置的OSD的名称，是否显示，大小，X/Y坐标，和颜色值
+GET|osd_name|是|array: ['datetime', 'device_name', 'comment', 'frame_rate', 'bit_rate']|需要查询的OSD显示项的名称
+PUT|osd|是|object: {'osd_name':'datetime','isshow':true,'size':5,'x':10,'y':20,'color':0}|要设置的OSD显示项的名称，是否显示，大小，X/Y坐标，和颜色值
 
 ### 注意事项
 无
@@ -47,8 +47,12 @@ PUT
 ### 返回字段说明
 返回值字段|字段类型|字段说明
 ---|---|---
-device_name|string|设备名称
-comment|string|用户自定义说明
+name|string|OSD设置项名称
+isshow|bool|是否在屏幕显示
+size|int|大小
+x|int|X坐标
+y|int|Y坐标
+color|int|显示颜色
 
 ## 2. osd（message）
 

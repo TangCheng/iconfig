@@ -40,7 +40,8 @@ iconfig_SOURCES = \
 	ctemplate.c \
 	iconfig.c \
 	main.c \
-	ajax/http_osd_handler.c
+	ajax/http_osd_handler.c \
+	ajax/http_video_handler.c
 
 iconfig_LDFLAGS = 
 
