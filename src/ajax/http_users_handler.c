@@ -1,11 +1,11 @@
-#include "http_osd_handler.h"
+#include "http_users_handler.h"
 #include "http_request.h"
 #include "http_response.h"
 #include "http_query_string_parser.h"
 #include "iconfig.h"
-#include "../msg-handler/ipcam-osd-handler.h"
+#include "../msg-handler/ipcam-users-handler.h"
 
-G_DEFINE_TYPE(IpcamHttpOsdHandler, ipcam_http_osd_handler, IPCAM_HTTP_REQUEST_HANDLER_TYPE)
+G_DEFINE_TYPE(IpcamHttpUsersHandler, ipcam_http_users_handler, IPCAM_HTTP_REQUEST_HANDLER_TYPE)
 
 static gchar* do_get_action(IpcamIConfig *iconfig, GList *item_list)
 {
@@ -29,7 +29,7 @@ static gchar* do_get_action(IpcamIConfig *iconfig, GList *item_list)
 
     req_node = json_builder_get_root(builder);
 
-    IpcamMessageHandler *msg_handler = g_object_new(IPCAM_TYPE_OSD_MSG_HANDLER,
+    IpcamMessageHandler *msg_handler = g_object_new(IPCAM_TYPE_USERS_MSG_HANDLER,
                                                       "app", iconfig, NULL);
 
     ipcam_message_handler_do_get(msg_handler, req_node, &res_node);
@@ -44,7 +44,7 @@ static gchar* do_get_action(IpcamIConfig *iconfig, GList *item_list)
     return result;
 }
 
-START_HANDLER(get_osd, HTTP_GET, "/api/1.0/osd.json", http_request, http_response)
+START_HANDLER(get_users, HTTP_GET, "/api/1.0/users.json", http_request, http_response)
 {
     IpcamIConfig *iconfig;
     IpcamHttpQueryStringParser *parser;
@@ -53,7 +53,7 @@ START_HANDLER(get_osd, HTTP_GET, "/api/1.0/osd.json", http_request, http_respons
     GHashTable *query_hash = NULL;
     gboolean success = FALSE;
     
-    g_object_get(get_osd, "app", &iconfig, NULL);
+    g_object_get(get_users, "app", &iconfig, NULL);
     g_object_get(http_request, "query-string", &query_string, NULL);
     if (query_string) 
     {
@@ -93,7 +93,7 @@ static gchar* do_put_action(IpcamIConfig *iconfig, JsonNode *request)
 
     generator = json_generator_new();
 
-    IpcamMessageHandler *msg_handler = g_object_new(IPCAM_TYPE_OSD_MSG_HANDLER,
+    IpcamMessageHandler *msg_handler = g_object_new(IPCAM_TYPE_USERS_MSG_HANDLER,
                                                       "app", iconfig, NULL);
 
     ipcam_message_handler_do_put(msg_handler, request, &response);
@@ -108,13 +108,13 @@ static gchar* do_put_action(IpcamIConfig *iconfig, JsonNode *request)
     return result;
 }
 
-START_HANDLER(put_osd, HTTP_PUT, "/api/1.0/osd.json", http_request, http_response)
+START_HANDLER(put_users, HTTP_PUT, "/api/1.0/users.json", http_request, http_response)
 {
     gchar *body = NULL;
     IpcamIConfig *iconfig;
     gboolean success = FALSE;
 
-    g_object_get(put_osd, "app", &iconfig, NULL);
+    g_object_get(put_users, "app", &iconfig, NULL);
     g_object_get(http_request, "body", &body, NULL);
     if (body)
     {
@@ -141,12 +141,12 @@ START_HANDLER(put_osd, HTTP_PUT, "/api/1.0/osd.json", http_request, http_respons
 }
 END_HANDLER
 
-static void ipcam_http_osd_handler_init(IpcamHttpOsdHandler *self)
+static void ipcam_http_users_handler_init(IpcamHttpUsersHandler *self)
 {
-    ipcam_http_request_handler_register(IPCAM_HTTP_REQUEST_HANDLER(self), get_osd);
-    ipcam_http_request_handler_register(IPCAM_HTTP_REQUEST_HANDLER(self), put_osd);
+    ipcam_http_request_handler_register(IPCAM_HTTP_REQUEST_HANDLER(self), get_users);
+    ipcam_http_request_handler_register(IPCAM_HTTP_REQUEST_HANDLER(self), put_users);
 }
 
-static void ipcam_http_osd_handler_class_init(IpcamHttpOsdHandlerClass *klass)
+static void ipcam_http_users_handler_class_init(IpcamHttpUsersHandlerClass *klass)
 {
 }

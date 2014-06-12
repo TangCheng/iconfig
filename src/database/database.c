@@ -137,7 +137,7 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "value    TEXT"
                      ");");
         EXEC_OR_FAIL("INSERT INTO network_static (name, value) "
-                     "VALUES ('address', '192.168.0.100');");
+                     "VALUES ('ipaddr', '192.168.0.100');");
         EXEC_OR_FAIL("INSERT INTO network_static (name, value) "
                      "VALUES ('netmask', '255.255.255.0');");
         EXEC_OR_FAIL("INSERT INTO network_static (name, value) "

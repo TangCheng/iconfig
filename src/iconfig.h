@@ -24,14 +24,32 @@ struct _IpcamIConfigClass
 };
 
 GType ipcam_iconfig_get_type(void);
-gchar *ipcam_iconfig_get_base_info(IpcamIConfig *iconfig, GList *infos);
-void ipcam_iconfig_set_base_info(IpcamIConfig *iconfig, GHashTable *infos);
-gchar *ipcam_iconfig_get_osd(IpcamIConfig *iconfig, GList *infos);
+gchar *ipcam_iconfig_get_base_info(IpcamIConfig *iconfig, const gchar *name);
+void ipcam_iconfig_set_base_info(IpcamIConfig *iconfig, const char *name, const char *value);
+gboolean ipcam_iconfig_get_osd(IpcamIConfig *iconfig, const char *name, gboolean *isshow,
+                             guint *size, guint *x, guint *y, guint *color);
 void ipcam_iconfig_set_osd(IpcamIConfig *iconfig, const gchar *name, gboolean isshow,
                            guint size, guint x, guint y, guint color);
-gchar *ipcam_iconfig_get_video_param(IpcamIConfig *iconfig, GList *params);
-void ipcam_iconfig_set_video_param(IpcamIConfig *iconfig, const char *name, gint value);
-gchar *ipcam_iconfig_get_scene(IpcamIConfig *iconfig, GList *infos);
+gint ipcam_iconfig_get_video(IpcamIConfig *iconfig, const gchar *name);
+void ipcam_iconfig_set_video(IpcamIConfig *iconfig, const char *name, gint value);
+gint ipcam_iconfig_get_scene(IpcamIConfig *iconfig, const gchar *name);
 void ipcam_iconfig_set_scene(IpcamIConfig *iconfig, const gchar *name, gint value);
+
+gint ipcam_iconfig_get_network(IpcamIConfig *iconfig, gchar *name);
+void ipcam_iconfig_set_network(IpcamIConfig *iconfig, gchar *name, guint value);
+gchar *ipcam_iconfig_get_network_static(IpcamIConfig *iconfig, gchar *name);
+void ipcam_iconfig_set_network_static(IpcamIConfig *iconfig, gchar *name, gchar *value);
+gchar *ipcam_iconfig_get_network_pppoe(IpcamIConfig *iconfig, gchar *name);
+void ipcam_iconfig_set_network_pppoe(IpcamIConfig *iconfig, gchar *name, gchar *value);
+gint ipcam_iconfig_get_network_port(IpcamIConfig *iconfig, gchar *name);
+void ipcam_iconfig_set_network_port(IpcamIConfig *iconfig, gchar *name, guint value);
+void ipcam_iconfig_set_datetime(IpcamIConfig *iconfig, gchar *name, guint int_value, gchar *str_value);
+void ipcam_iconfig_get_datetime(IpcamIConfig *iconfig, gchar *name, guint *int_value, gchar **str_value);
+GList *ipcam_iconfig_get_users(IpcamIConfig *iconfig);
+void ipcam_iconfig_set_user_password(IpcamIConfig *iconfig, gchar *username, gchar *password);
+gchar *ipcam_iconfig_get_user_password(IpcamIConfig *iconfig, gchar *username);
+void ipcam_iconfig_set_user_privilege(IpcamIConfig *iconfig, gchar *username, gboolean isadmin);
+gboolean ipcam_iconfig_get_user_privilege(IpcamIConfig *iconfig, gchar *username);
+void ipcam_iconfig_del_user(IpcamIConfig *iconfig, gchar *username);
 
 #endif /* __ICONFIG_H__ */

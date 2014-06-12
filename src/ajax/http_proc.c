@@ -6,6 +6,9 @@
 #include "http_osd_handler.h"
 #include "http_video_handler.h"
 #include "http_scene_handler.h"
+#include "http_network_handler.h"
+#include "http_datetime_handler.h"
+#include "http_users_handler.h"
 #include "iconfig.h"
 
 enum
@@ -48,9 +51,15 @@ static void ipcam_http_proc_init(IpcamHttpProc *self)
     priv->request_handler_list = g_list_append(priv->request_handler_list, req_handler);
     req_handler = g_object_new(IPCAM_HTTP_OSD_HANDLER_TYPE, "app", priv->iconfig, NULL);
     priv->request_handler_list = g_list_append(priv->request_handler_list, req_handler);
-    req_handler = g_object_new(IPCAM_HTTP_VIDEO_PARAM_HANDLER_TYPE, "app", priv->iconfig, NULL);
+    req_handler = g_object_new(IPCAM_HTTP_VIDEO_HANDLER_TYPE, "app", priv->iconfig, NULL);
     priv->request_handler_list = g_list_append(priv->request_handler_list, req_handler);
     req_handler = g_object_new(IPCAM_HTTP_SCENE_HANDLER_TYPE, "app", priv->iconfig, NULL);
+    priv->request_handler_list = g_list_append(priv->request_handler_list, req_handler);
+    req_handler = g_object_new(IPCAM_HTTP_NETWORK_HANDLER_TYPE, "app", priv->iconfig, NULL);
+    priv->request_handler_list = g_list_append(priv->request_handler_list, req_handler);
+    req_handler = g_object_new(IPCAM_HTTP_DATETIME_HANDLER_TYPE, "app", priv->iconfig, NULL);
+    priv->request_handler_list = g_list_append(priv->request_handler_list, req_handler);
+    req_handler = g_object_new(IPCAM_HTTP_USERS_HANDLER_TYPE, "app", priv->iconfig, NULL);
     priv->request_handler_list = g_list_append(priv->request_handler_list, req_handler);
 }
 static void ipcam_http_proc_get_property(GObject    *object,

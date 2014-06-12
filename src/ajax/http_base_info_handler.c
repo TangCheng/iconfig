@@ -3,18 +3,53 @@
 #include "http_response.h"
 #include "http_query_string_parser.h"
 #include "iconfig.h"
+#include "../msg-handler/ipcam-base-info-handler.h"
 
 G_DEFINE_TYPE(IpcamHttpBaseInfoHandler, ipcam_http_base_info_handler, IPCAM_HTTP_REQUEST_HANDLER_TYPE)
 
-static gchar *json_get_value(JsonNode *json, const gchar *key);
-static void destroy_data(gpointer data);
+static gchar* do_get_action(IpcamIConfig *iconfig, GList *item_list)
+{
+    JsonBuilder *builder;
+    JsonNode *req_node, *res_node = NULL;
+    GList *item;
+    JsonGenerator *generator;
+
+    builder = json_builder_new();
+    generator = json_generator_new();
+
+    json_builder_begin_object(builder);
+    json_builder_set_member_name(builder, "items");
+    json_builder_begin_array (builder);
+    for (item = g_list_first(item_list); item; item = g_list_next(item))
+    {
+        json_builder_add_string_value(builder, item->data);
+    }
+    json_builder_end_array(builder);
+    json_builder_end_object(builder);
+
+    req_node = json_builder_get_root(builder);
+
+    IpcamMessageHandler *msg_handler = g_object_new(IPCAM_TYPE_BASE_INFO_MSG_HANDLER,
+                                                      "app", iconfig, NULL);
+
+    ipcam_message_handler_do_get(msg_handler, req_node, &res_node);
+
+    json_generator_set_root(generator, res_node);
+    json_generator_set_pretty(generator, TRUE);
+
+    gchar *result = json_generator_to_data(generator, NULL);;
+    json_node_free(res_node);
+    g_object_unref(G_OBJECT(generator));
+
+    return result;
+}
 
 START_HANDLER(get_base_info, HTTP_GET, "/api/1.0/base_info.json", http_request, http_response)
 {
     IpcamIConfig *iconfig;
     IpcamHttpQueryStringParser *parser;
     gchar *query_string = NULL;
-    GList *infos_list = NULL;
+    GList *item_list = NULL;
     GHashTable *query_hash = NULL;
     gboolean success = FALSE;
     
@@ -26,12 +61,13 @@ START_HANDLER(get_base_info, HTTP_GET, "/api/1.0/base_info.json", http_request, 
         query_hash = ipcam_http_query_string_parser_get(parser, query_string);
         if (query_hash)
         {
-            infos_list = g_hash_table_lookup(query_hash, "infos[]");
-            if (infos_list)
+            item_list = g_hash_table_lookup(query_hash, "items[]");
+            if (item_list)
             {
-                gchar *infos = ipcam_iconfig_get_base_info(iconfig, infos_list);
-                g_object_set(http_response, "body", infos, NULL);
-                g_free(infos);
+                gchar *result = do_get_action(iconfig, item_list);
+                g_object_set(http_response, "body", result, NULL);
+                g_free(result);
+
                 g_object_set(http_response,
                              "status", 200,
                              NULL);
@@ -49,11 +85,33 @@ START_HANDLER(get_base_info, HTTP_GET, "/api/1.0/base_info.json", http_request, 
 }
 END_HANDLER
 
+static gchar* do_put_action(IpcamIConfig *iconfig, JsonNode *request)
+{
+    JsonNode *response;
+    JsonGenerator *generator;
+    gchar *result = NULL;
+
+    generator = json_generator_new();
+
+    IpcamMessageHandler *msg_handler = g_object_new(IPCAM_TYPE_BASE_INFO_MSG_HANDLER,
+                                                      "app", iconfig, NULL);
+
+    ipcam_message_handler_do_put(msg_handler, request, &response);
+
+    json_generator_set_root(generator, response);
+    json_generator_set_pretty(generator, TRUE);
+
+    result = json_generator_to_data(generator, NULL);;
+    json_node_free(response);
+    g_object_unref(G_OBJECT(generator));
+
+    return result;
+}
+
 START_HANDLER(put_base_info, HTTP_PUT, "/api/1.0/base_info.json", http_request, http_response)
 {
     gchar *body = NULL;
     IpcamIConfig *iconfig;
-    GHashTable *infos_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, destroy_data);
     gboolean success = FALSE;
 
     g_object_get(put_base_info, "app", &iconfig, NULL);
@@ -61,22 +119,15 @@ START_HANDLER(put_base_info, HTTP_PUT, "/api/1.0/base_info.json", http_request, 
     if (body)
     {
         JsonParser *parser = json_parser_new();
-        JsonNode *jbody;
-        gchar *value = NULL;
+        JsonNode *root_node;
         if (json_parser_load_from_data(parser, body, -1, NULL))
         {
-            jbody = json_parser_get_root(parser);
-            value = json_get_value(jbody, "$.infos.device_name");
-            if (value)
-            {
-                g_hash_table_insert(infos_hash, "device_name", value);
-            }
-            value = json_get_value(jbody, "$.infos.comment");
-            if (value)
-            {
-                g_hash_table_insert(infos_hash, "comment", value);
-            }
-            ipcam_iconfig_set_base_info(iconfig, infos_hash);
+            root_node = json_parser_get_root(parser);
+
+            gchar *result = do_put_action(iconfig, root_node);
+            g_object_set(http_response, "body", result, NULL);
+            g_free(result);
+
             g_object_set(http_response,
                          "status", 200,
                          NULL);
@@ -86,7 +137,6 @@ START_HANDLER(put_base_info, HTTP_PUT, "/api/1.0/base_info.json", http_request, 
         g_free(body);
     }
     ipcam_http_response_success(http_response, success);
-    g_hash_table_destroy(infos_hash);
     ret = TRUE;
 }
 END_HANDLER
@@ -96,22 +146,7 @@ static void ipcam_http_base_info_handler_init(IpcamHttpBaseInfoHandler *self)
     ipcam_http_request_handler_register(IPCAM_HTTP_REQUEST_HANDLER(self), get_base_info);
     ipcam_http_request_handler_register(IPCAM_HTTP_REQUEST_HANDLER(self), put_base_info);
 }
+
 static void ipcam_http_base_info_handler_class_init(IpcamHttpBaseInfoHandlerClass *klass)
 {
-}
-static gchar *json_get_value(JsonNode *json, const gchar *key)
-{
-    gchar *str = NULL;
-    JsonNode *jattr = json_path_query(key, json, NULL);
-    JsonArray *array = json_node_get_array(jattr);
-    if (json_array_get_length(array) > 0)
-    {
-        str = g_strdup(json_array_get_string_element(array, 0));
-    }
-    json_node_free(jattr);
-    return str;
-}
-static void destroy_data(gpointer data)
-{
-    g_free(data);
 }

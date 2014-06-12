@@ -19,14 +19,14 @@ PUT
 ### 请求参数
  请求|参数|必选|类型及范围|说明
 ---|---|:-:|---|---|---
-GET|infos|是|array: ['device_name', 'comment']|需要查询的基本信息的名称
-PUT|infos|是|object: {'device_name':'ipcam','comment':'my content'}|要设置的基本信息的名值对
+GET|items|是|array: ['device_name', 'comment']|需要查询的基本信息的名称
+PUT|items|是|object: {'device_name':'ipcam','comment':'my content'}|要设置的基本信息的名值对
 
 ### 注意事项
 无
 
 ### 调用样例
-GET http://x.x.x.x/api/1.0/base_info.json?infos%5B%5D=device_name&infos%5B%5D=comment  
+GET http://x.x.x.x/api/1.0/base_info.json?items%5B%5D=device_name&items%5B%5D=comment  
 PUT http://x.x.x.x/api/1.0/base_info.json json_data
 
 ### 返回结果
@@ -34,7 +34,7 @@ JSON示例
 GET
 
 	{
-		infos: {
+		items: {
 			“device_name”: "ipcam",
 			"comment": "my content"
 		}
@@ -60,20 +60,20 @@ comment|string|用户自定义说明
             version: '1.0'
 		},
         body: {
-            infos: ['device_name', 'comment']
+            items: ['device_name', 'comment']
         }
     }
 #### response
     {
-		head: {
-            action: 'get_base_info',
-            version: '1.0',
-		    code: '0'
+		'head': {
+            'action': 'get_base_info',
+            'version': '1.0',
+		    'code': '0'
 		},
-        body: {
-		    infos: {
-                device_name: 'device_name',
-			    comment: 'comment'
+        'body': {
+		    'items': {
+                'device_name': 'device_name',
+			    'comment': 'comment'
 			}
         }
     }
@@ -81,24 +81,24 @@ comment|string|用户自定义说明
 ### 2.2 set_base_info
 #### request
     {
-		head: {
-		    action: 'set_base_info',
-            version: '1.0'
+		'head': {
+		    'action': 'set_base_info',
+            'version': '1.0'
         },
-        body: {
-			infos: {
-                device_name: 'device_name',
-			    comment: 'comment'
+        'body': {
+			'infos': {
+                'device_name': 'device_name',
+			    'comment': 'comment'
 			}
 		}
     }
 #### response
     {
-		head: {
-    		action: 'set_base_info',
-            version: '1.0',
-			code: '0'
+		'head': {
+    		'action': 'set_base_info',
+            'version': '1.0',
+			'code': '0'
 		},
-        body: {
+        'body': {
 		}
     }

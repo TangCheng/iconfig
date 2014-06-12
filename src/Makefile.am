@@ -42,7 +42,28 @@ iconfig_SOURCES = \
 	main.c \
 	ajax/http_osd_handler.c \
 	ajax/http_video_handler.c \
-	ajax/http_scene_handler.c
+	ajax/http_scene_handler.c \
+	ajax/http_network_handler.c \
+    ajax/http_datetime_handler.c \
+    ajax/http_users_handler.c \
+	msg-handler/ipcam-message-handler.c \
+	msg-handler/ipcam-message-handler.h \
+	msg-handler/ipcam-base-info-handler.c \
+	msg-handler/ipcam-base-info-handler.h \
+	msg-handler/ipcam-osd-handler.c \
+	msg-handler/ipcam-osd-handler.h \
+	msg-handler/ipcam-video-handler.c \
+	msg-handler/ipcam-video-handler.h \
+	msg-handler/ipcam-scene-handler.c \
+	msg-handler/ipcam-scene-handler.h \
+	action-handler/base_info_action_handler.c \
+	action-handler/base_info_action_handler.h \
+	msg-handler/ipcam-network-handler.c \
+	msg-handler/ipcam-network-handler.h \
+	msg-handler/ipcam-datetime-handler.c \
+	msg-handler/ipcam-datetime-handler.h \
+	msg-handler/ipcam-users-handler.c \
+	msg-handler/ipcam-users-handler.h
 
 iconfig_LDFLAGS = 
 
