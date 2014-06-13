@@ -21,8 +21,10 @@ DELETE
 ### 请求参数
  请求|参数|必选|类型及范围|说明
 ---|---|:-:|---|---|---
-GET|items|是|array: ['profile', 'flip', 'quanlity', 'frame_rate', 'bit_rate', 'bit_rate_value']|需要查询的Users设置项的名称
-PUT|items|是|object: {'profile':0, 'flip':0, 'quanlity':0, 'frame_rate':25, 'bit_rate':0, 'bit_rate_value':300}|要设置的Users设置项的名称，值
+GET|items|是|array: ['password', 'privilege']|是否需要返回用户密码和特权级
+PUT|items|是|object: [ {'username':'username', 'password':'password', 'privilege':0}]|所有需要设置的用户名，密码，特权级的数组，允许一次调用设置多个用户
+POST|items|是|object: [ {'username':'username', 'password':'password', 'privilege':0}]|目前POST和PUT功能完全一样，都是可以增加用户，修改用户信息
+DELETE|items|是|object: [ { 'username':'user1' }, { 'username':'user2' } ]|需要被删除的用户名，可以一次删除多个
 
 ### 注意事项
 无

@@ -54,7 +54,7 @@ scenario|int|场景设置（50Hz/60Hz/混合模式）
 #### request
     {
 		'head': {
-        	'action': 'get_scene',
+            'action': 'get_scene',
             'version': '1.0'
 		},
         'body': {
@@ -68,10 +68,10 @@ scenario|int|场景设置（50Hz/60Hz/混合模式）
 		'head': {
             'action': 'get_scene',
             'version': '1.0',
-		    'code': '0'
+            'code': '0'
 		},
         'body': {
-		    'items': {
+            'items': {
                 'scenario':0
 			}
         }
@@ -81,7 +81,7 @@ scenario|int|场景设置（50Hz/60Hz/混合模式）
 #### request
     {
 		'head': {
-		    'action': 'set_scene',
+            'action': 'set_scene',
             'version': '1.0'
         },
         'body': {
@@ -98,7 +98,7 @@ scenario|int|场景设置（50Hz/60Hz/混合模式）
 #### response
     {
 		'head': {
-    		'action': 'set_scene',
+            'action': 'set_scene',
             'version': '1.0',
 			'code': '0'
 		},

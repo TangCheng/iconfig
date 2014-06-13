@@ -34,7 +34,7 @@ JSON示例
 GET
 
 	{
-		items: {
+		'items': {
 			“device_name”: "ipcam",
 			"comment": "my content"
 		}
@@ -55,12 +55,12 @@ comment|string|用户自定义说明
 ### 2.1 get_base_info
 #### request
     {
-		head: {
-        	action: 'get_base_info',
-            version: '1.0'
+		'head': {
+            'action': 'get_base_info',
+            'version': '1.0'
 		},
-        body: {
-            items: ['device_name', 'comment']
+        'body': {
+            'items': ['device_name', 'comment']
         }
     }
 #### response
@@ -68,12 +68,12 @@ comment|string|用户自定义说明
 		'head': {
             'action': 'get_base_info',
             'version': '1.0',
-		    'code': '0'
+            'code': '0'
 		},
         'body': {
-		    'items': {
+            'items': {
                 'device_name': 'device_name',
-			    'comment': 'comment'
+                'comment': 'comment'
 			}
         }
     }
@@ -82,20 +82,20 @@ comment|string|用户自定义说明
 #### request
     {
 		'head': {
-		    'action': 'set_base_info',
+            'action': 'set_base_info',
             'version': '1.0'
         },
         'body': {
 			'infos': {
                 'device_name': 'device_name',
-			    'comment': 'comment'
+                'comment': 'comment'
 			}
 		}
     }
 #### response
     {
 		'head': {
-    		'action': 'set_base_info',
+            'action': 'set_base_info',
             'version': '1.0',
 			'code': '0'
 		},

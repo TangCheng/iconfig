@@ -20,7 +20,7 @@ PUT
  请求|参数|必选|类型及范围|说明
 ---|---|:-:|---|---|---
 GET|items|是|array: ['timezone', 'use_ntp', 'ntp_server']|需要查询的Datetime设置项的名称
-PUT|items|是|object: {'timezone':'GMT+8', 'use_ntp':0, 'ntp_server':'xxx.xxx.xxx.xxx'}|要设置的Datetime设置项的名值对
+PUT|items|是|object: {'timezone': { int_value':0, 'str_value':'GMT+8' }, 'use_ntp':{ 'int_value':0, 'str_value':'' }, 'ntp_server': { 'int_value':0, 'str_value':'xxx.xxx.xxx.xxx' }}|要设置的Datetime设置项的名值对
 
 ### 注意事项
 无
@@ -67,7 +67,7 @@ ntp_server|object|NTP服务器
 #### request
     {
 		'head': {
-        	'action': 'get_datetime',
+            'action': 'get_datetime',
             'version': '1.0'
 		},
         'body': {
@@ -107,7 +107,7 @@ ntp_server|object|NTP服务器
 #### request
     {
 		'head': {
-		    'action': 'set_datetime',
+            'action': 'set_datetime',
             'version': '1.0'
         },
         'body': {
@@ -130,7 +130,7 @@ ntp_server|object|NTP服务器
 #### response
     {
 		'head': {
-    		'action': 'set_datetime',
+            'action': 'set_datetime',
             'version': '1.0',
 			'code': '0'
 		},

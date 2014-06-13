@@ -26,7 +26,7 @@ PUT|items|是|object: {'profile':0, 'flip':0, 'quanlity':0, 'frame_rate':25, 'bi
 无
 
 ### 调用样例
-GET http://x.x.x.x/api/1.0/video.json?params%5B%5D=profile&params%5B%5D=flip  
+GET http://x.x.x.x/api/1.0/video.json?items%5B%5D=profile&items%5B%5D=flip  
 PUT http://x.x.x.x/api/1.0/video.json json_data
 
 ### 返回结果
@@ -64,7 +64,7 @@ bit_rate_value|int|视频码率值
 #### request
     {
 		'head': {
-        	'action': 'get_video',
+            'action': 'get_video',
             'version': '1.0'
 		},
         'body': {
@@ -83,10 +83,10 @@ bit_rate_value|int|视频码率值
 		'head': {
             'action': 'get_video',
             'version': '1.0',
-		    'code': '0'
+            'code': '0'
 		},
         'body': {
-		    'items': {
+            'items': {
                 'profile':0,
 				'flip':0,
 				'quanlity':0
@@ -101,7 +101,7 @@ bit_rate_value|int|视频码率值
 #### request
     {
 		'head': {
-		    'action': 'set_video',
+            'action': 'set_video',
             'version': '1.0'
         },
         'body': {
@@ -118,7 +118,7 @@ bit_rate_value|int|视频码率值
 #### response
     {
 		'head': {
-    		'action': 'set_video',
+            'action': 'set_video',
             'version': '1.0',
 			'code': '0'
 		},

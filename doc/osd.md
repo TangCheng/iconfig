@@ -35,8 +35,22 @@ GET
 
 	{
 		'items': [
-			{"name":"datetime","isshow":true,"size":5,"x":10,"y":20,"color":0},
-			{"name":"device_name","isshow":true,"size":5,"x":10,"y":10,"color":0}
+			{
+				"name":"datetime",
+				"isshow":true,
+				"size":5,
+				"x":10,
+				"y":20,
+				"color":0
+			},
+			{
+				"name":"device_name",
+				"isshow":true,
+				"size":5,
+				"x":10,
+				"y":10,
+				"color":0
+			}
 		]
 	}
 	
@@ -60,11 +74,15 @@ color|int|显示颜色
 #### request
     {
 		'head': {
-        	'action': 'get_osd',
+            'action': 'get_osd',
             'version': '1.0'
 		},
         'body': {
-            'items': ['datetime', 'device_name', 'comment']
+            'items': [
+                'datetime',
+                'device_name',
+                'comment'
+            ]
         }
     }
 #### response
@@ -72,12 +90,26 @@ color|int|显示颜色
 		'head': {
             'action': 'get_osd',
             'version': '1.0',
-		    'code': '0'
+            'code': '0'
 		},
         'body': {
-		    'items': [
-                {"name":"datetime","isshow":true,"size":5,"x":10,"y":20,"color":0},
-				{"name":"device_name","isshow":true,"size":5,"x":10,"y":10,"color":0}
+            'items': [
+                {
+                    "name":"datetime",
+                    "isshow":true,
+                    "size":5,
+                    "x":10,
+                    "y":20,
+                    "color":0
+                },
+				{
+                    "name":"device_name",
+                    "isshow":true,
+                    "size":5,
+                    "x":10,
+                    "y":10,
+                    "color":0
+                }
 			]
         }
     }
@@ -85,24 +117,38 @@ color|int|显示颜色
 ### 2.2 set_osd
 #### request
     {
-		'head': {
-		    'action': 'set_osd',
+        'head': {
+            'action': 'set_osd',
             'version': '1.0'
         },
         'body': {
 			'items': [
-                {"name":"datetime","isshow":true,"size":5,"x":10,"y":20,"color":0},
-				{"name":"device_name","isshow":true,"size":5,"x":10,"y":10,"color":0}
-			]
-		}
+                {
+                    "name":"datetime",
+                    "isshow":true,
+                    "size":5,
+                    "x":10,
+                    "y":20,
+                    "color":0
+                },
+				{
+                    "name":"device_name",
+                    "isshow":true,
+                    "size":5,
+                    "x":10,
+                    "y":10,
+                    "color":0
+                }
+            ]
+        }
     }
 #### response
     {
 		'head': {
-    		'action': 'set_osd',
+            'action': 'set_osd',
             'version': '1.0',
-			'code': '0'
-		},
+            'code': '0'
+        },
         'body': {
-		}
+        }
     }

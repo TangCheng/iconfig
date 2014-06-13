@@ -20,7 +20,7 @@ PUT
  请求|参数|必选|类型及范围|说明
 ---|---|:-:|---|---|---
 GET|items|是|array: ['autoconf', 'address', 'pppoe', 'server_port']|需要查询的网络配置项的名称
-PUT|items|是|object: {'autoconf':0, 'address':{'ipaddr':'192.168.0.15', 'netmask':'255.255.255.0', 'gateway':'192.168.0.1','dns1':'192.168.0.1', 'dns2':''}, 'pppoe':{'username':'admin','password':'123456'}, 'server_port':{'http':80, 'rtsp':554}}|要设置的场景设置项的名称，值
+PUT|items|是|object: {'autoconf':0, 'address':{'ipaddr':'192.168.0.15', 'netmask':'255.255.255.0', 'gateway':'192.168.0.1','dns1':'192.168.0.1', 'dns2':''}, 'pppoe':{'username':'admin','password':'123456'}, 'server_port':{'http':80, 'rtsp':554}}|要设置的网络设置项的名称，值
 
 ### 注意事项
 无
@@ -78,12 +78,12 @@ server_port.rtsp|int|RTSP服务端口
 #### request
     {
 		'head': {
-        	'action': 'get_network',
+            'action': 'get_network',
             'version': '1.0'
 		},
         'body': {
-		    'items': [
-			    'autoconf',
+            'items': [
+                'autoconf',
                 'address',
                 'pppoe',
                 'server_port'
@@ -95,11 +95,11 @@ server_port.rtsp|int|RTSP服务端口
 		'head': {
             'action': 'get_network',
             'version': '1.0',
-		    'code': '0'
+            'code': '0'
 		},
         'body': {
-		    'items': {
-			    'autoconf':0,
+            'items': {
+                'autoconf':0,
                 'address': {
                     'ipaddr':'192.168.0.15',
                     'netmask':'255.255.255.0',
@@ -115,7 +115,7 @@ server_port.rtsp|int|RTSP服务端口
                     'http':80,
                     'rtsp':554
                 }
-		    }
+            }
         }
     }
 ---
@@ -123,12 +123,12 @@ server_port.rtsp|int|RTSP服务端口
 #### request
     {
 		'head': {
-		    'action': 'set_network',
+            'action': 'set_network',
             'version': '1.0'
         },
         'body': {
-		    'network': {
-			    'autoconf':0,
+            'network': {
+                'autoconf':0,
                 'address': {
                     'ipaddr':'192.168.0.15',
                     'netmask':'255.255.255.0',
@@ -144,13 +144,13 @@ server_port.rtsp|int|RTSP服务端口
                     'http':80,
                     'rtsp':554
                 }
-		    }
+            }
 		}
     }
 #### response
     {
 		'head': {
-    		'action': 'set_network',
+            'action': 'set_network',
             'version': '1.0',
 			'code': '0'
 		},
