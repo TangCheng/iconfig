@@ -141,10 +141,124 @@ START_HANDLER(put_users, HTTP_PUT, "/api/1.0/users.json", http_request, http_res
 }
 END_HANDLER
 
+static gchar* do_post_action(IpcamIConfig *iconfig, JsonNode *request)
+{
+    JsonNode *response;
+    JsonGenerator *generator;
+    gchar *result = NULL;
+
+    generator = json_generator_new();
+
+    IpcamMessageHandler *msg_handler = g_object_new(IPCAM_TYPE_USERS_MSG_HANDLER,
+                                                      "app", iconfig, NULL);
+
+    ipcam_message_handler_do_post(msg_handler, request, &response);
+
+    json_generator_set_root(generator, response);
+    json_generator_set_pretty(generator, TRUE);
+
+    result = json_generator_to_data(generator, NULL);;
+    json_node_free(response);
+    g_object_unref(G_OBJECT(generator));
+
+    return result;
+}
+
+START_HANDLER(post_users, HTTP_POST, "/api/1.0/users.json", http_request, http_response)
+{
+    gchar *body = NULL;
+    IpcamIConfig *iconfig;
+    gboolean success = FALSE;
+
+    g_object_get(post_users, "app", &iconfig, NULL);
+    g_object_get(http_request, "body", &body, NULL);
+    if (body)
+    {
+        JsonParser *parser = json_parser_new();
+        JsonNode *root_node;
+        if (json_parser_load_from_data(parser, body, -1, NULL))
+        {
+            root_node = json_parser_get_root(parser);
+
+            gchar *result = do_post_action(iconfig, root_node);
+            g_object_set(http_response, "body", result, NULL);
+            g_free(result);
+
+            g_object_set(http_response,
+                         "status", 200,
+                         NULL);
+            success = TRUE;
+        }
+        g_object_unref(parser);
+        g_free(body);
+    }
+    ipcam_http_response_success(http_response, success);
+    ret = TRUE;
+}
+END_HANDLER
+
+static gchar* do_delete_action(IpcamIConfig *iconfig, JsonNode *request)
+{
+    JsonNode *response;
+    JsonGenerator *generator;
+    gchar *result = NULL;
+
+    generator = json_generator_new();
+
+    IpcamMessageHandler *msg_handler = g_object_new(IPCAM_TYPE_USERS_MSG_HANDLER,
+                                                      "app", iconfig, NULL);
+
+    ipcam_message_handler_do_delete(msg_handler, request, &response);
+
+    json_generator_set_root(generator, response);
+    json_generator_set_pretty(generator, TRUE);
+
+    result = json_generator_to_data(generator, NULL);;
+    json_node_free(response);
+    g_object_unref(G_OBJECT(generator));
+
+    return result;
+}
+
+START_HANDLER(delete_users, HTTP_DELETE, "/api/1.0/users.json", http_request, http_response)
+{
+    gchar *body = NULL;
+    IpcamIConfig *iconfig;
+    gboolean success = FALSE;
+
+    g_object_get(delete_users, "app", &iconfig, NULL);
+    g_object_get(http_request, "body", &body, NULL);
+    if (body)
+    {
+        JsonParser *parser = json_parser_new();
+        JsonNode *root_node;
+        if (json_parser_load_from_data(parser, body, -1, NULL))
+        {
+            root_node = json_parser_get_root(parser);
+
+            gchar *result = do_delete_action(iconfig, root_node);
+            g_object_set(http_response, "body", result, NULL);
+            g_free(result);
+
+            g_object_set(http_response,
+                         "status", 200,
+                         NULL);
+            success = TRUE;
+        }
+        g_object_unref(parser);
+        g_free(body);
+    }
+    ipcam_http_response_success(http_response, success);
+    ret = TRUE;
+}
+END_HANDLER
+
 static void ipcam_http_users_handler_init(IpcamHttpUsersHandler *self)
 {
     ipcam_http_request_handler_register(IPCAM_HTTP_REQUEST_HANDLER(self), get_users);
     ipcam_http_request_handler_register(IPCAM_HTTP_REQUEST_HANDLER(self), put_users);
+    ipcam_http_request_handler_register(IPCAM_HTTP_REQUEST_HANDLER(self), post_users);
+    ipcam_http_request_handler_register(IPCAM_HTTP_REQUEST_HANDLER(self), delete_users);
 }
 
 static void ipcam_http_users_handler_class_init(IpcamHttpUsersHandlerClass *klass)

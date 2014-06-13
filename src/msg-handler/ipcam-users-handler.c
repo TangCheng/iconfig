@@ -166,18 +166,21 @@ ipcam_users_msg_handler_delete_action_impl(IpcamMessageHandler *handler, JsonNod
     g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
 
     JsonBuilder *builder = json_builder_new();
-    JsonObject *req_obj;
-    GList *members, *item;
+    JsonObject *req_array;
+    int i;
 
     json_builder_begin_object(builder);
 
-    req_obj = json_object_get_object_member(json_node_get_object(request), "items");
-    members = json_object_get_members(req_obj);
-    for (item = g_list_first(members); item; item = g_list_next(item))
+    req_array = json_object_get_array_member(json_node_get_object(request), "items");
+
+    for (i = 0; i < json_array_get_length (req_array); i++)
     {
-        const gchar *name = item->data;
-        const gchar *value = json_object_get_string_member(req_obj, name);
-        //ipcam_iconfig_set_users(iconfig, name, value);
+        JsonObject *item_obj = json_array_get_object_element (req_array, i);
+        if (json_object_has_member(item_obj, "username"))
+        {
+            const gchar *username = json_object_get_string_member (item_obj, "username");
+            ipcam_iconfig_del_user(iconfig, username);
+        }
     }
     json_builder_end_object(builder);
 
