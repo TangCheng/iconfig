@@ -56,8 +56,8 @@ iconfig_SOURCES = \
 	msg-handler/ipcam-video-handler.h \
 	msg-handler/ipcam-scene-handler.c \
 	msg-handler/ipcam-scene-handler.h \
-	action-handler/base_info_action_handler.c \
-	action-handler/base_info_action_handler.h \
+	action-handler/generic_action_handler.c \
+	action-handler/generic_action_handler.h \
 	msg-handler/ipcam-network-handler.c \
 	msg-handler/ipcam-network-handler.h \
 	msg-handler/ipcam-datetime-handler.c \

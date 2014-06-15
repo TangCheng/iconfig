@@ -166,7 +166,7 @@ ipcam_users_msg_handler_delete_action_impl(IpcamMessageHandler *handler, JsonNod
     g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
 
     JsonBuilder *builder = json_builder_new();
-    JsonObject *req_array;
+    JsonArray *req_array;
     int i;
 
     json_builder_begin_object(builder);

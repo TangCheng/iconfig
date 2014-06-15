@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: nil; c-basic-offset: 4; tab-width: 4 -*-  */
 /*
  * ipcam-message-handler.c
- * Copyright (C) 2014 Watson Xu <watson@watsons-pc>
+ * Copyright (C) 2014 Watson Xu <xuhuashan@gmail.com>
  *
  * iconfig is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the

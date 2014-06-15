@@ -138,7 +138,7 @@ privilege|int|是否特权用户
 #### request
     {
 		'head': {
-		    'action': 'set_users',
+		    'action': 'add_users',
             'version': '1.0'
         },
         'body': {
@@ -159,7 +159,7 @@ privilege|int|是否特权用户
 #### response
     {
 		'head': {
-    		'action': 'set_users',
+    		'action': 'add_users',
             'version': '1.0',
 			'code': '0'
 		},
@@ -170,7 +170,7 @@ privilege|int|是否特权用户
 #### request
     {
 		'head': {
-		    'action': 'set_users',
+		    'action': 'del_users',
             'version': '1.0'
         },
         'body': {
@@ -187,7 +187,7 @@ privilege|int|是否特权用户
 #### response
     {
 		'head': {
-    		'action': 'set_users',
+    		'action': 'del_users',
             'version': '1.0',
 			'code': '0'
 		},

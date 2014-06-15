@@ -45,7 +45,7 @@ struct _IpcamOsdMsgHandler
     IpcamMessageHandler parent_instance;
 };
 
-GType ipcam_osd_handler_get_type (void) G_GNUC_CONST;
+GType ipcam_osd_msg_handler_get_type (void) G_GNUC_CONST;
 
 G_END_DECLS
 

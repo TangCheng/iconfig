@@ -3,7 +3,7 @@
 #include "iconfig.h"
 #include "database/database.h"
 #include "ajax/ajax.h"
-#include "action-handler/base_info_action_handler.h"
+#include "action-handler/generic_action_handler.h"
 
 typedef struct _IpcamIConfigPrivate
 {
@@ -70,11 +70,22 @@ static void ipcam_iconfig_before_start(IpcamIConfig *iconfig)
     g_list_free_full(ipcam_iconfig_get_users(iconfig), g_free);
 
     /* Message Handler */
-    const char *name = ipcam_base_app_get_config(IPCAM_BASE_APP(iconfig), "token");
-    const char *address = ipcam_base_app_get_config(IPCAM_BASE_APP(iconfig), "bind:iconfig");
-    ipcam_service_bind_by_name(IPCAM_SERVICE(iconfig), name, address);
-    ipcam_base_app_register_handler(IPCAM_BASE_APP(iconfig), "get_base_info", IPCAM_BASE_INFO_ACTION_HANDLER_TYPE);
-    ipcam_base_app_register_handler(IPCAM_BASE_APP(iconfig), "set_base_info", IPCAM_BASE_INFO_ACTION_HANDLER_TYPE);
+    ipcam_base_app_register_handler(IPCAM_BASE_APP(iconfig), "get_base_info", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
+    ipcam_base_app_register_handler(IPCAM_BASE_APP(iconfig), "set_base_info", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
+    ipcam_base_app_register_handler(IPCAM_BASE_APP(iconfig), "get_osd", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
+    ipcam_base_app_register_handler(IPCAM_BASE_APP(iconfig), "set_osd", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
+    ipcam_base_app_register_handler(IPCAM_BASE_APP(iconfig), "get_video", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
+    ipcam_base_app_register_handler(IPCAM_BASE_APP(iconfig), "set_video", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
+    ipcam_base_app_register_handler(IPCAM_BASE_APP(iconfig), "get_scene", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
+    ipcam_base_app_register_handler(IPCAM_BASE_APP(iconfig), "set_scene", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
+    ipcam_base_app_register_handler(IPCAM_BASE_APP(iconfig), "get_network", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
+    ipcam_base_app_register_handler(IPCAM_BASE_APP(iconfig), "set_network", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
+    ipcam_base_app_register_handler(IPCAM_BASE_APP(iconfig), "get_datetime", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
+    ipcam_base_app_register_handler(IPCAM_BASE_APP(iconfig), "set_datetime", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
+    ipcam_base_app_register_handler(IPCAM_BASE_APP(iconfig), "get_users", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
+    ipcam_base_app_register_handler(IPCAM_BASE_APP(iconfig), "set_users", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
+    ipcam_base_app_register_handler(IPCAM_BASE_APP(iconfig), "post_users", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
+    ipcam_base_app_register_handler(IPCAM_BASE_APP(iconfig), "delete_users", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
 }
 
 static void ipcam_iconfig_in_loop(IpcamIConfig *iconfig)
