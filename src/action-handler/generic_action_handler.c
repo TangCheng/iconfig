@@ -48,9 +48,9 @@ static void ipcam_generic_action_handler_init(IpcamGenericActionHandler *self)
 {
     IpcamGenericActionHandlerPrivate *priv = ipcam_generic_action_handler_get_instance_private(self);
 
-    priv->action_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
+    priv->action_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, g_free);
 
-#define _       msg_handler_hash_value_init
+#define _(...)       msg_handler_hash_value_init(__VA_ARGS__)
     g_hash_table_insert(priv->action_hash, "get_base_info", 
                         _(ACT_GET, IPCAM_TYPE_BASE_INFO_MSG_HANDLER));
     g_hash_table_insert(priv->action_hash, "set_base_info", 
@@ -89,6 +89,7 @@ static void ipcam_generic_action_handler_init(IpcamGenericActionHandler *self)
                         _(ACT_ADD, IPCAM_TYPE_USERS_MSG_HANDLER));
     g_hash_table_insert(priv->action_hash, "del_users", 
                         _(ACT_DEL, IPCAM_TYPE_USERS_MSG_HANDLER));
+#undef _
 }
 
 static void ipcam_generic_action_handler_finalize(GObject *gobject)
@@ -111,53 +112,60 @@ static void ipcam_generic_action_handler_class_init(IpcamGenericActionHandlerCla
 static void ipcam_generic_action_handler_run_impl(IpcamActionHandler *self,
                                                IpcamMessage *message)
 {
-    IpcamGenericActionHandlerPrivate *priv = ipcam_generic_action_handler_get_instance_private(self);
+    IpcamGenericActionHandler *handler = IPCAM_GENERIC_ACTION_HANDLER(self);
+    IpcamGenericActionHandlerPrivate *priv = ipcam_generic_action_handler_get_instance_private(handler);
     IpcamIConfig *iconfig;
-    IpcamRequestMessage *rq_msg;
-    IpcamResponseMessage *rp_msg;
+    IpcamRequestMessage *req_msg;
+    IpcamResponseMessage *resp_msg;
     const gchar *action;
-    JsonNode *rq_body;
-    JsonNode *rp_body;
+    JsonNode *req_body;
+    JsonNode *resp_body = NULL;
     MsgHandlerHashValue *hash_val;
     gchar *token;
 
     g_object_get(G_OBJECT(self), "service", &iconfig, NULL);
-    rq_msg = IPCAM_REQUEST_MESSAGE(message);
-    g_object_get(G_OBJECT(rq_msg), "action", &action, "body", &rq_body, NULL);
+    req_msg = IPCAM_REQUEST_MESSAGE(message);
+    g_object_get(G_OBJECT(req_msg), "action", &action, "body", &req_body, NULL);
+
     hash_val = g_hash_table_lookup(priv->action_hash, action);
     if (hash_val)
     {
-        IpcamMessageHandler *handler = g_object_new(hash_val->g_type, NULL);
+        IpcamMessageHandler *handler = g_object_new(hash_val->g_type, "app", iconfig, NULL);
         if (handler)
         {
             gboolean ret = FALSE;
             switch (hash_val->method)
             {
                 case ACT_GET:
-                    ret = ipcam_message_handler_do_get(handler, rq_body, &rp_body);
+                    ret = ipcam_message_handler_do_get(handler, req_body, &resp_body);
                     break;
                 case ACT_SET:
-                    ret = ipcam_message_handler_do_put(handler, rq_body, &rp_body);
+                    ret = ipcam_message_handler_do_put(handler, req_body, &resp_body);
                     break;
                 case ACT_ADD:
-                    ret = ipcam_message_handler_do_post(handler, rq_body, &rp_body);
+                    ret = ipcam_message_handler_do_post(handler, req_body, &resp_body);
                     break;
                 case ACT_DEL:
-                    ret = ipcam_message_handler_do_delete(handler, rq_body, &rp_body);
+                    ret = ipcam_message_handler_do_delete(handler, req_body, &resp_body);
                     break;
                  default:
                     break;
             }
-            if (ret)
-            {
-                rp_msg = ipcam_request_message_get_response_message(rq_msg, "0");
-                g_object_set(G_OBJECT(rq_msg), "body", rq_body, NULL);
-            }
+            g_object_unref(handler);
         }
     }
-    rp_msg = ipcam_request_message_get_response_message(rq_msg, "1");
-    g_object_get(G_OBJECT(rq_msg), "token", &token, NULL);
-    ipcam_base_app_send_message(IPCAM_BASE_APP(iconfig), rp_msg, "iconfig", token, NULL, 0);
-    g_object_unref(rp_msg);
+
+    if (resp_body == NULL)
+    {
+        resp_body = json_node_new(JSON_NODE_OBJECT);
+        json_node_take_object(resp_body, json_object_new());
+    }
+
+    resp_msg = ipcam_request_message_get_response_message(req_msg, "0");
+    g_object_set(G_OBJECT(resp_msg), "body", resp_body, NULL);
+
+    g_object_get(G_OBJECT(req_msg), "token", &token, NULL);
+    ipcam_base_app_send_message(IPCAM_BASE_APP(iconfig), resp_msg, "iconfig", token, NULL, 0);
+    g_object_unref(resp_msg);
     g_free(token);
 }
