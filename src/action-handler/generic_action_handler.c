@@ -166,6 +166,8 @@ static void ipcam_generic_action_handler_run_impl(IpcamActionHandler *self,
 
     g_object_get(G_OBJECT(req_msg), "token", &token, NULL);
     ipcam_base_app_send_message(IPCAM_BASE_APP(iconfig), resp_msg, "iconfig", token, NULL, 0);
+
+    g_free(action);
     g_object_unref(resp_msg);
     g_free(token);
 }

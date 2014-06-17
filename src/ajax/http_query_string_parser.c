@@ -106,6 +106,7 @@ GHashTable *ipcam_http_query_string_parser_get(IpcamHttpQueryStringParser *parse
             }
             else
             {
+                g_free(key);
                 list = g_list_append(list, value);
             }
         }

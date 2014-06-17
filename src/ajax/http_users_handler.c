@@ -38,7 +38,11 @@ static gchar* do_get_action(IpcamIConfig *iconfig, GList *item_list)
     json_generator_set_pretty(generator, TRUE);
 
     gchar *result = json_generator_to_data(generator, NULL);;
+
+    json_node_free(req_node);
     json_node_free(res_node);
+    g_object_unref(msg_handler);
+    g_object_unref(G_OBJECT(builder));
     g_object_unref(G_OBJECT(generator));
 
     return result;
@@ -102,7 +106,9 @@ static gchar* do_put_action(IpcamIConfig *iconfig, JsonNode *request)
     json_generator_set_pretty(generator, TRUE);
 
     result = json_generator_to_data(generator, NULL);;
+
     json_node_free(response);
+    g_object_unref(msg_handler);
     g_object_unref(G_OBJECT(generator));
 
     return result;
@@ -158,7 +164,9 @@ static gchar* do_post_action(IpcamIConfig *iconfig, JsonNode *request)
     json_generator_set_pretty(generator, TRUE);
 
     result = json_generator_to_data(generator, NULL);;
+
     json_node_free(response);
+    g_object_unref(msg_handler);
     g_object_unref(G_OBJECT(generator));
 
     return result;
@@ -214,7 +222,9 @@ static gchar* do_delete_action(IpcamIConfig *iconfig, JsonNode *request)
     json_generator_set_pretty(generator, TRUE);
 
     result = json_generator_to_data(generator, NULL);;
+
     json_node_free(response);
+    g_object_unref(msg_handler);
     g_object_unref(G_OBJECT(generator));
 
     return result;

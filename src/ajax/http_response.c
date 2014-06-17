@@ -221,6 +221,7 @@ void ipcam_http_response_success(IpcamHttpResponse *http_response, gboolean succ
     g_object_set(http_response, "body", string, NULL);
     g_free(string);
 }
+
 void ipcam_http_response_write_string(IpcamHttpResponse *http_response, GSocket *socket)
 {
     g_return_if_fail(IPCAM_IS_HTTP_RESPONSE(http_response));
