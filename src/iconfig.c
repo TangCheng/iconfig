@@ -13,8 +13,8 @@ typedef struct _IpcamIConfigPrivate
 
 G_DEFINE_TYPE_WITH_PRIVATE(IpcamIConfig, ipcam_iconfig, IPCAM_BASE_APP_TYPE);
 
-static void ipcam_iconfig_before_start(IpcamIConfig *iconfig);
-static void ipcam_iconfig_in_loop(IpcamIConfig *iconfig);
+static void ipcam_iconfig_before_start(IpcamBaseService *base_service);
+static void ipcam_iconfig_in_loop(IpcamBaseService *base_service);
 
 static void ipcam_iconfig_finalize(GObject *object)
 {
@@ -37,8 +37,9 @@ static void ipcam_iconfig_class_init(IpcamIConfigClass *klass)
     base_service_class->before = ipcam_iconfig_before_start;
     base_service_class->in_loop = ipcam_iconfig_in_loop;
 }
-static void ipcam_iconfig_before_start(IpcamIConfig *iconfig)
+static void ipcam_iconfig_before_start(IpcamBaseService *base_service)
 {
+    IpcamIConfig *iconfig = IPCAM_ICONFIG(base_service);
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
     const gchar *ajax_addr = ipcam_base_app_get_config(IPCAM_BASE_APP(iconfig), "ajax:address");
     const gchar *port = ipcam_base_app_get_config(IPCAM_BASE_APP(iconfig), "ajax:port");
@@ -63,7 +64,7 @@ static void ipcam_iconfig_before_start(IpcamIConfig *iconfig)
     g_free(ipcam_iconfig_get_network_static(iconfig, "ipaddr"));
     g_free(ipcam_iconfig_get_network_pppoe(iconfig, "username"));
     ipcam_iconfig_get_network_port(iconfig, "http");
-    gint int_value;
+    guint int_value;
     gchar *str_value;
     ipcam_iconfig_get_datetime(iconfig, "timezone", &int_value, &str_value);
     g_free(str_value);
@@ -88,7 +89,7 @@ static void ipcam_iconfig_before_start(IpcamIConfig *iconfig)
     ipcam_base_app_register_handler(IPCAM_BASE_APP(iconfig), "delete_users", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
 }
 
-static void ipcam_iconfig_in_loop(IpcamIConfig *iconfig)
+static void ipcam_iconfig_in_loop(IpcamBaseService *base_service)
 {
 }
 
@@ -168,7 +169,7 @@ void ipcam_iconfig_set_scene(IpcamIConfig *iconfig, const gchar *name, gint valu
 	ipcam_database_set_scene(priv->database, (gchar *)name, value);
 }
 
-gint ipcam_iconfig_get_network(IpcamIConfig *iconfig, gchar *name)
+gint ipcam_iconfig_get_network(IpcamIConfig *iconfig, const gchar *name)
 {
     g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), NULL);
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
@@ -176,7 +177,7 @@ gint ipcam_iconfig_get_network(IpcamIConfig *iconfig, gchar *name)
     return ipcam_database_get_network(priv->database, name);
 }
 
-void ipcam_iconfig_set_network(IpcamIConfig *iconfig, gchar *name, guint value)
+void ipcam_iconfig_set_network(IpcamIConfig *iconfig, const gchar *name, guint value)
 {
     g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), NULL);
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
@@ -184,7 +185,7 @@ void ipcam_iconfig_set_network(IpcamIConfig *iconfig, gchar *name, guint value)
     ipcam_database_set_network(priv->database, name, value);
 }
 
-gchar *ipcam_iconfig_get_network_static(IpcamIConfig *iconfig, gchar *name)
+gchar *ipcam_iconfig_get_network_static(IpcamIConfig *iconfig, const gchar *name)
 {
     g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), NULL);
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
@@ -192,7 +193,7 @@ gchar *ipcam_iconfig_get_network_static(IpcamIConfig *iconfig, gchar *name)
     return ipcam_database_get_network_static(priv->database, name);
 }
 
-void ipcam_iconfig_set_network_static(IpcamIConfig *iconfig, gchar *name, gchar *value)
+void ipcam_iconfig_set_network_static(IpcamIConfig *iconfig, const gchar *name, gchar *value)
 {
     g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), NULL);
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
@@ -200,7 +201,7 @@ void ipcam_iconfig_set_network_static(IpcamIConfig *iconfig, gchar *name, gchar 
     ipcam_database_set_network_static(priv->database, name, value);
 }
 
-gchar *ipcam_iconfig_get_network_pppoe(IpcamIConfig *iconfig, gchar *name)
+gchar *ipcam_iconfig_get_network_pppoe(IpcamIConfig *iconfig, const gchar *name)
 {
     g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), NULL);
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
@@ -208,7 +209,7 @@ gchar *ipcam_iconfig_get_network_pppoe(IpcamIConfig *iconfig, gchar *name)
     return ipcam_database_get_network_pppoe(priv->database, name);
 }
 
-void ipcam_iconfig_set_network_pppoe(IpcamIConfig *iconfig, gchar *name, gchar *value)
+void ipcam_iconfig_set_network_pppoe(IpcamIConfig *iconfig, const gchar *name, gchar *value)
 {
     g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), NULL);
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
@@ -216,7 +217,7 @@ void ipcam_iconfig_set_network_pppoe(IpcamIConfig *iconfig, gchar *name, gchar *
     ipcam_database_set_network_pppoe(priv->database, name, value);
 }
 
-gint ipcam_iconfig_get_network_port(IpcamIConfig *iconfig, gchar *name)
+gint ipcam_iconfig_get_network_port(IpcamIConfig *iconfig, const gchar *name)
 {
     g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), NULL);
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
@@ -224,7 +225,7 @@ gint ipcam_iconfig_get_network_port(IpcamIConfig *iconfig, gchar *name)
     return ipcam_database_get_network_port(priv->database, name);
 }
 
-void ipcam_iconfig_set_network_port(IpcamIConfig *iconfig, gchar *name, guint value)
+void ipcam_iconfig_set_network_port(IpcamIConfig *iconfig, const gchar *name, guint value)
 {
     g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), NULL);
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
@@ -232,7 +233,7 @@ void ipcam_iconfig_set_network_port(IpcamIConfig *iconfig, gchar *name, guint va
     ipcam_database_set_network_port(priv->database, name, value);
 }
 
-void ipcam_iconfig_set_datetime(IpcamIConfig *iconfig, gchar *name, guint int_value, gchar *str_value)
+void ipcam_iconfig_set_datetime(IpcamIConfig *iconfig, const gchar *name, guint int_value, gchar *str_value)
 {
     g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), NULL);
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
@@ -240,7 +241,7 @@ void ipcam_iconfig_set_datetime(IpcamIConfig *iconfig, gchar *name, guint int_va
     ipcam_database_set_datetime (priv->database, name, int_value, str_value);
 }
 
-void ipcam_iconfig_get_datetime(IpcamIConfig *iconfig, gchar *name, guint *int_value, gchar **str_value)
+void ipcam_iconfig_get_datetime(IpcamIConfig *iconfig, const gchar *name, guint *int_value, gchar **str_value)
 {
     g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), NULL);
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
@@ -256,7 +257,7 @@ GList *ipcam_iconfig_get_users(IpcamIConfig *iconfig)
     return ipcam_database_get_users (priv->database);
 }
 
-void ipcam_iconfig_set_user_password(IpcamIConfig *iconfig, gchar *username, gchar *password)
+void ipcam_iconfig_set_user_password(IpcamIConfig *iconfig, const gchar *username, gchar *password)
 {
     g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), NULL);
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
@@ -264,7 +265,7 @@ void ipcam_iconfig_set_user_password(IpcamIConfig *iconfig, gchar *username, gch
     ipcam_database_set_user_password (priv->database, username, password);
 }
 
-gchar *ipcam_iconfig_get_user_password(IpcamIConfig *iconfig, gchar *username)
+gchar *ipcam_iconfig_get_user_password(IpcamIConfig *iconfig, const gchar *username)
 {
     g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), NULL);
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
@@ -272,7 +273,7 @@ gchar *ipcam_iconfig_get_user_password(IpcamIConfig *iconfig, gchar *username)
     return ipcam_database_get_user_password (priv->database, username);
 }
 
-void ipcam_iconfig_set_user_privilege(IpcamIConfig *iconfig, gchar *username, gboolean isadmin)
+void ipcam_iconfig_set_user_privilege(IpcamIConfig *iconfig, const gchar *username, gboolean isadmin)
 {
     g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), NULL);
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
@@ -280,7 +281,7 @@ void ipcam_iconfig_set_user_privilege(IpcamIConfig *iconfig, gchar *username, gb
     ipcam_database_set_user_privilege (priv->database, username, isadmin);
 }
 
-gboolean ipcam_iconfig_get_user_privilege(IpcamIConfig *iconfig, gchar *username)
+gboolean ipcam_iconfig_get_user_privilege(IpcamIConfig *iconfig, const gchar *username)
 {
     g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), NULL);
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
@@ -288,7 +289,7 @@ gboolean ipcam_iconfig_get_user_privilege(IpcamIConfig *iconfig, gchar *username
     return ipcam_database_get_user_privilege (priv->database, username);
 }
 
-void ipcam_iconfig_del_user(IpcamIConfig *iconfig, gchar *username)
+void ipcam_iconfig_del_user(IpcamIConfig *iconfig, const gchar *username)
 {
     g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), NULL);
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);

@@ -221,7 +221,7 @@ static void ipcam_database_open(IpcamDatabase *database)
     }
 }
 
-static GomResource *ipcam_database_get_resource(IpcamDatabase *database, GType resource_type, gchar *name)
+static GomResource *ipcam_database_get_resource(IpcamDatabase *database, GType resource_type, const gchar *name)
 {
     IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);
     GValue value = { 0, };
@@ -264,7 +264,7 @@ static GomResourceGroup *ipcam_database_get_resource_group(IpcamDatabase *databa
     
     return resource_group;
 }
-void ipcam_database_set_baseinfo(IpcamDatabase *database, gchar *name, gchar *value)
+void ipcam_database_set_baseinfo(IpcamDatabase *database, const gchar *name, gchar *value)
 {
     g_return_if_fail(IPCAM_IS_DATABASE(database));
     GomResource *resource = NULL;
@@ -284,7 +284,7 @@ void ipcam_database_set_baseinfo(IpcamDatabase *database, gchar *name, gchar *va
         g_error_free(error);
     }
 }
-gchar *ipcam_database_get_baseinfo(IpcamDatabase *database, gchar *name)
+gchar *ipcam_database_get_baseinfo(IpcamDatabase *database, const gchar *name)
 {
     g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
     GomResource *resource = NULL;
@@ -333,7 +333,7 @@ GList *ipcam_database_get_users(IpcamDatabase *database)
 
     return users_list;
 }
-void ipcam_database_set_user_password(IpcamDatabase *database, gchar *username, gchar *password)
+void ipcam_database_set_user_password(IpcamDatabase *database, const gchar *username, gchar *password)
 {
     g_return_if_fail(IPCAM_IS_DATABASE(database));
     GomResource *resource = NULL;
@@ -361,7 +361,7 @@ void ipcam_database_set_user_password(IpcamDatabase *database, gchar *username, 
         g_error_free(error);
     }
 }
-gchar *ipcam_database_get_user_password(IpcamDatabase *database, gchar *username)
+gchar *ipcam_database_get_user_password(IpcamDatabase *database, const gchar *username)
 {
     g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
     GomResource *resource = NULL;
@@ -376,7 +376,7 @@ gchar *ipcam_database_get_user_password(IpcamDatabase *database, gchar *username
     
     return password;
 }
-void ipcam_database_set_user_privilege(IpcamDatabase *database, gchar *username, gboolean isadmin)
+void ipcam_database_set_user_privilege(IpcamDatabase *database, const gchar *username, gboolean isadmin)
 {
     g_return_if_fail(IPCAM_IS_DATABASE(database));
     GomResource *resource = NULL;
@@ -396,7 +396,7 @@ void ipcam_database_set_user_privilege(IpcamDatabase *database, gchar *username,
         g_error_free(error);
     }
 }
-gboolean ipcam_database_get_user_privilege(IpcamDatabase *database, gchar *username)
+gboolean ipcam_database_get_user_privilege(IpcamDatabase *database, const gchar *username)
 {
     g_return_val_if_fail(IPCAM_IS_DATABASE(database), FALSE);
     GomResource *resource = NULL;
@@ -411,7 +411,7 @@ gboolean ipcam_database_get_user_privilege(IpcamDatabase *database, gchar *usern
     
     return isadmin;
 }
-void ipcam_database_del_user(IpcamDatabase *database, gchar *username)
+void ipcam_database_del_user(IpcamDatabase *database, const gchar *username)
 {
     g_return_if_fail(IPCAM_IS_DATABASE(database));
     GomResource *resource = NULL;
@@ -431,7 +431,7 @@ void ipcam_database_del_user(IpcamDatabase *database, gchar *username)
     }
 }
 void ipcam_database_set_osd(IpcamDatabase *database,
-                            gchar *name,
+                            const gchar *name,
                             gboolean isshow,
                             guint size,
                             guint x,
@@ -457,7 +457,7 @@ void ipcam_database_set_osd(IpcamDatabase *database,
     }
 }
 gboolean ipcam_database_get_osd(IpcamDatabase *database,
-                                gchar *name,
+                                const gchar *name,
                                 gboolean *isshow,
                                 guint *size,
                                 guint *x,
@@ -478,7 +478,7 @@ gboolean ipcam_database_get_osd(IpcamDatabase *database,
     
     return ret;
 }
-void ipcam_database_set_video(IpcamDatabase *database, gchar *name, guint value)
+void ipcam_database_set_video(IpcamDatabase *database, const gchar *name, guint value)
 {
     g_return_if_fail(IPCAM_IS_DATABASE(database));
     GomResource *resource = NULL;
@@ -498,7 +498,7 @@ void ipcam_database_set_video(IpcamDatabase *database, gchar *name, guint value)
         g_error_free(error);
     }
 }
-gint ipcam_database_get_video(IpcamDatabase *database, gchar *name)
+gint ipcam_database_get_video(IpcamDatabase *database, const gchar *name)
 {
     g_return_val_if_fail(IPCAM_IS_DATABASE(database), -1);
     GomResource *resource = NULL;
@@ -513,7 +513,7 @@ gint ipcam_database_get_video(IpcamDatabase *database, gchar *name)
     
     return value;
 }
-void ipcam_database_set_scene(IpcamDatabase *database, gchar *name, guint value)
+void ipcam_database_set_scene(IpcamDatabase *database, const gchar *name, guint value)
 {
     g_return_if_fail(IPCAM_IS_DATABASE(database));
     GomResource *resource = NULL;
@@ -533,7 +533,7 @@ void ipcam_database_set_scene(IpcamDatabase *database, gchar *name, guint value)
         g_error_free(error);
     }
 }
-gint ipcam_database_get_scene(IpcamDatabase *database, gchar *name)
+gint ipcam_database_get_scene(IpcamDatabase *database, const gchar *name)
 {
     g_return_val_if_fail(IPCAM_IS_DATABASE(database), -1);
     GomResource *resource = NULL;
@@ -548,7 +548,7 @@ gint ipcam_database_get_scene(IpcamDatabase *database, gchar *name)
     
     return value;
 }
-void ipcam_database_set_network(IpcamDatabase *database, gchar *name, guint value)
+void ipcam_database_set_network(IpcamDatabase *database, const gchar *name, guint value)
 {
     g_return_if_fail(IPCAM_IS_DATABASE(database));
     GomResource *resource = NULL;
@@ -568,7 +568,7 @@ void ipcam_database_set_network(IpcamDatabase *database, gchar *name, guint valu
         g_error_free(error);
     }
 }
-gint ipcam_database_get_network(IpcamDatabase *database, gchar *name)
+gint ipcam_database_get_network(IpcamDatabase *database, const gchar *name)
 {
     g_return_val_if_fail(IPCAM_IS_DATABASE(database), -1);
     GomResource *resource = NULL;
@@ -583,7 +583,7 @@ gint ipcam_database_get_network(IpcamDatabase *database, gchar *name)
     
     return value;
 }
-void ipcam_database_set_network_static(IpcamDatabase *database, gchar *name, gchar *value)
+void ipcam_database_set_network_static(IpcamDatabase *database, const gchar *name, gchar *value)
 {
     g_return_if_fail(IPCAM_IS_DATABASE(database));
     GomResource *resource = NULL;
@@ -603,7 +603,7 @@ void ipcam_database_set_network_static(IpcamDatabase *database, gchar *name, gch
         g_error_free(error);
     }
 }
-gchar *ipcam_database_get_network_static(IpcamDatabase *database, gchar *name)
+gchar *ipcam_database_get_network_static(IpcamDatabase *database, const gchar *name)
 {
     g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
     GomResource *resource = NULL;
@@ -618,7 +618,7 @@ gchar *ipcam_database_get_network_static(IpcamDatabase *database, gchar *name)
     
     return value;
 }
-void ipcam_database_set_network_pppoe(IpcamDatabase *database, gchar *name, gchar *value)
+void ipcam_database_set_network_pppoe(IpcamDatabase *database, const gchar *name, gchar *value)
 {
     g_return_if_fail(IPCAM_IS_DATABASE(database));
     GomResource *resource = NULL;
@@ -638,7 +638,7 @@ void ipcam_database_set_network_pppoe(IpcamDatabase *database, gchar *name, gcha
         g_error_free(error);
     }
 }
-gchar *ipcam_database_get_network_pppoe(IpcamDatabase *database, gchar *name)
+gchar *ipcam_database_get_network_pppoe(IpcamDatabase *database, const gchar *name)
 {
     g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
     GomResource *resource = NULL;
@@ -653,7 +653,7 @@ gchar *ipcam_database_get_network_pppoe(IpcamDatabase *database, gchar *name)
     
     return value;
 }
-void ipcam_database_set_network_port(IpcamDatabase *database, gchar *name, guint value)
+void ipcam_database_set_network_port(IpcamDatabase *database, const gchar *name, guint value)
 {
     g_return_if_fail(IPCAM_IS_DATABASE(database));
     GomResource *resource = NULL;
@@ -673,7 +673,7 @@ void ipcam_database_set_network_port(IpcamDatabase *database, gchar *name, guint
         g_error_free(error);
     }
 }
-gint ipcam_database_get_network_port(IpcamDatabase *database, gchar *name)
+gint ipcam_database_get_network_port(IpcamDatabase *database, const gchar *name)
 {
     g_return_val_if_fail(IPCAM_IS_DATABASE(database), -1);
     GomResource *resource = NULL;
@@ -688,7 +688,7 @@ gint ipcam_database_get_network_port(IpcamDatabase *database, gchar *name)
     
     return value;
 }
-void ipcam_database_set_datetime(IpcamDatabase *database, gchar *name, guint int_value, gchar *str_value)
+void ipcam_database_set_datetime(IpcamDatabase *database, const gchar *name, guint int_value, gchar *str_value)
 {
     g_return_if_fail(IPCAM_IS_DATABASE(database));
     GomResource *resource = NULL;
@@ -712,7 +712,7 @@ void ipcam_database_set_datetime(IpcamDatabase *database, gchar *name, guint int
         g_error_free(error);
     }
 }
-void ipcam_database_get_datetime(IpcamDatabase *database, gchar *name, guint *int_value, gchar **str_value)
+void ipcam_database_get_datetime(IpcamDatabase *database, const gchar *name, guint *int_value, gchar **str_value)
 {
     g_return_if_fail(IPCAM_IS_DATABASE(database));
     GomResource *resource = NULL;
