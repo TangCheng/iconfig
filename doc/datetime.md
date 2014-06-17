@@ -19,14 +19,14 @@ PUT
 ### 请求参数
  请求|参数|必选|类型及范围|说明
 ---|---|:-:|---|---|---
-GET|items|是|array: ['timezone', 'use_ntp', 'ntp_server']|需要查询的Datetime设置项的名称
-PUT|items|是|object: {'timezone': { int_value':0, 'str_value':'GMT+8' }, 'use_ntp':{ 'int_value':0, 'str_value':'' }, 'ntp_server': { 'int_value':0, 'str_value':'xxx.xxx.xxx.xxx' }}|要设置的Datetime设置项的名值对
+GET|items|是|array: ['timezone', 'use_ntp', 'ntp_server', 'datetime']|需要查询的Datetime设置项的名称
+PUT|items|是|object: {'timezone': { int_value':0, 'str_value':'GMT+8' }, 'use_ntp':{ 'int_value':0, 'str_value':'' }, 'ntp_server': { 'int_value':0, 'str_value':'xxx.xxx.xxx.xxx' }, 'datetime': {'int_value': 1, 'str_value':'2014-06-17:13:00:00'}}|要设置的Datetime设置项的名值对
 
 ### 注意事项
 无
 
 ### 调用样例
-GET http://x.x.x.x/api/1.0/datetime.json?items%5B%5D=timezone&items%5B%5D=use_ntp&items%5B%5D=ntp_server  
+GET http://x.x.x.x/api/1.0/datetime.json?items%5B%5D=timezone&items%5B%5D=use_ntp&items%5B%5D=ntp_server&items%5B%5D=datetime  
 PUT http://x.x.x.x/api/1.0/datetime.json json_data
 
 ### 返回结果
@@ -46,6 +46,10 @@ GET
 			'ntp_server': {
 				'int_value':0
 				'str_value':'xxx.xxx.xxx.xxx'
+			},
+			'datetime': {
+				'int_value':1
+				'str_value':'2014-06-17 13:00:00'
 			}
 		}
 	}
@@ -74,7 +78,8 @@ ntp_server|object|NTP服务器
             'items': [
                 'timezone',
                 'use_ntp',
-                'ntp_server'
+                'ntp_server',
+                'datetime'
 			]
         }
     }
@@ -99,7 +104,11 @@ ntp_server|object|NTP服务器
                     'int_value':0,
                     'str_value':'xxx.xxx.xxx.xxx'
                 }
-			}
+                'datetime': {
+                    'int_value':1
+                    'str_value':'2014-06-17 13:00:00'
+                }
+            }
         }
     }
 ---
@@ -123,6 +132,10 @@ ntp_server|object|NTP服务器
                 'ntp_server': {
                     'int_value':0,
                     'str_value':'xxx.xxx.xxx.xxx'
+                }
+                'datetime': {
+                    'int_value':1
+                    'str_value':'2014-06-17 13:00:00'
                 }
 			}
 		}

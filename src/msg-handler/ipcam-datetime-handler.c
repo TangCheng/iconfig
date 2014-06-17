@@ -55,7 +55,22 @@ ipcam_datetime_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNod
         const gchar *name = json_array_get_string_element(req_array, i);
         gchar *str_val;
         gint int_val;
-        ipcam_iconfig_get_datetime(iconfig, name, &int_val, &str_val);
+
+        if (g_strcmp0 (name, "datetime") == 0)
+        {
+            char buf[32];
+            struct tm tm;
+            time_t t;
+
+            int_val = 1;
+            t = time(NULL);
+            strftime(buf, sizeof(buf), "%F %T", localtime_r(&t, &tm));
+            str_val = g_strdup(buf);
+        }
+        else
+        {
+            ipcam_iconfig_get_datetime(iconfig, name, &int_val, &str_val);
+        }
 
         json_builder_set_member_name(builder, name);
         json_builder_begin_object(builder);
