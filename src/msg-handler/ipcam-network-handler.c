@@ -147,38 +147,44 @@ ipcam_network_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode
     if (json_object_has_member(req_obj, "address"))
     {
         JsonObject *addr_obj = json_object_get_object_member(req_obj, "address");
-        GList *item = json_object_get_members(addr_obj);
-        for (item = g_list_first(item); item; item = g_list_next(item))
+        GList *items = json_object_get_members(addr_obj);
+        GList *l;
+        for (l = g_list_first(items); l; l = g_list_next(l))
         {
-            gchar *name = item->data;
+            gchar *name = l->data;
             gchar *value = (gchar *)json_object_get_string_member(addr_obj, name);
 
             ipcam_iconfig_set_network_static(iconfig, name, value);
         }
+        g_list_free(items);
     }
     if (json_object_has_member(req_obj, "pppoe"))
     {
         JsonObject *addr_obj = json_object_get_object_member(req_obj, "pppoe");
-        GList *item = json_object_get_members(addr_obj);
-        for (item = g_list_first(item); item; item = g_list_next(item))
+        GList *items = json_object_get_members(addr_obj);
+        GList *l;
+        for (l = g_list_first(items); l; l = g_list_next(l))
         {
-            gchar *name = item->data;
+            gchar *name = l->data;
             gchar *value = (gchar *)json_object_get_string_member(addr_obj, name);
 
             ipcam_iconfig_set_network_pppoe(iconfig, name, value);
         }
+        g_list_free(items);
     }
     if (json_object_has_member(req_obj, "server_port"))
     {
         JsonObject *addr_obj = json_object_get_object_member(req_obj, "server_port");
-        GList *item = json_object_get_members(addr_obj);
-        for (item = g_list_first(item); item; item = g_list_next(item))
+        GList *items = json_object_get_members(addr_obj);
+        GList *l;
+        for (l = g_list_first(items); l; l = g_list_next(l))
         {
-            gchar *name = item->data;
+            gchar *name = l->data;
             gint value = json_object_get_int_member(addr_obj, name);
 
             ipcam_iconfig_set_network_port (iconfig, name, value);
         }
+        g_list_free(items);
     }
 
     json_builder_end_object(builder);

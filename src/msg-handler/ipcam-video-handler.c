@@ -88,6 +88,7 @@ ipcam_video_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode *
         gint value = json_object_get_int_member(req_obj, name);
         ipcam_iconfig_set_video(iconfig, name, value);
     }
+    g_list_free(members);
     json_builder_end_object(builder);
 
     *response = json_builder_get_root(builder);

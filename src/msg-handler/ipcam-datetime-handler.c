@@ -118,6 +118,7 @@ ipcam_datetime_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNod
         str_value= json_object_get_string_member(val_obj, "str_value");
         ipcam_iconfig_set_datetime(iconfig, name, int_value, str_value);
     }
+    g_list_free(members);
     json_builder_end_object(builder);
 
     *response = json_builder_get_root(builder);
