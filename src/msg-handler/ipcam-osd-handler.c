@@ -96,9 +96,11 @@ ipcam_osd_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode *re
     JsonObject *req_obj;
     int i;
 
-    json_builder_begin_object(builder);
-
     req_arr = json_object_get_array_member(json_node_get_object(request), "items");
+
+    json_builder_begin_object(builder);
+    json_builder_set_member_name (builder, "changed_items");
+    json_builder_begin_array (builder);
     for(i = 0; i < json_array_get_length(req_arr); i++)
     {
         const gchar *name;
@@ -114,7 +116,24 @@ ipcam_osd_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode *re
         color = json_object_get_int_member(req_obj, "color");
 
         ipcam_iconfig_set_osd(iconfig, name, isshow, size, x, y, color);
+
+        ipcam_iconfig_get_osd(iconfig, name, &isshow, &size, &x, &y, &color);
+        json_builder_begin_object(builder);
+        json_builder_set_member_name (builder, "name");
+        json_builder_add_string_value (builder, name);
+        json_builder_set_member_name (builder, "isshow");
+        json_builder_add_int_value (builder, isshow);
+        json_builder_set_member_name (builder, "size");
+        json_builder_add_int_value (builder, size);
+        json_builder_set_member_name (builder, "x");
+        json_builder_add_int_value (builder, x);
+        json_builder_set_member_name (builder, "y");
+        json_builder_add_int_value (builder, y);
+        json_builder_set_member_name (builder, "color");
+        json_builder_add_int_value (builder, color);
+        json_builder_end_object (builder);
     }
+    json_builder_end_array(builder);
     json_builder_end_object(builder);
 
     *response = json_builder_get_root(builder);

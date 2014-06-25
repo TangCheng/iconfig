@@ -54,6 +54,7 @@ struct _IpcamMessageHandler
 };
 
 GType ipcam_message_handler_get_type (void) G_GNUC_CONST;
+gpointer ipcam_message_handler_get_app(IpcamMessageHandler *self);
 gboolean ipcam_message_handler_do_get (IpcamMessageHandler *self, JsonNode *request, JsonNode **response);
 gboolean ipcam_message_handler_do_put (IpcamMessageHandler *self, JsonNode *request, JsonNode **response);
 gboolean ipcam_message_handler_do_post (IpcamMessageHandler *self, JsonNode *request, JsonNode **response);

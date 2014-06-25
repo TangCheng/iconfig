@@ -21,6 +21,7 @@
 #include <glib/gprintf.h>
 #include "ipcam-message-handler.h"
 #include "iconfig.h"
+#include <notice_message.h>
 
 struct _IpcamMessageHandlerPrivate
 {
@@ -144,34 +145,74 @@ ipcam_message_handler_class_init (IpcamMessageHandlerClass *klass)
     klass->get_action = ipcam_message_handler_delete_action_impl;
 }
 
+gpointer ipcam_message_handler_get_app(IpcamMessageHandler *self)
+{
+    IpcamMessageHandlerPrivate *priv = ipcam_message_handler_get_instance_private(self);
+
+    return priv->iconfig;
+}
+
+static void
+ipcam_message_handler_send_notify(IpcamMessageHandler *self, JsonNode *notice_body)
+{
+    IpcamIConfig *iconfig;
+    IpcamMessage *notice_msg;
+
+    notice_msg = g_object_new(IPCAM_NOTICE_MESSAGE_TYPE, "event", "property_changed", "body", notice_body, NULL);
+    iconfig = ipcam_message_handler_get_app(self);
+    ipcam_base_app_broadcast_notice_message(IPCAM_BASE_APP(iconfig), notice_msg, "iconfig_token");
+
+    g_object_unref(notice_msg);
+}
+
 gboolean
 ipcam_message_handler_do_get (IpcamMessageHandler *self, JsonNode *request, JsonNode **response)
 {
     g_return_if_fail (IPCAM_IS_MESSAGE_HANDLER(self));
 
-    IPCAM_MESSAGE_HANDLER_GET_CLASS(self)->get_action(self, request, response);
+    return IPCAM_MESSAGE_HANDLER_GET_CLASS(self)->get_action(self, request, response);
 }
 
 gboolean
 ipcam_message_handler_do_put (IpcamMessageHandler *self, JsonNode *request, JsonNode **response)
 {
-    g_return_if_fail (IPCAM_IS_MESSAGE_HANDLER(self));
+    gboolean ret = FALSE;
 
-    IPCAM_MESSAGE_HANDLER_GET_CLASS(self)->put_action(self, request, response);
+    g_return_if_fail (IPCAM_IS_MESSAGE_HANDLER(self));
+    ret = IPCAM_MESSAGE_HANDLER_GET_CLASS(self)->put_action(self, request, response);
+
+    if (ret && response && *response)
+        ipcam_message_handler_send_notify(self, json_node_copy(*response));
+
+    return ret;
 }
 
 gboolean
 ipcam_message_handler_do_post (IpcamMessageHandler *self, JsonNode *request, JsonNode **response)
 {
+    gboolean ret = FALSE;
+
     g_return_if_fail (IPCAM_IS_MESSAGE_HANDLER(self));
 
     IPCAM_MESSAGE_HANDLER_GET_CLASS(self)->post_action(self, request, response);
+
+    if (ret && response && *response)
+        ipcam_message_handler_send_notify(self, json_node_copy(*response));
+
+    return ret;
 }
 
 gboolean
 ipcam_message_handler_do_delete (IpcamMessageHandler *self, JsonNode *request, JsonNode **response)
 {
+    gboolean ret = FALSE;
+
     g_return_if_fail (IPCAM_IS_MESSAGE_HANDLER(self));
 
     IPCAM_MESSAGE_HANDLER_GET_CLASS(self)->delete_action(self, request, response);
+
+    if (ret && response && *response)
+        ipcam_message_handler_send_notify(self, json_node_copy(*response));
+
+    return ret;
 }

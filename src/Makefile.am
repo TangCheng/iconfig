@@ -63,7 +63,9 @@ iconfig_SOURCES = \
 	msg-handler/ipcam-datetime-handler.c \
 	msg-handler/ipcam-datetime-handler.h \
 	msg-handler/ipcam-users-handler.c \
-	msg-handler/ipcam-users-handler.h
+	msg-handler/ipcam-users-handler.h \
+	sysutils.c \
+	sysutils.h
 
 iconfig_LDFLAGS = 
 

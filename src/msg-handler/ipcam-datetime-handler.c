@@ -21,6 +21,7 @@
 #include <glib/gprintf.h>
 #include "ipcam-datetime-handler.h"
 #include "iconfig.h"
+#include "sysutils.h"
 
 G_DEFINE_TYPE (IpcamDatetimeMsgHandler, ipcam_datetime_msg_handler, IPCAM_TYPE_MESSAGE_HANDLER);
 
@@ -53,19 +54,12 @@ ipcam_datetime_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNod
     for (i = 0; i < json_array_get_length(req_array); i++)
     {
         const gchar *name = json_array_get_string_element(req_array, i);
-        gchar *str_val;
-        gint int_val;
+        gchar *str_val = NULL;
+        guint int_val;
 
         if (g_strcmp0 (name, "datetime") == 0)
         {
-            char buf[32];
-            struct tm tm;
-            time_t t;
-
-            int_val = 1;
-            t = time(NULL);
-            strftime(buf, sizeof(buf), "%F %T", localtime_r(&t, &tm));
-            str_val = g_strdup(buf);
+            sysutils_datetime_get_datetime(&str_val);
         }
         else
         {
@@ -76,8 +70,11 @@ ipcam_datetime_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNod
         json_builder_begin_object(builder);
         json_builder_set_member_name(builder, "int_value");
         json_builder_add_int_value(builder, int_val);
-        json_builder_set_member_name(builder, "str_value");
-        json_builder_add_string_value(builder, str_val);
+        if (str_val)
+        {
+            json_builder_set_member_name(builder, "str_value");
+            json_builder_add_string_value(builder, str_val);
+        }
         json_builder_end_object(builder);
 
         g_free(str_val);
@@ -102,24 +99,43 @@ ipcam_datetime_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNod
     JsonObject *req_obj;
     GList *members, *item;
 
-    json_builder_begin_object(builder);
-
     req_obj = json_object_get_object_member(json_node_get_object(request), "items");
     members = json_object_get_members(req_obj);
+
+    json_builder_begin_object(builder);
+    json_builder_set_member_name(builder, "changed_items");
+    json_builder_begin_object(builder);
     for (item = g_list_first(members); item; item = g_list_next(item))
     {
         JsonObject *val_obj;
         const gchar *name = item->data;
-        gint int_value;
+        guint int_value;
         gchar *str_value;
 
         val_obj = json_object_get_object_member (req_obj, name);
         int_value = json_object_get_int_member (val_obj, "int_value");
-        str_value= json_object_get_string_member(val_obj, "str_value");
-        ipcam_iconfig_set_datetime(iconfig, name, int_value, str_value);
+        str_value = (gchar *)json_object_get_string_member(val_obj, "str_value");
+
+        if (g_strcmp0 (name, "datetime") == 0)
+            sysutils_datetime_set_datetime(str_value);
+        else
+            ipcam_iconfig_set_datetime(iconfig, name, int_value, str_value);
+
+        ipcam_iconfig_get_datetime(iconfig, name, &int_value, &str_value);
+        json_builder_set_member_name (builder, name);
+        json_builder_begin_object(builder);
+        json_builder_set_member_name(builder, "int_value");
+        json_builder_add_int_value(builder, int_value);
+        json_builder_set_member_name(builder, "str_value");
+        json_builder_add_string_value(builder, str_value);
+        json_builder_end_object(builder);
+
+        g_free(str_value);
     }
-    g_list_free(members);
     json_builder_end_object(builder);
+    json_builder_end_object(builder);
+
+    g_list_free(members);
 
     *response = json_builder_get_root(builder);
 

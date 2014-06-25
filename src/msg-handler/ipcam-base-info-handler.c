@@ -80,18 +80,30 @@ ipcam_base_info_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNo
     JsonObject *req_obj;
     GList *members, *item;
 
-    json_builder_begin_object(builder);
-
     req_obj = json_object_get_object_member(json_node_get_object(request), "items");
     members = json_object_get_members(req_obj);
+
+    json_builder_begin_object(builder);
+    json_builder_set_member_name(builder, "changed_items");
+    json_builder_begin_object(builder);
     for (item = g_list_first(members); item; item = g_list_next(item))
     {
         const gchar *name = item->data;
         const gchar *value = json_object_get_string_member(req_obj, name);
         ipcam_iconfig_set_base_info(iconfig, name, value);
+        value = ipcam_iconfig_get_base_info(iconfig, name);
+        if (value)
+        {
+            json_builder_set_member_name(builder, name);
+            json_builder_add_string_value(builder, value);
+
+            g_free(value);
+        }
     }
-    g_list_free(members);
     json_builder_end_object(builder);
+    json_builder_end_object(builder);
+
+    g_list_free(members);
 
     *response = json_builder_get_root(builder);
 

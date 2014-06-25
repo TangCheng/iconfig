@@ -48,7 +48,7 @@ ipcam_users_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode *
 
     req_array = json_object_get_array_member (json_node_get_object(request), "items");
     for (i = 0; i < json_array_get_length (req_array); i++) {
-        gchar *item = json_array_get_string_element (req_array, i);
+        const gchar *item = json_array_get_string_element (req_array, i);
         if (g_strcmp0(item, "password") == 0)
             need_password = TRUE;
         else if (g_strcmp0(item, "privilege") == 0)
@@ -103,20 +103,35 @@ ipcam_users_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode *
     JsonArray *req_array;
     int i;
 
-    json_builder_begin_object(builder);
-
     req_array = json_object_get_array_member(json_node_get_object(request), "items");
 
+    json_builder_begin_object(builder);
+    json_builder_set_member_name(builder, "changed_items");
+    json_builder_begin_array(builder);
     for (i = 0; i < json_array_get_length(req_array); i++)
     {
         JsonObject *user_obj = json_array_get_object_element(req_array, i);
-        gchar *username = json_object_get_string_member(user_obj, "username");
-        gchar *password = json_object_get_string_member(user_obj, "password");
+        const gchar *username = json_object_get_string_member(user_obj, "username");
+        const gchar *password = json_object_get_string_member(user_obj, "password");
         gint privilege = json_object_get_int_member(user_obj, "privilege");
 
-        ipcam_iconfig_set_user_password (iconfig, username, password);
+        ipcam_iconfig_set_user_password (iconfig, username, (gchar *)password);
         ipcam_iconfig_set_user_privilege (iconfig, username, privilege);
+
+        password = ipcam_iconfig_get_user_password (iconfig, username);
+        privilege = ipcam_iconfig_get_user_privilege (iconfig, username);
+        json_builder_begin_object(builder);
+        json_builder_set_member_name (builder, "username");
+        json_builder_add_string_value (builder, username);
+        json_builder_set_member_name (builder, "password");
+        json_builder_add_string_value (builder, password);
+        json_builder_set_member_name (builder, "privilege");
+        json_builder_add_int_value (builder, privilege);
+        json_builder_end_object(builder);
+
+        g_free((gchar *)password);
     }
+    json_builder_end_array(builder);
     json_builder_end_object(builder);
 
     *response = json_builder_get_root(builder);
@@ -136,20 +151,35 @@ ipcam_users_msg_handler_post_action_impl(IpcamMessageHandler *handler, JsonNode 
     JsonArray *req_array;
     int i;
 
-    json_builder_begin_object(builder);
-
     req_array = json_object_get_array_member(json_node_get_object(request), "items");
 
+    json_builder_begin_object(builder);
+    json_builder_set_member_name(builder, "changed_items");
+    json_builder_begin_array(builder);
     for (i = 0; i < json_array_get_length(req_array); i++)
     {
         JsonObject *user_obj = json_array_get_object_element(req_array, i);
-        gchar *username = json_object_get_string_member(user_obj, "username");
-        gchar *password = json_object_get_string_member(user_obj, "password");
+        const gchar *username = json_object_get_string_member(user_obj, "username");
+        const gchar *password = json_object_get_string_member(user_obj, "password");
         gint privilege = json_object_get_int_member(user_obj, "privilege");
 
-        ipcam_iconfig_set_user_password (iconfig, username, password);
+        ipcam_iconfig_set_user_password (iconfig, username, (gchar *)password);
         ipcam_iconfig_set_user_privilege (iconfig, username, privilege);
+
+        password = ipcam_iconfig_get_user_password (iconfig, username);
+        privilege = ipcam_iconfig_get_user_privilege (iconfig, username);
+        json_builder_begin_object(builder);
+        json_builder_set_member_name (builder, "username");
+        json_builder_add_string_value (builder, username);
+        json_builder_set_member_name (builder, "password");
+        json_builder_add_string_value (builder, password);
+        json_builder_set_member_name (builder, "privilege");
+        json_builder_add_int_value (builder, privilege);
+        json_builder_end_object(builder);
+
+        g_free((gchar *)password);
     }
+    json_builder_end_array(builder);
     json_builder_end_object(builder);
 
     *response = json_builder_get_root(builder);
@@ -169,10 +199,11 @@ ipcam_users_msg_handler_delete_action_impl(IpcamMessageHandler *handler, JsonNod
     JsonArray *req_array;
     int i;
 
-    json_builder_begin_object(builder);
-
     req_array = json_object_get_array_member(json_node_get_object(request), "items");
 
+    json_builder_begin_object(builder);
+    json_builder_set_member_name (builder, "deleted_items");
+    json_builder_begin_array (builder);
     for (i = 0; i < json_array_get_length (req_array); i++)
     {
         JsonObject *item_obj = json_array_get_object_element (req_array, i);
@@ -180,8 +211,11 @@ ipcam_users_msg_handler_delete_action_impl(IpcamMessageHandler *handler, JsonNod
         {
             const gchar *username = json_object_get_string_member (item_obj, "username");
             ipcam_iconfig_del_user(iconfig, username);
+
+            json_builder_add_string_value (builder, username);
         }
     }
+    json_builder_end_array (builder);
     json_builder_end_object(builder);
 
     *response = json_builder_get_root(builder);

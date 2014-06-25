@@ -21,6 +21,7 @@
 #include <glib/gprintf.h>
 #include "ipcam-network-handler.h"
 #include "iconfig.h"
+#include "sysutils.h"
 
 G_DEFINE_TYPE (IpcamNetworkMsgHandler, ipcam_network_msg_handler, IPCAM_TYPE_MESSAGE_HANDLER);
 
@@ -63,6 +64,34 @@ ipcam_network_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode
             json_builder_add_int_value(builder, value);
         }
         else if (g_strcmp0(name, "address") == 0)
+        {
+            gchar *ipaddr = NULL, *netmask = NULL, *gateway = NULL;
+            json_builder_set_member_name(builder, "ipaddr");
+            json_builder_begin_object(builder);
+            sysutils_network_get_ipaddr("wlp8s0", &ipaddr, &netmask, NULL);
+            sysutils_network_get_gateway(&gateway);
+            if (ipaddr)
+            {
+                json_builder_set_member_name(builder, "ipaddr");
+                json_builder_add_string_value(builder, ipaddr);
+            }
+            if (netmask)
+            {
+                json_builder_set_member_name(builder, "netmask");
+                json_builder_add_string_value(builder, netmask);
+            }
+            if (gateway)
+            {
+                json_builder_set_member_name(builder, "gateway");
+                json_builder_add_string_value(builder, gateway);
+            }
+            json_builder_end_object(builder);
+
+            g_free(ipaddr);
+            g_free(netmask);
+            g_free(gateway);
+        }
+        else if (g_strcmp0(name, "static-address") == 0)
         {
             static gchar *keys[] = { "ipaddr", "netmask", "gateway", "dns1", "dns2" };
             int i;
@@ -134,28 +163,40 @@ ipcam_network_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode
     JsonBuilder *builder = json_builder_new();
     JsonObject *req_obj;
 
-    json_builder_begin_object(builder);
-
     req_obj = json_object_get_object_member(json_node_get_object(request), "items");
 
+    json_builder_begin_object(builder);
+    json_builder_set_member_name(builder, "changed_items");
+    json_builder_begin_object(builder);
     if (json_object_has_member(req_obj, "autoconf"))
     {
         gint value = json_object_get_int_member(req_obj, "autoconf");
 
         ipcam_iconfig_set_network(iconfig, "method", value);
+        value = ipcam_iconfig_get_network(iconfig, "method");
+        json_builder_set_member_name(builder, "autoconf");
+        json_builder_add_int_value(builder, value);
     }
     if (json_object_has_member(req_obj, "address"))
     {
         JsonObject *addr_obj = json_object_get_object_member(req_obj, "address");
         GList *items = json_object_get_members(addr_obj);
         GList *l;
+        json_builder_set_member_name(builder, "address");
+        json_builder_begin_object(builder);
         for (l = g_list_first(items); l; l = g_list_next(l))
         {
             gchar *name = l->data;
             gchar *value = (gchar *)json_object_get_string_member(addr_obj, name);
 
             ipcam_iconfig_set_network_static(iconfig, name, value);
+            value = ipcam_iconfig_get_network_static(iconfig, name);
+            json_builder_set_member_name(builder, name);
+            json_builder_add_string_value(builder, value);
+
+            g_free(value);
         }
+        json_builder_end_object(builder);
         g_list_free(items);
     }
     if (json_object_has_member(req_obj, "pppoe"))
@@ -163,13 +204,21 @@ ipcam_network_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode
         JsonObject *addr_obj = json_object_get_object_member(req_obj, "pppoe");
         GList *items = json_object_get_members(addr_obj);
         GList *l;
+        json_builder_set_member_name(builder, "pppoe");
+        json_builder_begin_object(builder);
         for (l = g_list_first(items); l; l = g_list_next(l))
         {
             gchar *name = l->data;
             gchar *value = (gchar *)json_object_get_string_member(addr_obj, name);
 
             ipcam_iconfig_set_network_pppoe(iconfig, name, value);
+            value = ipcam_iconfig_get_network_pppoe(iconfig, name);
+            json_builder_set_member_name(builder, name);
+            json_builder_add_string_value(builder, value);
+
+            g_free(value);
         }
+        json_builder_end_object(builder);
         g_list_free(items);
     }
     if (json_object_has_member(req_obj, "server_port"))
@@ -177,16 +226,24 @@ ipcam_network_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode
         JsonObject *addr_obj = json_object_get_object_member(req_obj, "server_port");
         GList *items = json_object_get_members(addr_obj);
         GList *l;
+
+        json_builder_set_member_name(builder, "server_port");
+        json_builder_begin_object(builder);
         for (l = g_list_first(items); l; l = g_list_next(l))
         {
             gchar *name = l->data;
             gint value = json_object_get_int_member(addr_obj, name);
 
             ipcam_iconfig_set_network_port (iconfig, name, value);
+            value = ipcam_iconfig_get_network_port(iconfig, name);
+            json_builder_set_member_name(builder, name);
+            json_builder_add_int_value(builder, value);
         }
+        json_builder_end_object(builder);
         g_list_free(items);
     }
 
+    json_builder_end_object(builder);
     json_builder_end_object(builder);
 
     *response = json_builder_get_root(builder);
