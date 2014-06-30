@@ -74,10 +74,10 @@ ipcam_datetime_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNod
         {
             json_builder_set_member_name(builder, "str_value");
             json_builder_add_string_value(builder, str_val);
+
+            g_free(str_val);
         }
         json_builder_end_object(builder);
-
-        g_free(str_val);
     }
     json_builder_end_object(builder);
     json_builder_end_object(builder);
@@ -109,28 +109,36 @@ ipcam_datetime_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNod
     {
         JsonObject *val_obj;
         const gchar *name = item->data;
-        guint int_value;
-        gchar *str_value;
+        guint int_val;
+        gchar *str_val = NULL;
 
         val_obj = json_object_get_object_member (req_obj, name);
-        int_value = json_object_get_int_member (val_obj, "int_value");
-        str_value = (gchar *)json_object_get_string_member(val_obj, "str_value");
+        int_val = json_object_get_int_member (val_obj, "int_value");
+        str_val = (gchar *)json_object_get_string_member(val_obj, "str_value");
 
         if (g_strcmp0 (name, "datetime") == 0)
-            sysutils_datetime_set_datetime(str_value);
+        {
+            sysutils_datetime_set_datetime(str_val);
+            sysutils_datetime_get_datetime(&str_val);
+        }
         else
-            ipcam_iconfig_set_datetime(iconfig, name, int_value, str_value);
+        {
+            ipcam_iconfig_set_datetime(iconfig, name, int_val, str_val);
+            ipcam_iconfig_get_datetime(iconfig, name, &int_val, &str_val);
+        }
 
-        ipcam_iconfig_get_datetime(iconfig, name, &int_value, &str_value);
         json_builder_set_member_name (builder, name);
         json_builder_begin_object(builder);
         json_builder_set_member_name(builder, "int_value");
-        json_builder_add_int_value(builder, int_value);
-        json_builder_set_member_name(builder, "str_value");
-        json_builder_add_string_value(builder, str_value);
-        json_builder_end_object(builder);
+        json_builder_add_int_value(builder, int_val);
+        if (str_val)
+        {
+            json_builder_set_member_name(builder, "str_value");
+            json_builder_add_string_value(builder, str_val);
 
-        g_free(str_value);
+            g_free(str_val);
+        }
+        json_builder_end_object(builder);
     }
     json_builder_end_object(builder);
     json_builder_end_object(builder);

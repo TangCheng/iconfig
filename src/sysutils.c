@@ -27,6 +27,7 @@
 #include <time.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
+#include <sys/stat.h>
 #include <net/if.h>
 #include <netinet/in.h>
 #include <net/route.h>
@@ -48,6 +49,7 @@ gboolean sysutils_datetime_get_datetime(gchar **str_value)
 
             return TRUE;
         }
+        *str_value = NULL;
     }
 
     return FALSE;
@@ -73,15 +75,31 @@ gboolean sysutils_datetime_set_datetime(gchar *str_value)
     return(stime(&timer) == 0);
 }
 
-int sysutils_network_get_interfaces(const char *ifaces[], int *nr_ifaces)
+int sysutils_network_if_indextoname(unsigned int ifindex, char *ifname)
 {
-    
+    int sockfd;
+    struct ifreq ifr;
+    int ret;
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0)
+        return -1;
+
+    ifr.ifr_ifindex = ifindex;
+    ret = ioctl(sockfd, SIOCGIFNAME, &ifr);
+
+    if (ret == 0)
+        strncpy(ifname, ifr.ifr_name, IFNAMSIZ);
+
+    close(sockfd);
+
+    return 0;
 }
 
-int sysutils_network_get_ipaddr(const char *ifname,
-                                     char **ipaddr,
-                                     char **netmask,
-                                     char **broadaddr)
+int sysutils_network_get_address(const char *ifname,
+                                 char **ipaddr,
+                                 char **netmask,
+                                 char **broadaddr)
 {
     struct ifreq ifr;
     int sockfd;
@@ -90,13 +108,15 @@ int sysutils_network_get_ipaddr(const char *ifname,
     assert(ifname);
 
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0)
+        return -1;
 
     if (ipaddr) {
         *ipaddr = NULL;
         strcpy(ifr.ifr_name, ifname);
         ret = ioctl(sockfd, SIOCGIFADDR, &ifr);
         if (ret < 0)
-            goto finish;
+            goto fail;
         *ipaddr = strdup(inet_ntoa(((struct sockaddr_in*)&ifr.ifr_addr)->sin_addr));
     }
 
@@ -105,7 +125,7 @@ int sysutils_network_get_ipaddr(const char *ifname,
         strcpy(ifr.ifr_name, ifname);
         ret = ioctl(sockfd, SIOCGIFNETMASK, &ifr);
         if (ret < 0)
-            goto finish;
+            goto fail;
         *netmask = strdup(inet_ntoa(((struct sockaddr_in*)&ifr.ifr_netmask)->sin_addr));
     }
 
@@ -114,56 +134,83 @@ int sysutils_network_get_ipaddr(const char *ifname,
         strcpy(ifr.ifr_name, ifname);
         ret = ioctl(sockfd, SIOCGIFBRDADDR, &ifr);
         if (ret < 0)
-            goto finish;
+            goto fail;
         *broadaddr = strdup(inet_ntoa(((struct sockaddr_in*)&ifr.ifr_broadaddr)->sin_addr));
     }
+
+    close(sockfd);
+    return ret;
+
+fail:
+    if (ipaddr) {
+        g_free(*ipaddr);
+        *ipaddr = NULL;
+    }
+    if (netmask) {
+        g_free(*netmask);
+        *netmask = NULL;
+    }
+    if (broadaddr) {
+        g_free(*broadaddr);
+        *broadaddr = NULL;
+    }
+
+    close(sockfd);
+    return ret;
+}
+
+int sysutils_network_set_address(const char *ifname,
+                                 const char *ipaddr,
+                                 const char *netmask,
+                                 const char *broadaddr)
+{
+    struct ifreq ifr;
+    struct sockaddr_in *addr_in = (struct sockaddr_in *)&(ifr.ifr_addr);
+    int sockfd;
+    int ret = -1;
+
+    assert(ifname);
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0)
+        return -1;
+
+    if (ipaddr) {
+        memset(&ifr, 0, sizeof(ifr));
+        addr_in->sin_family = AF_INET;
+        if (!inet_aton(ipaddr, &addr_in->sin_addr))
+            goto finish;
+        strcpy(ifr.ifr_name, ifname);
+        if ((ret = ioctl(sockfd, SIOCSIFADDR, &ifr)) < 0)
+            goto finish;
+    }
+
+    if (netmask) {
+        memset(&ifr, 0, sizeof(ifr));
+        addr_in->sin_family = AF_INET;
+        if (!inet_aton(netmask, &addr_in->sin_addr))
+            goto finish;
+        strcpy(ifr.ifr_name, ifname);
+        if ((ret = ioctl(sockfd, SIOCSIFNETMASK, &ifr)) < 0)
+            goto finish;
+    }
+
+    if (broadaddr) {
+        memset(&ifr, 0, sizeof(ifr));
+        addr_in->sin_family = AF_INET;
+        if (!inet_aton(broadaddr, &addr_in->sin_addr))
+            goto finish;
+        strcpy(ifr.ifr_name, ifname);
+        if ((ret = ioctl(sockfd, SIOCSIFBRDADDR, &ifr)) < 0)
+            goto finish;
+    }
+
 finish:
     close(sockfd);
     return ret;
 }
 
-gboolean sysutils_network_set_address(const char *ifname,
-                                      char *ipaddr,
-                                      char *netmask,
-                                      char *broadaddr)
-{
-    struct ifreq ifr;
-    int sockfd;
-
-    assert(ifname && ipaddr);
-
-    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-
-    inet_aton(ipaddr, &((struct sockaddr_in*)&ifr.ifr_addr)->sin_addr);
-    strcpy(ifr.ifr_name, ifname);
-    if (ioctl(sockfd, SIOCSIFADDR, &ifr) < 0)
-        goto fail;
-
-    if (netmask) {
-        if (!inet_aton(netmask, &((struct sockaddr_in*)&ifr.ifr_netmask)->sin_addr))
-            goto fail;
-        strcpy(ifr.ifr_name, ifname);
-        if (ioctl(sockfd, SIOCSIFNETMASK, &ifr) < 0)
-            goto fail;
-    }
-
-    if (broadaddr) {
-        if (!inet_aton(broadaddr, &((struct sockaddr_in*)&ifr.ifr_broadaddr)->sin_addr))
-            goto fail;
-        strcpy(ifr.ifr_name, ifname);
-        if (ioctl(sockfd, SIOCSIFBRDADDR, &ifr) < 0)
-            goto fail;
-    }
-
-    close(sockfd);
-    return TRUE;
-
-fail:
-    close(sockfd);
-    return FALSE;
-}
-
-int sysutils_network_set_gateway(char *ifname, const char *gwaddr)
+int sysutils_network_set_gateway(const char *ifname, const char *gwaddr)
 {
     int skfd;
     struct rtentry rt;
@@ -188,7 +235,7 @@ int sysutils_network_set_gateway(char *ifname, const char *gwaddr)
 
     rt.rt_flags = RTF_UP;
 
-    rt.rt_dev = ifname;
+    rt.rt_dev = (gchar *)ifname;
 
     err = ioctl(skfd, SIOCDELRT, &rt);
 
@@ -207,7 +254,7 @@ int sysutils_network_set_gateway(char *ifname, const char *gwaddr)
 
         rt.rt_flags = RTF_UP | RTF_GATEWAY;
 
-        rt.rt_dev = ifname;
+        rt.rt_dev = (gchar *)ifname;
 
         err = ioctl(skfd, SIOCADDRT, &rt);
     }
@@ -217,7 +264,7 @@ int sysutils_network_set_gateway(char *ifname, const char *gwaddr)
     return err;
 }
 
-int sysutils_network_get_gateway(char *ifname, char **gwaddr)
+int sysutils_network_get_gateway(const char *ifname, char **gwaddr)
 {
     FILE *fp;
     char buf[256]; // 128 is enough for linux
@@ -247,23 +294,25 @@ int sysutils_network_get_gateway(char *ifname, char **gwaddr)
     return 0;
 }
 
-int sysutils_network_set_dns(char *ifname, char **dns, int size)
+int sysutils_network_set_dns(const char *ifname, const char **dns, int size)
 {
     FILE *fp;
     char buf[128];
     int i;
 
-    fp = fopen("/etc/resolv.conf", "r");
+    if (access(PACKAGE_SYSCONFDIR, F_OK) < 0)
+        mkdir(PACKAGE_SYSCONFDIR, 0775);
+
+    fp = fopen(PACKAGE_SYSCONFDIR "/resolv.conf", "w+");
     if (fp == NULL)
         return -1;
 
-    i = 0;
-    while (fgets(buf, sizeof(buf), fp) && (i < size)) {
-        char str[64];
-        if (sscanf(buf, "nameserver %s", str) != 1)
+    fputs("# Generated by IConfig\n", fp);
+    for (i = 0; i < size; i++) {
+        if (dns[i] == NULL || strlen(dns[i]) == 0)
             continue;
-        dns[i++] = strdup(str);
-        break;
+        snprintf(buf, sizeof(buf), "nameserver %s\n", dns[i]);
+        fputs(buf, fp);
     }
 
     fclose(fp);

@@ -23,5 +23,18 @@
 int sysutils_datetime_get_datetime(gchar **str_value);
 int sysutils_datetime_set_datetime(gchar *str_value);
 
+int sysutils_network_if_indextoname(unsigned int ifindex, char *ifname);
+int sysutils_network_get_address(const char *ifname,
+                                 char **ipaddr,
+                                 char **netmask,
+                                 char **broadaddr);
+int sysutils_network_set_address(const char *ifname,
+                                 const char *ipaddr,
+                                 const char *netmask,
+                                 const char *broadaddr);
+int sysutils_network_set_gateway(const char *ifname, const char *gwaddr);
+int sysutils_network_get_gateway(const char *ifname, char **gwaddr);
+int sysutils_network_set_dns(const char *ifname, const char **dns, int size);
+
 #endif // _SYSUTILS_H_
 
