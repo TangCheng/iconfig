@@ -5,7 +5,7 @@ enum {
   PROP_ID,
   PROP_NAME,
   PROP_PASSWORD,
-  PROP_IS_ADMIN,
+  PROP_PRIVILEGE,
   N_PROPERTIES
 };
 
@@ -14,7 +14,7 @@ typedef struct _IpcamUsersPrivate
     guint id;
     gchar *name;
     gchar *password;
-    gboolean is_admin;
+    guint privilege;
 } IpcamUsersPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE(IpcamUsers, ipcam_users, GOM_TYPE_RESOURCE);
@@ -54,9 +54,9 @@ static void ipcam_users_set_property(GObject      *object,
             priv->password = g_value_dup_string(value);
         }
         break;
-    case PROP_IS_ADMIN:
+    case PROP_PRIVILEGE:
         {
-            priv->is_admin = g_value_get_boolean(value);
+            priv->privilege = g_value_get_uint(value);
         }
         break;
     default:
@@ -88,9 +88,9 @@ static void ipcam_users_get_property(GObject    *object,
             g_value_set_string(value, priv->password);
         }
         break;
-    case PROP_IS_ADMIN:
+    case PROP_PRIVILEGE:
         {
-            g_value_set_boolean(value, priv->is_admin);
+            g_value_set_uint(value, priv->privilege);
         }
         break;
     default:
@@ -131,12 +131,14 @@ static void ipcam_users_class_init(IpcamUsersClass *klass)
                             "User's password.",
                             NULL, // default value
                             G_PARAM_READWRITE);
-    obj_properties[PROP_IS_ADMIN] =
-        g_param_spec_boolean("isadmin",
-                             "Administrator?",
-                             "Is this user administrator?",
-                             FALSE,
-                             G_PARAM_READWRITE);
+    obj_properties[PROP_PRIVILEGE] =
+        g_param_spec_uint("privilege",
+                          "User Privilege Level",
+                          "User Privilege Level",
+                          0,
+                          65536,
+                          0,
+                          G_PARAM_READWRITE);
 
     g_object_class_install_properties(object_class, N_PROPERTIES, obj_properties);
     gom_resource_class_set_primary_key(resource_class, "id");

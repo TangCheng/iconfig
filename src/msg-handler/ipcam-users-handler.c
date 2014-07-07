@@ -76,7 +76,7 @@ ipcam_users_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode *
         }
         if (need_privilege)
         {
-            gint privilege = ipcam_iconfig_get_user_privilege(iconfig, username);
+            guint privilege = ipcam_iconfig_get_user_privilege(iconfig, username);
             json_builder_set_member_name(builder, "privilege");
             json_builder_add_int_value(builder, privilege);
         }
@@ -113,7 +113,7 @@ ipcam_users_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode *
         JsonObject *user_obj = json_array_get_object_element(req_array, i);
         const gchar *username = json_object_get_string_member(user_obj, "username");
         const gchar *password = json_object_get_string_member(user_obj, "password");
-        gint privilege = json_object_get_int_member(user_obj, "privilege");
+        guint privilege = json_object_get_int_member(user_obj, "privilege");
 
         ipcam_iconfig_set_user_password (iconfig, username, (gchar *)password);
         ipcam_iconfig_set_user_privilege (iconfig, username, privilege);
@@ -161,7 +161,7 @@ ipcam_users_msg_handler_post_action_impl(IpcamMessageHandler *handler, JsonNode 
         JsonObject *user_obj = json_array_get_object_element(req_array, i);
         const gchar *username = json_object_get_string_member(user_obj, "username");
         const gchar *password = json_object_get_string_member(user_obj, "password");
-        gint privilege = json_object_get_int_member(user_obj, "privilege");
+        guint privilege = json_object_get_int_member(user_obj, "privilege");
 
         ipcam_iconfig_set_user_password (iconfig, username, (gchar *)password);
         ipcam_iconfig_set_user_privilege (iconfig, username, privilege);

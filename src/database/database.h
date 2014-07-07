@@ -30,8 +30,8 @@ gchar *ipcam_database_get_baseinfo(IpcamDatabase *database, const gchar *name);
 GList *ipcam_database_get_users(IpcamDatabase *database);
 void ipcam_database_set_user_password(IpcamDatabase *database, const gchar *username, gchar *password);
 gchar *ipcam_database_get_user_password(IpcamDatabase *database, const gchar *username);
-void ipcam_database_set_user_privilege(IpcamDatabase *database, const gchar *username, gboolean isadmin);
-gboolean ipcam_database_get_user_privilege(IpcamDatabase *database, const gchar *username);
+void ipcam_database_set_user_privilege(IpcamDatabase *database, const gchar *username, guint privilege);
+guint ipcam_database_get_user_privilege(IpcamDatabase *database, const gchar *username);
 void ipcam_database_del_user(IpcamDatabase *database, const gchar *username);
 void ipcam_database_set_osd(IpcamDatabase *database,
                             const gchar *name,

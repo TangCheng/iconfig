@@ -48,8 +48,8 @@ void ipcam_iconfig_get_datetime(IpcamIConfig *iconfig, const gchar *name, guint 
 GList *ipcam_iconfig_get_users(IpcamIConfig *iconfig);
 void ipcam_iconfig_set_user_password(IpcamIConfig *iconfig, const gchar *username, gchar *password);
 gchar *ipcam_iconfig_get_user_password(IpcamIConfig *iconfig, const gchar *username);
-void ipcam_iconfig_set_user_privilege(IpcamIConfig *iconfig, const gchar *username, gboolean isadmin);
-gboolean ipcam_iconfig_get_user_privilege(IpcamIConfig *iconfig, const gchar *username);
+void ipcam_iconfig_set_user_privilege(IpcamIConfig *iconfig, const gchar *username, guint privilege);
+guint ipcam_iconfig_get_user_privilege(IpcamIConfig *iconfig, const gchar *username);
 void ipcam_iconfig_del_user(IpcamIConfig *iconfig, const gchar *username);
 
 #endif /* __ICONFIG_H__ */

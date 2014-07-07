@@ -3,7 +3,7 @@ netif: eth0
 bind:
   iconfig: tcp://127.0.0.1:3000
 connect:
-  test_app: tcp://127.0.0.1:4000
+  ionvif: tcp://127.0.0.1:3010
 ajax:
   address: 127.0.0.1
   port: 3001

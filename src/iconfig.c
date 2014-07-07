@@ -85,8 +85,8 @@ static void ipcam_iconfig_before_start(IpcamBaseService *base_service)
     ipcam_base_app_register_handler(IPCAM_BASE_APP(iconfig), "set_datetime", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
     ipcam_base_app_register_handler(IPCAM_BASE_APP(iconfig), "get_users", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
     ipcam_base_app_register_handler(IPCAM_BASE_APP(iconfig), "set_users", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
-    ipcam_base_app_register_handler(IPCAM_BASE_APP(iconfig), "post_users", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
-    ipcam_base_app_register_handler(IPCAM_BASE_APP(iconfig), "delete_users", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
+    ipcam_base_app_register_handler(IPCAM_BASE_APP(iconfig), "add_users", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
+    ipcam_base_app_register_handler(IPCAM_BASE_APP(iconfig), "del_users", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
 }
 
 static void ipcam_iconfig_in_loop(IpcamBaseService *base_service)
@@ -273,15 +273,15 @@ gchar *ipcam_iconfig_get_user_password(IpcamIConfig *iconfig, const gchar *usern
     return ipcam_database_get_user_password (priv->database, username);
 }
 
-void ipcam_iconfig_set_user_privilege(IpcamIConfig *iconfig, const gchar *username, gboolean isadmin)
+void ipcam_iconfig_set_user_privilege(IpcamIConfig *iconfig, const gchar *username, guint privilege)
 {
     g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), NULL);
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
 
-    ipcam_database_set_user_privilege (priv->database, username, isadmin);
+	ipcam_database_set_user_privilege (priv->database, username, privilege);
 }
 
-gboolean ipcam_iconfig_get_user_privilege(IpcamIConfig *iconfig, const gchar *username)
+guint ipcam_iconfig_get_user_privilege(IpcamIConfig *iconfig, const gchar *username)
 {
     g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), NULL);
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);

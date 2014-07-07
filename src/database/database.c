@@ -73,9 +73,9 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
                      "password TEXT NOT NULL,"
-                     "isadmin  BOOLEAN"
+                     "privilege INTEGER"
                      ");");
-        EXEC_OR_FAIL("INSERT INTO users (name, password, isadmin) "
+        EXEC_OR_FAIL("INSERT INTO users (name, password, privilege) "
                      "VALUES ('admin', 'admin', 1);");
         
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS osd ("
@@ -376,7 +376,7 @@ gchar *ipcam_database_get_user_password(IpcamDatabase *database, const gchar *us
     
     return password;
 }
-void ipcam_database_set_user_privilege(IpcamDatabase *database, const gchar *username, gboolean isadmin)
+void ipcam_database_set_user_privilege(IpcamDatabase *database, const gchar *username, guint privilege)
 {
     g_return_if_fail(IPCAM_IS_DATABASE(database));
     GomResource *resource = NULL;
@@ -385,7 +385,7 @@ void ipcam_database_set_user_privilege(IpcamDatabase *database, const gchar *use
     resource = ipcam_database_get_resource(database, IPCAM_USERS_TYPE, username);
     if (resource)
     {
-        g_object_set(resource, "isadmin", isadmin, NULL);
+        g_object_set(resource, "privilege", privilege, NULL);
         gom_resource_save_sync(resource, &error);
         g_object_unref(resource);
     }
@@ -396,20 +396,20 @@ void ipcam_database_set_user_privilege(IpcamDatabase *database, const gchar *use
         g_error_free(error);
     }
 }
-gboolean ipcam_database_get_user_privilege(IpcamDatabase *database, const gchar *username)
+guint ipcam_database_get_user_privilege(IpcamDatabase *database, const gchar *username)
 {
     g_return_val_if_fail(IPCAM_IS_DATABASE(database), FALSE);
     GomResource *resource = NULL;
-    gboolean isadmin = FALSE;
+    guint privilege = 0;
 
     resource = ipcam_database_get_resource(database, IPCAM_USERS_TYPE, username);
     if (resource)
     {
-        g_object_get(resource, "isadmin", &isadmin, NULL);
+        g_object_get(resource, "privilege", &privilege, NULL);
         g_object_unref(resource);
     }
     
-    return isadmin;
+    return privilege;
 }
 void ipcam_database_del_user(IpcamDatabase *database, const gchar *username)
 {
