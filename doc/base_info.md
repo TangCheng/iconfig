@@ -20,7 +20,7 @@ PUT
  请求|参数|必选|类型及范围|说明
 ---|---|:-:|---|---|---
 GET|items|是|array: ['device_name', 'comment']|需要查询的基本信息的名称
-PUT|items|是|object: {'device_name':'ipcam','comment':'my content'}|要设置的基本信息的名值对
+PUT|items|是|object: {'device_name':'ipcam','location'='China','comment':'my content'}|要设置的基本信息的名值对
 
 ### 注意事项
 无
@@ -86,7 +86,7 @@ comment|string|用户自定义说明
             'version': '1.0'
         },
         'body': {
-			'infos': {
+			'items': {
                 'device_name': 'device_name',
                 'comment': 'comment'
 			}

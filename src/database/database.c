@@ -66,6 +66,8 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      ");");
         EXEC_OR_FAIL("INSERT INTO base_info (name, value) "
                      "VALUES ('device_name', 'ipcam');");
+		EXEC_OR_FAIL("INSERT INTO base_info (name, value) "
+		             "VALUES ('location', 'China');");
         EXEC_OR_FAIL("INSERT INTO base_info (name, value) "
                      "VALUES ('comment', '');");
         
