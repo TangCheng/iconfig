@@ -13,16 +13,10 @@ AC_PROG_CC
 
 AM_PROG_CC_C_O
 
-
-
-
-
-
+AC_USE_SYSTEM_EXTENSIONS
 
 
 PKG_CHECK_MODULES(ICONFIG, [json-glib-1.0 gio-2.0 gom-1.0 libipcam_base-0.1.0])
-
-
 
 
 AC_OUTPUT([

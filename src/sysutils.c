@@ -20,6 +20,8 @@
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <printf.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
@@ -96,66 +98,53 @@ int sysutils_network_if_indextoname(unsigned int ifindex, char *ifname)
     return 0;
 }
 
+static char *__prefixlen2_mask(unsigned int prefix_len)
+{
+	struct in_addr addr = { 0 };
+	int i;
+
+	for (i = 31; i >= 32 - prefix_len; i--)
+		addr.s_addr |= (1 << i);
+
+	return inet_ntoa(addr);
+}
+
 int sysutils_network_get_address(const char *ifname,
                                  char **ipaddr,
                                  char **netmask,
                                  char **broadaddr)
 {
-    struct ifreq ifr;
-    int sockfd;
-    int ret = 0;
+    char cmd[32];
+    FILE *fp;
+    int ret = -1;
 
-    assert(ifname);
+    snprintf(cmd, sizeof(cmd), "ip -o -4 addr show dev %s", ifname);
+    fp = popen(cmd, "r");
 
-    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sockfd < 0)
-        return -1;
+    if (fp) {
+        char ip[16];
+        char mask[16];
+        char brd[16];
 
-    if (ipaddr) {
-        *ipaddr = NULL;
-        strcpy(ifr.ifr_name, ifname);
-        ret = ioctl(sockfd, SIOCGIFADDR, &ifr);
-        if (ret < 0)
-            goto fail;
-        *ipaddr = strdup(inet_ntoa(((struct sockaddr_in*)&ifr.ifr_addr)->sin_addr));
+        /* 
+         * Output for example
+         * 2: eth0    inet 192.168.10.15/24 brd 192.168.10.255 scope global eth0
+         */
+        if (fscanf(fp, "%*d:%*s inet %[0-9.] %*c %s brd %16[0-9.] %*[^$] %*[$]",
+                   ip, mask, brd) == 3)
+        {
+            if (ipaddr)
+                *ipaddr = strdup(ip);
+            if (netmask)
+                *netmask = strdup(__prefixlen2_mask(strtoul(mask, NULL, 0)));
+            if (broadaddr)
+                *broadaddr = strdup(brd);
+
+            ret = 0;
+        }
+        pclose(fp);
     }
 
-    if (netmask) {
-        *netmask = NULL;
-        strcpy(ifr.ifr_name, ifname);
-        ret = ioctl(sockfd, SIOCGIFNETMASK, &ifr);
-        if (ret < 0)
-            goto fail;
-        *netmask = strdup(inet_ntoa(((struct sockaddr_in*)&ifr.ifr_netmask)->sin_addr));
-    }
-
-    if (broadaddr) {
-        *broadaddr = NULL;
-        strcpy(ifr.ifr_name, ifname);
-        ret = ioctl(sockfd, SIOCGIFBRDADDR, &ifr);
-        if (ret < 0)
-            goto fail;
-        *broadaddr = strdup(inet_ntoa(((struct sockaddr_in*)&ifr.ifr_broadaddr)->sin_addr));
-    }
-
-    close(sockfd);
-    return ret;
-
-fail:
-    if (ipaddr) {
-        g_free(*ipaddr);
-        *ipaddr = NULL;
-    }
-    if (netmask) {
-        g_free(*netmask);
-        *netmask = NULL;
-    }
-    if (broadaddr) {
-        g_free(*broadaddr);
-        *broadaddr = NULL;
-    }
-
-    close(sockfd);
     return ret;
 }
 
@@ -164,133 +153,113 @@ int sysutils_network_set_address(const char *ifname,
                                  const char *netmask,
                                  const char *broadaddr)
 {
-    struct ifreq ifr;
-    struct sockaddr_in *addr_in = (struct sockaddr_in *)&(ifr.ifr_addr);
-    int sockfd;
+    char cmd[128];
+    char brd[32];
+    char mask[32];
+    FILE *fp;
     int ret = -1;
 
-    assert(ifname);
+    if (broadaddr)
+        snprintf(brd, sizeof(brd), "-broadcast %s", broadaddr);
+    if (netmask)
+        snprintf(mask, sizeof(mask), "netmask %s", netmask);
 
-    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sockfd < 0)
-        return -1;
+    snprintf(cmd, sizeof(cmd), "ifconfig %s %s %s %s", ifname,
+             ipaddr ? ipaddr : "",
+             netmask ? mask : "",
+             broadaddr ? brd : "");
+    fp = popen(cmd, "r");
 
-    if (ipaddr) {
-        memset(&ifr, 0, sizeof(ifr));
-        addr_in->sin_family = AF_INET;
-        if (!inet_aton(ipaddr, &addr_in->sin_addr))
-            goto finish;
-        strcpy(ifr.ifr_name, ifname);
-        if ((ret = ioctl(sockfd, SIOCSIFADDR, &ifr)) < 0)
-            goto finish;
+    if (fp) {
+        pclose(fp);
+
+        ret = 0;
     }
 
-    if (netmask) {
-        memset(&ifr, 0, sizeof(ifr));
-        addr_in->sin_family = AF_INET;
-        if (!inet_aton(netmask, &addr_in->sin_addr))
-            goto finish;
-        strcpy(ifr.ifr_name, ifname);
-        if ((ret = ioctl(sockfd, SIOCSIFNETMASK, &ifr)) < 0)
-            goto finish;
-    }
-
-    if (broadaddr) {
-        memset(&ifr, 0, sizeof(ifr));
-        addr_in->sin_family = AF_INET;
-        if (!inet_aton(broadaddr, &addr_in->sin_addr))
-            goto finish;
-        strcpy(ifr.ifr_name, ifname);
-        if ((ret = ioctl(sockfd, SIOCSIFBRDADDR, &ifr)) < 0)
-            goto finish;
-    }
-
-finish:
-    close(sockfd);
     return ret;
-}
-
-int sysutils_network_set_gateway(const char *ifname, const char *gwaddr)
-{
-    int skfd;
-    struct rtentry rt;
-    struct in_addr addr;
-    int err;
-
-    if (!inet_aton(gwaddr, &addr))
-        return -1;
-
-    skfd = socket(PF_INET, SOCK_DGRAM, 0);
-    if (skfd < 0)
-        return -1;
-
-    /* Delete existing defalt gateway */
-    memset(&rt, 0, sizeof(rt));
-
-    rt.rt_dst.sa_family = AF_INET;
-    ((struct sockaddr_in *)&rt.rt_dst)->sin_addr.s_addr = 0;
-
-    rt.rt_genmask.sa_family = AF_INET;
-    ((struct sockaddr_in *)&rt.rt_genmask)->sin_addr.s_addr = 0;
-
-    rt.rt_flags = RTF_UP;
-
-    rt.rt_dev = (gchar *)ifname;
-
-    err = ioctl(skfd, SIOCDELRT, &rt);
-
-    if ((err == 0 || errno == ESRCH) && addr.s_addr) {
-        /* Set default gateway */
-        memset(&rt, 0, sizeof(rt));
-
-        rt.rt_dst.sa_family = AF_INET;
-        ((struct sockaddr_in *)&rt.rt_dst)->sin_addr.s_addr = 0;
-
-        rt.rt_gateway.sa_family = AF_INET;
-        ((struct sockaddr_in *)&rt.rt_gateway)->sin_addr = addr;
-
-        rt.rt_genmask.sa_family = AF_INET;
-        ((struct sockaddr_in *)&rt.rt_genmask)->sin_addr.s_addr = 0;
-
-        rt.rt_flags = RTF_UP | RTF_GATEWAY;
-
-        rt.rt_dev = (gchar *)ifname;
-
-        err = ioctl(skfd, SIOCADDRT, &rt);
-    }
-
-    close(skfd);
-
-    return err;
 }
 
 int sysutils_network_get_gateway(const char *ifname, char **gwaddr)
 {
     FILE *fp;
-    char buf[256]; // 128 is enough for linux
-    char iface[16];
-    struct in_addr addr;
-    unsigned long int dest_addr, gate_addr;
+    int ret = -1;
+    char buf[128];
+    char gw[16];
 
-    *gwaddr = NULL;
-    fp = fopen("/proc/net/route", "r");
+    fp = popen("ip route", "r");
     if (fp == NULL)
         return -1;
-    /* Skip title line */
-    fgets(buf, sizeof(buf), fp);
-    while (fgets(buf, sizeof(buf), fp)) {
-        if (sscanf(buf, "%s\t%lX\t%lX", iface, &dest_addr, &gate_addr) != 3)
+
+        /* 
+         * Output for example
+         * default via 192.168.1.1 dev wlp8s0  proto static  metric 1024
+         */
+    while(!feof(fp)) {
+        if (fgets(buf, sizeof(buf), fp) == NULL)
             continue;
-        if (dest_addr != 0)
-            continue;
-        if (strcmp(ifname, iface) != 0)
-            continue;
-        addr.s_addr = gate_addr;
-        *gwaddr = strdup(inet_ntoa(addr));
-        break;
+        if (sscanf(buf, "default via %s %*[^$] %*[$]", gw) == 1) {
+            *gwaddr = strdup(gw);
+            ret = 0;
+            break;
+        }
+        pclose(fp);
     }
 
+    return ret;
+}
+
+int sysutils_network_set_gateway(const char *ifname, const char *gwaddr)
+{
+    char cmd[32];
+    FILE *fp;
+
+    /* Delete the route */
+    fp = popen("ip route del default", "r");
+    if (fp == NULL)
+        return -1;
+    pclose(fp);
+
+    /* Add new route */
+    snprintf(cmd, sizeof(cmd), "ip route add default via %s dev %s", gwaddr, ifname);
+    fp = popen(cmd, "r");
+    if (fp == NULL)
+        return -1;
+
+    pclose(fp);
+
+    return 0;
+}
+
+int sysutils_network_get_dns(const char *ifname, char **dns, int *size)
+{
+    FILE *fp;
+    char *fname = PACKAGE_SYSCONFDIR "/resolv.conf";
+    char buf[128];
+    int i;
+
+    if (access(PACKAGE_SYSCONFDIR, F_OK) < 0)
+        mkdir(PACKAGE_SYSCONFDIR, 0775);
+
+    fp = fopen(fname, "r");
+    if (fp == NULL)
+        return -1;
+
+    i = 0;
+    while(!feof(fp) && i < *size) {
+        char val[16];
+
+        if (fgets(buf, sizeof(buf), fp) == NULL)
+            continue;
+
+        if (sscanf(buf, "nameserver %16s", val) == 1) {
+            dns[i] = strdup(val);
+            i++;
+        }
+    }
+    *size = i;
+
     fclose(fp);
+
     return 0;
 }
 
@@ -317,4 +286,38 @@ int sysutils_network_set_dns(const char *ifname, const char **dns, int size)
 
     fclose(fp);
     return i;
+}
+
+int sysutils_network_get_hostname(const char **hostname)
+{
+    FILE *fp = NULL;
+    char buf[64];
+    int ret = -1;
+
+    fp = popen("hostname", "r");
+    if (fp) {
+        if (fscanf(fp, "%s", buf)) {
+            *hostname = strdup(buf);
+            ret = 0;
+        }
+        pclose(fp);
+    }
+
+    return ret;
+}
+
+int sysutils_network_set_hostname(const char *hostname)
+{
+    FILE *fp = NULL;
+    char cmd[64];
+    int ret = -1;
+
+    snprintf(cmd, sizeof(cmd), "hostname %s", hostname);
+    fp = popen(cmd, "r");
+    if (fp) {
+        pclose(fp);
+        ret = 0;
+    }
+
+    return ret;
 }

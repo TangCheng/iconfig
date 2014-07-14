@@ -32,9 +32,12 @@ int sysutils_network_set_address(const char *ifname,
                                  const char *ipaddr,
                                  const char *netmask,
                                  const char *broadaddr);
-int sysutils_network_set_gateway(const char *ifname, const char *gwaddr);
 int sysutils_network_get_gateway(const char *ifname, char **gwaddr);
+int sysutils_network_set_gateway(const char *ifname, const char *gwaddr);
+int sysutils_network_get_dns(const char *ifname, char **dns, int *size);
 int sysutils_network_set_dns(const char *ifname, const char **dns, int size);
+int sysutils_network_get_hostname(const char **hostname);
+int sysutils_network_set_hostname(const char *hostname);
 
 #endif // _SYSUTILS_H_
 

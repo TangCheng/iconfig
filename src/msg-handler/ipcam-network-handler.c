@@ -55,28 +55,33 @@ ipcam_network_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode
     json_builder_set_member_name(builder, "items");
     json_builder_begin_object(builder);
 
+    gint dhcp = ipcam_iconfig_get_network(iconfig, "method");
+
     for (idx = 0; idx < json_array_get_length(req_array); idx++)
     {
         const gchar *name = json_array_get_string_element(req_array, idx);
 
         if (g_strcmp0(name, "autoconf") == 0) {
-            gint value = ipcam_iconfig_get_network(iconfig, "method");
-
             json_builder_set_member_name(builder, name);
-            json_builder_add_int_value(builder, value);
+            json_builder_add_int_value(builder, dhcp);
         }
-        else if (g_strcmp0(name, "address") == 0)
+        else if ((g_strcmp0(name, "address") == 0) && dhcp)
         {
             gchar *ipaddr = NULL, *netmask = NULL, *gateway = NULL;
-            json_builder_set_member_name(builder, "ipaddr");
+            char *dns[2] = { [0 ... (ARRAY_SIZE(dns) - 1)] = NULL };
+            int nr_dns = 2;
+
+            json_builder_set_member_name(builder, "address");
             json_builder_begin_object(builder);
             struct __key_val {
                 gchar *key;
                 gchar **pval;
             } kv[] = {
-                { "ipaddr", &ipaddr },
+                { "ipaddr",  &ipaddr },
                 { "netmask", &netmask },
-                { "gateway", &gateway }
+                { "gateway", &gateway },
+                { "dns1",    &dns[0] },
+                { "dns2",    &dns[1] }
             };
             const gchar *netif = ipcam_base_app_get_config(IPCAM_BASE_APP(iconfig), "netif");
 
@@ -84,6 +89,8 @@ ipcam_network_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode
                 perror("error get network address: ");
             if (sysutils_network_get_gateway(netif, &gateway) != 0)
                 perror("error get gateway: ");
+            if (sysutils_network_get_dns(netif, dns, &nr_dns) != 0)
+                perror("error get dns: ");
 
             int i;
             for (i = 0; i < ARRAY_SIZE(kv); i++)
@@ -98,7 +105,7 @@ ipcam_network_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode
             }
             json_builder_end_object(builder);
         }
-        else if (g_strcmp0(name, "static-address") == 0)
+        else if ((g_strcmp0(name, "address") == 0) && !dhcp)
         {
             static gchar *keys[] = { "ipaddr", "netmask", "gateway", "dns1", "dns2" };
             int i;
@@ -115,6 +122,15 @@ ipcam_network_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode
                 g_free(value);
             }
             json_builder_end_object(builder);
+        }
+        else if (g_strcmp0(name, "hostname") == 0)
+        {
+            const gchar *hostname = NULL;
+            if (sysutils_network_get_hostname(&hostname) == 0)
+            {
+                json_builder_set_member_name(builder, "hostname");
+                json_builder_add_string_value(builder, hostname);
+            }
         }
         else if (g_strcmp0(name, "pppoe") == 0)
         {
@@ -170,6 +186,8 @@ ipcam_network_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode
     JsonBuilder *builder = json_builder_new();
     JsonObject *req_obj;
 
+    gint dhcp = ipcam_iconfig_get_network(iconfig, "method");
+
     req_obj = json_object_get_object_member(json_node_get_object(request), "items");
 
     json_builder_begin_object(builder);
@@ -177,14 +195,23 @@ ipcam_network_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode
     json_builder_begin_object(builder);
     if (json_object_has_member(req_obj, "autoconf"))
     {
-        gint value = json_object_get_int_member(req_obj, "autoconf");
+        dhcp = json_object_get_int_member(req_obj, "autoconf");
 
-        ipcam_iconfig_set_network(iconfig, "method", value);
-        value = ipcam_iconfig_get_network(iconfig, "method");
+        ipcam_iconfig_set_network(iconfig, "method", dhcp);
+        dhcp = ipcam_iconfig_get_network(iconfig, "method");
         json_builder_set_member_name(builder, "autoconf");
-        json_builder_add_int_value(builder, value);
+        json_builder_add_int_value(builder, dhcp);
     }
-    if (json_object_has_member(req_obj, "address"))
+    if (json_object_has_member(req_obj, "hostname"))
+    {
+        const gchar *value = json_object_get_string_member(req_obj, "hostname");
+
+        sysutils_network_set_hostname(value);
+
+        json_builder_set_member_name(builder, "hostname");
+        json_builder_add_string_value(builder, value);
+    }
+    if (json_object_has_member(req_obj, "address") && !dhcp)
     {
         const gchar *ipaddr = NULL;
         const gchar *netmask = NULL;
