@@ -28,7 +28,6 @@ typedef struct _IpcamAjaxWorkerData
 {
     IpcamIConfig *iconfig;
     GSocket *socket;
-    GMutex *mutex;
 } IpcamAjaxWorkerData;
 
 G_DEFINE_TYPE_WITH_PRIVATE(IpcamAjax, ipcam_ajax, G_TYPE_OBJECT)
@@ -48,12 +47,34 @@ static void ipcam_ajax_finalize(GObject *object)
     g_free(priv->address);
     G_OBJECT_CLASS(ipcam_ajax_parent_class)->finalize(object);
 }
-static void ipcam_ajax_init(IpcamAjax *ajax)
+
+static GObject *ipcam_ajax_constructor(GType gtype,
+                                       guint  n_properties,
+                                       GObjectConstructParam *properties)
 {
-    IpcamAjaxPrivate *priv = ipcam_ajax_get_instance_private(ajax);
+    GObject *obj;
+    IpcamAjax *ajax;
+    IpcamAjaxPrivate *priv;
+
+    /* Always chain up to the parent constructor */
+    obj = G_OBJECT_CLASS(ipcam_ajax_parent_class)->constructor(gtype, n_properties, properties);
+
+    ajax = IPCAM_AJAX(obj);
+    g_assert(IPCAM_IS_AJAX(ajax));
+
+    priv = ipcam_ajax_get_instance_private(ajax);
+
+    /* thread must be create after construction has alread initialized the properties */
     priv->terminated = FALSE;
     priv->thread = g_thread_new("ajax-worker", ajax_worker, ajax);
+
+    return obj;
 }
+
+static void ipcam_ajax_init(IpcamAjax *ajax)
+{
+}
+
 static void ipcam_ajax_get_property(GObject    *object,
                                     guint       property_id,
                                     GValue     *value,
@@ -116,6 +137,7 @@ static void ipcam_ajax_set_property(GObject      *object,
 static void ipcam_ajax_class_init(IpcamAjaxClass *klass)
 {
     GObjectClass *object_class = G_OBJECT_CLASS(klass);
+    object_class->constructor = ipcam_ajax_constructor;
     object_class->finalize = &ipcam_ajax_finalize;
     object_class->get_property = &ipcam_ajax_get_property;
     object_class->set_property = &ipcam_ajax_set_property;
@@ -161,12 +183,12 @@ static gpointer ajax_worker(gpointer data)
                                    G_SOCKET_TYPE_STREAM,
                                    G_SOCKET_PROTOCOL_TCP,
                                    NULL);
-    g_socket_set_blocking(server, FALSE);
-    g_socket_bind(server, socket_address, TRUE, NULL);
-    g_socket_listen(server, NULL);
-    GMutex mutex;
-    g_mutex_init(&mutex);
-    
+
+    g_socket_set_blocking(server, TRUE);
+
+    g_assert(g_socket_bind(server, socket_address, TRUE, NULL));
+    g_assert(g_socket_listen(server, NULL));
+
     while (!ipcam_ajax_get_terminated(ajax))
     {
         GSocket *worker = g_socket_accept(server, NULL, NULL);
@@ -176,20 +198,20 @@ static gpointer ajax_worker(gpointer data)
             IpcamAjaxWorkerData *data = g_new(IpcamAjaxWorkerData, 1);
             g_object_get(ajax, "app", &data->iconfig, NULL);
             data->socket = worker;
-            data->mutex = &mutex;
+
             GThread *thread =g_thread_new("request-proc", request_proc, data);
             g_thread_unref(thread);
         }
         else
         {
-            usleep(500000);
+            g_warn_if_reached();
+            break;
         }
     }
 
-    g_mutex_clear(&mutex);
     g_socket_close(server, NULL);
     g_object_unref(server);
-    g_thread_exit(0);
+
     return NULL;
 }
 static gpointer request_proc(gpointer data)
@@ -197,7 +219,6 @@ static gpointer request_proc(gpointer data)
     IpcamAjaxWorkerData *params = data;
     IpcamIConfig *app = params->iconfig;
     GSocket *worker = params->socket;
-    GMutex *mutex = params->mutex;
     gchar *buffer = g_new0(gchar, 2048);
     gssize len;
 
@@ -210,10 +231,9 @@ static gpointer request_proc(gpointer data)
         IpcamHttpResponse *response = ipcam_http_proc_get_response(proc, request);
         if (response)
         {
-            g_mutex_lock(mutex);
             ipcam_http_response_write_string(response, worker);
-            g_mutex_unlock(mutex);
         }
+
         g_clear_object(&response);
         g_clear_object(&proc);
         g_clear_object(&request);
@@ -224,6 +244,6 @@ static gpointer request_proc(gpointer data)
     g_socket_close(worker, NULL);
     g_clear_object(&worker);
     g_free(params);
-    g_thread_exit(0);
+
     return NULL;
 }
