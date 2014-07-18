@@ -37,6 +37,7 @@ static void ipcam_iconfig_class_init(IpcamIConfigClass *klass)
     base_service_class->before = ipcam_iconfig_before_start;
     base_service_class->in_loop = ipcam_iconfig_in_loop;
 }
+
 static void ipcam_iconfig_before_start(IpcamBaseService *base_service)
 {
     IpcamIConfig *iconfig = IPCAM_ICONFIG(base_service);
@@ -51,24 +52,6 @@ static void ipcam_iconfig_before_start(IpcamBaseService *base_service)
                                   "port", strtol(port, NULL, 10),
                                   NULL);
     }
-    /* SO SURPRISED, it is cause segment fault when called
-       ipcam_iconfig_get_base_info in other thread if delete
-       code below. */
-    g_free(ipcam_iconfig_get_base_info(iconfig, "device_name"));
-    gboolean isshow;
-    guint size, x, y, color;
-	ipcam_iconfig_get_osd(iconfig, "datetime", &isshow, &size, &x, &y, &color);
-    ipcam_iconfig_get_video(iconfig, "profile");
-    ipcam_iconfig_get_scene(iconfig, "scenario");
-    ipcam_iconfig_get_network(iconfig, "method");
-    g_free(ipcam_iconfig_get_network_static(iconfig, "ipaddr"));
-    g_free(ipcam_iconfig_get_network_pppoe(iconfig, "username"));
-    ipcam_iconfig_get_network_port(iconfig, "http");
-    guint int_value;
-    gchar *str_value;
-    ipcam_iconfig_get_datetime(iconfig, "timezone", &int_value, &str_value);
-    g_free(str_value);
-    g_list_free_full(ipcam_iconfig_get_users(iconfig), g_free);
 
     /* Message Handler */
     ipcam_base_app_register_handler(IPCAM_BASE_APP(iconfig), "get_base_info", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
