@@ -2,8 +2,8 @@ token: iconfig_token
 netif: wlp8s0
 bind:
   iconfig: tcp://127.0.0.1:3000
-connect:
-  ionvif: tcp://127.0.0.1:3010
+publish:
+  iconfig_pub: tcp://127.0.0.1:3010
 ajax:
   address: 127.0.0.1
   port: 3001
