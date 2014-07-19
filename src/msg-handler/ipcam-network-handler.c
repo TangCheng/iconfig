@@ -131,7 +131,7 @@ ipcam_network_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode
                 json_builder_set_member_name(builder, "hostname");
                 json_builder_add_string_value(builder, hostname);
 
-                free(hostname);
+                g_free((gpointer)hostname);
             }
         }
         else if (g_strcmp0(name, "pppoe") == 0)

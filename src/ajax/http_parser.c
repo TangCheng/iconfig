@@ -83,13 +83,13 @@ static int ipcam_http_parser_request_url_cb (http_parser *p, const char *buf, si
 static int ipcam_http_parser_header_field_cb (http_parser *p, const char *buf, size_t len)
 {
     IpcamHttpRequest *request = IPCAM_HTTP_REQUEST(p->data);
-    ipcam_http_request_add_header_field(request, buf);
+    ipcam_http_request_add_header_field(request, (char *)buf);
     return 0;
 }
 static int ipcam_http_parser_header_value_cb (http_parser *p, const char *buf, size_t len)
 {
     IpcamHttpRequest *request = IPCAM_HTTP_REQUEST(p->data);
-    ipcam_http_request_add_header_value(request, buf);
+    ipcam_http_request_add_header_value(request, (char *)buf);
     return 0;
 }
 static int ipcam_http_parser_body_cb (http_parser *p, const char *buf, size_t len)

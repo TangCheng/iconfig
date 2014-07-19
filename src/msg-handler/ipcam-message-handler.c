@@ -153,12 +153,12 @@ gpointer ipcam_message_handler_get_app(IpcamMessageHandler *self)
 }
 
 static void
-ipcam_message_handler_send_notify(IpcamMessageHandler *self, JsonNode *notice_body)
+ipcam_message_handler_send_notify(IpcamMessageHandler *self, const gchar *action, JsonNode *notice_body)
 {
     IpcamIConfig *iconfig;
     IpcamMessage *notice_msg;
 
-    notice_msg = g_object_new(IPCAM_NOTICE_MESSAGE_TYPE, "event", "property_changed", "body", notice_body, NULL);
+    notice_msg = g_object_new(IPCAM_NOTICE_MESSAGE_TYPE, "event", action, "body", notice_body, NULL);
     iconfig = ipcam_message_handler_get_app(self);
     ipcam_base_app_broadcast_notice_message(IPCAM_BASE_APP(iconfig), notice_msg, "iconfig_token");
 
@@ -166,7 +166,8 @@ ipcam_message_handler_send_notify(IpcamMessageHandler *self, JsonNode *notice_bo
 }
 
 gboolean
-ipcam_message_handler_do_get (IpcamMessageHandler *self, JsonNode *request, JsonNode **response)
+ipcam_message_handler_do_get (IpcamMessageHandler *self, const gchar *action,
+                              JsonNode *request, JsonNode **response)
 {
     g_return_if_fail (IPCAM_IS_MESSAGE_HANDLER(self));
 
@@ -174,7 +175,8 @@ ipcam_message_handler_do_get (IpcamMessageHandler *self, JsonNode *request, Json
 }
 
 gboolean
-ipcam_message_handler_do_put (IpcamMessageHandler *self, JsonNode *request, JsonNode **response)
+ipcam_message_handler_do_put (IpcamMessageHandler *self, const gchar *action,
+                              JsonNode *request, JsonNode **response)
 {
     gboolean ret = FALSE;
 
@@ -182,13 +184,14 @@ ipcam_message_handler_do_put (IpcamMessageHandler *self, JsonNode *request, Json
     ret = IPCAM_MESSAGE_HANDLER_GET_CLASS(self)->put_action(self, request, response);
 
     if (ret && response && *response)
-        ipcam_message_handler_send_notify(self, json_node_copy(*response));
+        ipcam_message_handler_send_notify(self, action, json_node_copy(*response));
 
     return ret;
 }
 
 gboolean
-ipcam_message_handler_do_post (IpcamMessageHandler *self, JsonNode *request, JsonNode **response)
+ipcam_message_handler_do_post (IpcamMessageHandler *self, const gchar *action,
+                               JsonNode *request, JsonNode **response)
 {
     gboolean ret = FALSE;
 
@@ -197,13 +200,14 @@ ipcam_message_handler_do_post (IpcamMessageHandler *self, JsonNode *request, Jso
     IPCAM_MESSAGE_HANDLER_GET_CLASS(self)->post_action(self, request, response);
 
     if (ret && response && *response)
-        ipcam_message_handler_send_notify(self, json_node_copy(*response));
+        ipcam_message_handler_send_notify(self, action, json_node_copy(*response));
 
     return ret;
 }
 
 gboolean
-ipcam_message_handler_do_delete (IpcamMessageHandler *self, JsonNode *request, JsonNode **response)
+ipcam_message_handler_do_delete (IpcamMessageHandler *self, const gchar *action,
+                                 JsonNode *request, JsonNode **response)
 {
     gboolean ret = FALSE;
 
@@ -212,7 +216,7 @@ ipcam_message_handler_do_delete (IpcamMessageHandler *self, JsonNode *request, J
     IPCAM_MESSAGE_HANDLER_GET_CLASS(self)->delete_action(self, request, response);
 
     if (ret && response && *response)
-        ipcam_message_handler_send_notify(self, json_node_copy(*response));
+        ipcam_message_handler_send_notify(self, action, json_node_copy(*response));
 
     return ret;
 }

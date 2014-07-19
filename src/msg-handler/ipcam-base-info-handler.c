@@ -97,7 +97,7 @@ ipcam_base_info_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNo
             json_builder_set_member_name(builder, name);
             json_builder_add_string_value(builder, value);
 
-            g_free(value);
+            g_free((gpointer)value);
         }
     }
     json_builder_end_object(builder);

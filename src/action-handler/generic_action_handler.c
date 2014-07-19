@@ -137,16 +137,16 @@ static void ipcam_generic_action_handler_run_impl(IpcamActionHandler *self,
             switch (hash_val->method)
             {
                 case ACT_GET:
-                    ret = ipcam_message_handler_do_get(handler, req_body, &resp_body);
+                    ret = ipcam_message_handler_do_get(handler, action, req_body, &resp_body);
                     break;
                 case ACT_SET:
-                    ret = ipcam_message_handler_do_put(handler, req_body, &resp_body);
+                    ret = ipcam_message_handler_do_put(handler, action, req_body, &resp_body);
                     break;
                 case ACT_ADD:
-                    ret = ipcam_message_handler_do_post(handler, req_body, &resp_body);
+                    ret = ipcam_message_handler_do_post(handler, action, req_body, &resp_body);
                     break;
                 case ACT_DEL:
-                    ret = ipcam_message_handler_do_delete(handler, req_body, &resp_body);
+                    ret = ipcam_message_handler_do_delete(handler, action, req_body, &resp_body);
                     break;
                  default:
                     break;

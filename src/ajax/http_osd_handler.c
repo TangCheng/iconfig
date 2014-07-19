@@ -32,7 +32,7 @@ static gchar* do_get_action(IpcamIConfig *iconfig, GList *item_list)
     IpcamMessageHandler *msg_handler = g_object_new(IPCAM_TYPE_OSD_MSG_HANDLER,
                                                       "app", iconfig, NULL);
 
-    ipcam_message_handler_do_get(msg_handler, req_node, &res_node);
+    ipcam_message_handler_do_get(msg_handler, "get_osd", req_node, &res_node);
 
     json_generator_set_root(generator, res_node);
     json_generator_set_pretty(generator, TRUE);
@@ -100,7 +100,7 @@ static gchar* do_put_action(IpcamIConfig *iconfig, JsonNode *request)
     IpcamMessageHandler *msg_handler = g_object_new(IPCAM_TYPE_OSD_MSG_HANDLER,
                                                       "app", iconfig, NULL);
 
-    ipcam_message_handler_do_put(msg_handler, request, &response);
+    ipcam_message_handler_do_put(msg_handler, "set_osd", request, &response);
 
     json_generator_set_root(generator, response);
     json_generator_set_pretty(generator, TRUE);
