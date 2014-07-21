@@ -99,7 +99,7 @@ ipcam_osd_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode *re
     req_arr = json_object_get_array_member(json_node_get_object(request), "items");
 
     json_builder_begin_object(builder);
-    json_builder_set_member_name (builder, "changed_items");
+    json_builder_set_member_name (builder, "items");
     json_builder_begin_array (builder);
     for(i = 0; i < json_array_get_length(req_arr); i++)
     {

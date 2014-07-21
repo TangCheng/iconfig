@@ -60,7 +60,7 @@ comment|string|用户自定义说明
             'version': '1.0'
 		},
         'body': {
-            'items': ['device_name', 'comment']
+            'items': ['device_name', 'comment', 'location']
         }
     }
 #### response
@@ -73,7 +73,8 @@ comment|string|用户自定义说明
         'body': {
             'items': {
                 'device_name': 'device_name',
-                'comment': 'comment'
+                'comment': 'comment',
+                'location': 'China'
 			}
         }
     }

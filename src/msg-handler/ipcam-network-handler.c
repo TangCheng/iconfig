@@ -193,7 +193,7 @@ ipcam_network_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode
     req_obj = json_object_get_object_member(json_node_get_object(request), "items");
 
     json_builder_begin_object(builder);
-    json_builder_set_member_name(builder, "changed_items");
+    json_builder_set_member_name(builder, "items");
     json_builder_begin_object(builder);
     if (json_object_has_member(req_obj, "autoconf"))
     {

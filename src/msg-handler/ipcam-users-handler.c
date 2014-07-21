@@ -106,7 +106,7 @@ ipcam_users_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode *
     req_array = json_object_get_array_member(json_node_get_object(request), "items");
 
     json_builder_begin_object(builder);
-    json_builder_set_member_name(builder, "changed_items");
+    json_builder_set_member_name(builder, "items");
     json_builder_begin_array(builder);
     for (i = 0; i < json_array_get_length(req_array); i++)
     {
@@ -154,7 +154,7 @@ ipcam_users_msg_handler_post_action_impl(IpcamMessageHandler *handler, JsonNode 
     req_array = json_object_get_array_member(json_node_get_object(request), "items");
 
     json_builder_begin_object(builder);
-    json_builder_set_member_name(builder, "changed_items");
+    json_builder_set_member_name(builder, "items");
     json_builder_begin_array(builder);
     for (i = 0; i < json_array_get_length(req_array); i++)
     {
@@ -202,7 +202,7 @@ ipcam_users_msg_handler_delete_action_impl(IpcamMessageHandler *handler, JsonNod
     req_array = json_object_get_array_member(json_node_get_object(request), "items");
 
     json_builder_begin_object(builder);
-    json_builder_set_member_name (builder, "deleted_items");
+    json_builder_set_member_name (builder, "items");
     json_builder_begin_array (builder);
     for (i = 0; i < json_array_get_length (req_array); i++)
     {
