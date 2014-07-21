@@ -70,7 +70,17 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
 		             "VALUES ('location', 'China');");
         EXEC_OR_FAIL("INSERT INTO base_info (name, value) "
                      "VALUES ('comment', '');");
-        
+        EXEC_OR_FAIL("INSERT INTO base_info (name, value) "
+                     "VALUES ('manufacturer', 'IPNC');");
+        EXEC_OR_FAIL("INSERT INTO base_info (name, value) "
+                     "VALUES ('model', 'IPCAM-100');");
+        EXEC_OR_FAIL("INSERT INTO base_info (name, value) "
+                     "VALUES ('firmware', 'V1.0.0');");
+        EXEC_OR_FAIL("INSERT INTO base_info (name, value) "
+                     "VALUES ('serial', '0123456789');");
+        EXEC_OR_FAIL("INSERT INTO base_info (name, value) "
+                     "VALUES ('hardware', 'Hi3518');");
+
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS users ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"

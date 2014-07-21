@@ -19,8 +19,8 @@ PUT
 ### 请求参数
  请求|参数|必选|类型及范围|说明
 ---|---|:-:|---|---|---
-GET|items|是|array: ['device_name', 'comment']|需要查询的基本信息的名称
-PUT|items|是|object: {'device_name':'ipcam','location'='China','comment':'my content'}|要设置的基本信息的名值对
+GET|items|是|array: ['device_name', 'location', 'comment', 'manufacturer', 'model', 'serial', 'firmware', 'hardware']|需要查询的基本信息的名称
+PUT|items|是|object: {'device_name':'ipcam','location':'China','comment':'my content','manufacturer':'IPNC','model':'IPNC-100','serial':'12345678','firmware':'V1.0.0','hardware':'Hi3518'}|要设置的基本信息的名值对
 
 ### 注意事项
 无
@@ -36,7 +36,13 @@ GET
 	{
 		'items': {
 			“device_name”: "ipcam",
-			"comment": "my content"
+			"location": "China",
+			"comment": "my content",
+			"manufacturer": "IPNC",
+			"model": "IPNC-100",
+			"serial": "12345678",
+			"firmware": "V1.0.0",
+			"hardware": "Hi3518"
 		}
 	}
 	
@@ -60,7 +66,7 @@ comment|string|用户自定义说明
             'version': '1.0'
 		},
         'body': {
-            'items': ['device_name', 'comment', 'location']
+            'items': ['device_name', 'comment', 'location', 'manufacturer', 'model', 'serial', 'firmware', 'hardware']
         }
     }
 #### response
@@ -74,7 +80,12 @@ comment|string|用户自定义说明
             'items': {
                 'device_name': 'device_name',
                 'comment': 'comment',
-                'location': 'China'
+                'location': 'China',
+                "manufacturer": "IPNC",
+                "model": "IPNC-100",
+                "serial": "12345678",
+                "firmware": "V1.0.0",
+                "hardware": "Hi3518"
 			}
         }
     }
@@ -90,6 +101,7 @@ comment|string|用户自定义说明
 			'items': {
                 'device_name': 'device_name',
                 'comment': 'comment'
+                'location': 'China'
 			}
 		}
     }
