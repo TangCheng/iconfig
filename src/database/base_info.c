@@ -5,6 +5,7 @@ enum {
   PROP_ID,
   PROP_NAME,
   PROP_VALUE,
+  PROP_RW,
   N_PROPERTIES
 };
 
@@ -13,6 +14,7 @@ typedef struct _IpcamBaseInfoPrivate
     guint id;
     gchar *name;
     gchar *value;
+    guint rw;
 } IpcamBaseInfoPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE(IpcamBaseInfo, ipcam_base_info, GOM_TYPE_RESOURCE);
@@ -54,6 +56,12 @@ static void ipcam_base_info_set_property(GObject      *object,
             priv->value = g_value_dup_string(value);
         }
         break;
+    case PROP_RW:
+        {
+            IpcamBaseInfoPrivate *priv = ipcam_base_info_get_instance_private(self);
+            priv->rw = g_value_get_uint(value);
+        }
+        break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
         break;
@@ -83,6 +91,12 @@ static void ipcam_base_info_get_property(GObject    *object,
         {
             IpcamBaseInfoPrivate *priv = ipcam_base_info_get_instance_private(self);
             g_value_set_string(value, priv->value);
+        }
+        break;
+    case PROP_RW:
+        {
+            IpcamBaseInfoPrivate *priv = ipcam_base_info_get_instance_private(self);
+            g_value_set_uint(value, priv->rw);
         }
         break;
     default:
@@ -123,6 +137,14 @@ static void ipcam_base_info_class_init(IpcamBaseInfoClass *klass)
                             "Base information value.",
                             NULL, // default value
                             G_PARAM_READWRITE);
+    obj_properties[PROP_RW] =
+        g_param_spec_uint("rw",
+                          "Writable",
+                          "Base information value is writable.",
+                          0,
+                          1,
+                          0, // default value
+                          G_PARAM_READWRITE);
 
     g_object_class_install_properties(object_class, N_PROPERTIES, obj_properties);
     gom_resource_class_set_primary_key(resource_class, "id");

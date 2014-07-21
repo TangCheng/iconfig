@@ -59,27 +59,28 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
         g_object_unref(c);                                  \
     } G_STMT_END
     if (version == 1) {
-        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS base_info ("
-                     "id     INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name   TEXT UNIQUE NOT NULL,"
-                     "value  TEXT NOT NULL"
+        EXEC_OR_FAIL("CREATE   TABLE IF NOT EXISTS base_info ("
+                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
+                     "name     TEXT UNIQUE NOT NULL,"
+                     "value    TEXT NOT NULL,"
+                     "rw       INTEGER"
                      ");");
-        EXEC_OR_FAIL("INSERT INTO base_info (name, value) "
-                     "VALUES ('device_name', 'ipcam');");
-		EXEC_OR_FAIL("INSERT INTO base_info (name, value) "
-		             "VALUES ('location', 'China');");
-        EXEC_OR_FAIL("INSERT INTO base_info (name, value) "
-                     "VALUES ('comment', '');");
-        EXEC_OR_FAIL("INSERT INTO base_info (name, value) "
-                     "VALUES ('manufacturer', 'IPNC');");
-        EXEC_OR_FAIL("INSERT INTO base_info (name, value) "
-                     "VALUES ('model', 'IPCAM-100');");
-        EXEC_OR_FAIL("INSERT INTO base_info (name, value) "
-                     "VALUES ('firmware', 'V1.0.0');");
-        EXEC_OR_FAIL("INSERT INTO base_info (name, value) "
-                     "VALUES ('serial', '0123456789');");
-        EXEC_OR_FAIL("INSERT INTO base_info (name, value) "
-                     "VALUES ('hardware', 'Hi3518');");
+        EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
+                     "VALUES ('device_name', 'ipcam', 1);");
+		EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
+		             "VALUES ('location', 'China', 1);");
+        EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
+                     "VALUES ('comment', '', 1);");
+        EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
+                     "VALUES ('manufacturer', 'IPNC', 0);");
+        EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
+                     "VALUES ('model', 'IPCAM-100', 0);");
+        EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
+                     "VALUES ('firmware', 'V1.0.0', 0);");
+        EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
+                     "VALUES ('serial', '0123456789', 0);");
+        EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
+                     "VALUES ('hardware', 'Hi3518', 0);");
 
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS users ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -148,6 +149,8 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "name     TEXT UNIQUE NOT NULL,"
                      "value    TEXT"
                      ");");
+        EXEC_OR_FAIL("INSERT INTO network_static (name, value) "
+                     "VALUES ('hwaddr', '00:00:12:23:34:45');");
         EXEC_OR_FAIL("INSERT INTO network_static (name, value) "
                      "VALUES ('ipaddr', '192.168.0.100');");
         EXEC_OR_FAIL("INSERT INTO network_static (name, value) "
@@ -285,8 +288,17 @@ void ipcam_database_set_baseinfo(IpcamDatabase *database, const gchar *name, gch
     resource = ipcam_database_get_resource(database, IPCAM_BASE_INFO_TYPE, name);
     if (resource)
     {
-        g_object_set(resource, "value", value, NULL);
-        gom_resource_save_sync(resource, &error);
+        guint rw;
+        g_object_get(resource, "rw", &rw, NULL);
+        if (rw)
+        {
+            g_object_set(resource, "value", value, NULL);
+            gom_resource_save_sync(resource, &error);
+        }
+        else
+        {
+            g_warning("Attempt to set read-only property '%s'\n", name);
+        }
         g_object_unref(resource);
     }
 
