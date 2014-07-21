@@ -109,34 +109,51 @@ static char *__prefixlen2_mask(unsigned int prefix_len)
 	return inet_ntoa(addr);
 }
 
+int sysutils_network_set_hwaddr(const char *ifname, const char *hwaddr)
+{
+    char *cmd;
+    FILE *fp;
+
+    asprintf(&cmd, "ifconfig %s hw ether %s", ifname, hwaddr);
+    fp = popen(cmd, "r");
+    free(cmd);
+    if (fp == NULL)
+        return -1;
+
+    pclose(fp);
+
+    return 0;
+}
+
 int sysutils_network_get_address(const char *ifname,
                                  char **ipaddr,
                                  char **netmask,
                                  char **broadaddr)
 {
-    char cmd[32];
+    char *cmd;
     FILE *fp;
     int ret = -1;
 
-    snprintf(cmd, sizeof(cmd), "ip -o -4 addr show dev %s", ifname);
+    asprintf(&cmd, "ip -o -4 addr show dev %s", ifname);
     fp = popen(cmd, "r");
+    free(cmd);
 
     if (fp) {
-        char ip[16];
-        char mask[16];
-        char brd[16];
+        char ip[32];
+        guint mask;
+        char brd[32];
 
         /* 
          * Output for example
          * 2: eth0    inet 192.168.10.15/24 brd 192.168.10.255 scope global eth0
          */
-        if (fscanf(fp, "%*d:%*s inet %[0-9.] %*c %s brd %16[0-9.] %*[^$] %*[$]",
-                   ip, mask, brd) == 3)
+        if (fscanf(fp, "%*d:%*s inet %32[0-9.] %*c %d brd %32[0-9.] %*[^$] %*[$]",
+                   ip, &mask, brd) == 3)
         {
             if (ipaddr)
                 *ipaddr = strdup(ip);
             if (netmask)
-                *netmask = strdup(__prefixlen2_mask(strtoul(mask, NULL, 0)));
+                *netmask = strdup(__prefixlen2_mask(mask));
             if (broadaddr)
                 *broadaddr = strdup(brd);
 
@@ -153,22 +170,25 @@ int sysutils_network_set_address(const char *ifname,
                                  const char *netmask,
                                  const char *broadaddr)
 {
-    char cmd[128];
-    char brd[32];
-    char mask[32];
+    char *cmd = NULL;
+    char *_brd = NULL;
+    char *_mask = NULL;
     FILE *fp;
     int ret = -1;
 
     if (broadaddr)
-        snprintf(brd, sizeof(brd), "-broadcast %s", broadaddr);
+        asprintf(&_brd, "-broadcast %s", broadaddr);
     if (netmask)
-        snprintf(mask, sizeof(mask), "netmask %s", netmask);
+        asprintf(&_mask, "netmask %s", netmask);
 
-    snprintf(cmd, sizeof(cmd), "ifconfig %s %s %s %s", ifname,
+    asprintf(&cmd, "ifconfig %s %s %s %s", ifname,
              ipaddr ? ipaddr : "",
-             netmask ? mask : "",
-             broadaddr ? brd : "");
+             netmask ? _mask : "",
+             broadaddr ? _brd : "");
     fp = popen(cmd, "r");
+    free(cmd);
+    free(_brd);
+    free(_mask);
 
     if (fp) {
         pclose(fp);
@@ -184,7 +204,7 @@ int sysutils_network_get_gateway(const char *ifname, char **gwaddr)
     FILE *fp;
     int ret = -1;
     char buf[128];
-    char gw[16];
+    char gw[32];
 
     fp = popen("ip route", "r");
     if (fp == NULL)
@@ -197,7 +217,7 @@ int sysutils_network_get_gateway(const char *ifname, char **gwaddr)
     while(!feof(fp)) {
         if (fgets(buf, sizeof(buf), fp) == NULL)
             continue;
-        if (sscanf(buf, "default via %s %*[^$] %*[$]", gw) == 1) {
+        if (sscanf(buf, "default via %32s %*[^$] %*[$]", gw) == 1) {
             *gwaddr = strdup(gw);
             ret = 0;
             break;
@@ -210,7 +230,7 @@ int sysutils_network_get_gateway(const char *ifname, char **gwaddr)
 
 int sysutils_network_set_gateway(const char *ifname, const char *gwaddr)
 {
-    char cmd[32];
+    char *cmd;
     FILE *fp;
 
     /* Delete the route */
@@ -220,8 +240,9 @@ int sysutils_network_set_gateway(const char *ifname, const char *gwaddr)
     pclose(fp);
 
     /* Add new route */
-    snprintf(cmd, sizeof(cmd), "ip route add default via %s dev %s", gwaddr, ifname);
+    asprintf(&cmd, "ip route add default via %s dev %s", gwaddr, ifname);
     fp = popen(cmd, "r");
+    free(cmd);
     if (fp == NULL)
         return -1;
 
@@ -246,12 +267,12 @@ int sysutils_network_get_dns(const char *ifname, char **dns, int *size)
 
     i = 0;
     while(!feof(fp) && i < *size) {
-        char val[16];
+        char val[32];
 
         if (fgets(buf, sizeof(buf), fp) == NULL)
             continue;
 
-        if (sscanf(buf, "nameserver %16s", val) == 1) {
+        if (sscanf(buf, "nameserver %32s", val) == 1) {
             dns[i] = strdup(val);
             i++;
         }
@@ -296,7 +317,7 @@ int sysutils_network_get_hostname(const char **hostname)
 
     fp = popen("hostname", "r");
     if (fp) {
-        if (fscanf(fp, "%s", buf)) {
+        if (fscanf(fp, "%64s", buf)) {
             *hostname = strdup(buf);
             ret = 0;
         }
@@ -312,7 +333,7 @@ int sysutils_network_set_hostname(const char *hostname)
     char cmd[64];
     int ret = -1;
 
-    snprintf(cmd, sizeof(cmd), "hostname %s", hostname);
+    snprintf(cmd, sizeof(cmd), "hostname %64s", hostname);
     fp = popen(cmd, "r");
     if (fp) {
         pclose(fp);

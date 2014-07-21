@@ -65,9 +65,9 @@ ipcam_network_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode
             json_builder_set_member_name(builder, name);
             json_builder_add_int_value(builder, dhcp);
         }
-        else if ((g_strcmp0(name, "address") == 0) && dhcp)
+        else if ((!g_strcmp0(name, "address") && dhcp) || !g_strcmp0(name, "dyn-address"))
         {
-            gchar *ipaddr = NULL, *netmask = NULL, *gateway = NULL;
+            gchar *hwaddr = NULL, *ipaddr = NULL, *netmask = NULL, *gateway = NULL;
             char *dns[2] = { [0 ... (ARRAY_SIZE(dns) - 1)] = NULL };
             int nr_dns = 2;
 
@@ -77,6 +77,7 @@ ipcam_network_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode
                 gchar *key;
                 gchar **pval;
             } kv[] = {
+                { "hwaddr",  &hwaddr },
                 { "ipaddr",  &ipaddr },
                 { "netmask", &netmask },
                 { "gateway", &gateway },
@@ -85,6 +86,7 @@ ipcam_network_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode
             };
             const gchar *netif = ipcam_base_app_get_config(IPCAM_BASE_APP(iconfig), "netif");
 
+            hwaddr = ipcam_iconfig_get_network_static(iconfig, "hwaddr");
             if (sysutils_network_get_address(netif, &ipaddr, &netmask, NULL) != 0)
                 perror("error get network address: ");
             if (sysutils_network_get_gateway(netif, &gateway) != 0)
@@ -107,7 +109,7 @@ ipcam_network_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode
         }
         else if ((g_strcmp0(name, "address") == 0) && !dhcp)
         {
-            static gchar *keys[] = { "ipaddr", "netmask", "gateway", "dns1", "dns2" };
+            static gchar *keys[] = { "hwaddr", "ipaddr", "netmask", "gateway", "dns1", "dns2" };
             int i;
 
             json_builder_set_member_name(builder, name);
@@ -213,8 +215,9 @@ ipcam_network_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode
         json_builder_set_member_name(builder, "hostname");
         json_builder_add_string_value(builder, value);
     }
-    if (json_object_has_member(req_obj, "address") && !dhcp)
+    if (json_object_has_member(req_obj, "address"))
     {
+        const gchar *hwaddr = NULL;
         const gchar *ipaddr = NULL;
         const gchar *netmask = NULL;
         const gchar *gateway = NULL;
@@ -230,6 +233,7 @@ ipcam_network_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode
             const char *key;
             const gchar **pval;
         } kv[] = {
+            { "hwaddr", &hwaddr },
             { "ipaddr", &ipaddr },
             { "netmask", &netmask },
             { "gateway", &gateway },
@@ -255,6 +259,10 @@ ipcam_network_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode
         const gchar *netif = ipcam_base_app_get_config(IPCAM_BASE_APP(iconfig), "netif");
         if (netif)
         {
+            if (hwaddr) {
+                if (sysutils_network_set_hwaddr(netif, hwaddr) != 0)
+                    perror("error set hwaddr: ");
+            }
             if (ipaddr || netmask) {
                 if (sysutils_network_set_address(netif, (gchar *)ipaddr, (gchar *)netmask, NULL) != 0)
                     perror("error set network address: ");
