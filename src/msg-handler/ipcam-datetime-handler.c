@@ -55,9 +55,9 @@ ipcam_datetime_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNod
     {
         const gchar *name = json_array_get_string_element(req_array, i);
         gchar *str_val = NULL;
-        guint int_val;
+        guint int_val = 0;
 
-        if (g_strcmp0 (name, "datetime") == 0)
+        if (g_str_equal(name, "datetime"))
         {
             sysutils_datetime_get_datetime(&str_val);
         }

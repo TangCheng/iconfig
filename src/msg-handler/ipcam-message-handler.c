@@ -169,7 +169,7 @@ gboolean
 ipcam_message_handler_do_get (IpcamMessageHandler *self, const gchar *action,
                               JsonNode *request, JsonNode **response)
 {
-    g_return_if_fail (IPCAM_IS_MESSAGE_HANDLER(self));
+    g_return_val_if_fail (IPCAM_IS_MESSAGE_HANDLER(self), FALSE);
 
     return IPCAM_MESSAGE_HANDLER_GET_CLASS(self)->get_action(self, request, response);
 }
@@ -180,7 +180,7 @@ ipcam_message_handler_do_put (IpcamMessageHandler *self, const gchar *action,
 {
     gboolean ret = FALSE;
 
-    g_return_if_fail (IPCAM_IS_MESSAGE_HANDLER(self));
+    g_return_val_if_fail (IPCAM_IS_MESSAGE_HANDLER(self), FALSE);
     ret = IPCAM_MESSAGE_HANDLER_GET_CLASS(self)->put_action(self, request, response);
 
     if (ret && response && *response)
@@ -195,7 +195,7 @@ ipcam_message_handler_do_post (IpcamMessageHandler *self, const gchar *action,
 {
     gboolean ret = FALSE;
 
-    g_return_if_fail (IPCAM_IS_MESSAGE_HANDLER(self));
+    g_return_val_if_fail (IPCAM_IS_MESSAGE_HANDLER(self), FALSE);
 
     IPCAM_MESSAGE_HANDLER_GET_CLASS(self)->post_action(self, request, response);
 
@@ -211,7 +211,7 @@ ipcam_message_handler_do_delete (IpcamMessageHandler *self, const gchar *action,
 {
     gboolean ret = FALSE;
 
-    g_return_if_fail (IPCAM_IS_MESSAGE_HANDLER(self));
+    g_return_val_if_fail (IPCAM_IS_MESSAGE_HANDLER(self), FALSE);
 
     IPCAM_MESSAGE_HANDLER_GET_CLASS(self)->delete_action(self, request, response);
 
