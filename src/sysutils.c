@@ -333,7 +333,7 @@ int sysutils_network_set_hostname(const char *hostname)
     char cmd[64];
     int ret = -1;
 
-    snprintf(cmd, sizeof(cmd), "hostname %64s", hostname);
+    snprintf(cmd, sizeof(cmd), "hostname %s", hostname);
     fp = popen(cmd, "r");
     if (fp) {
         pclose(fp);

@@ -1,5 +1,5 @@
 token: iconfig_token
-netif: wlp8s0
+netif: eth0
 bind:
   iconfig: tcp://127.0.0.1:3000
 publish:
