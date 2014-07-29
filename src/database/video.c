@@ -4,7 +4,8 @@ enum {
   PROP_0,
   PROP_ID,
   PROP_NAME,
-  PROP_VALUE,
+  PROP_INTVAL,
+  PROP_STRVAL,
   N_PROPERTIES
 };
 
@@ -12,7 +13,8 @@ typedef struct _IpcamVideoPrivate
 {
     guint id;
     gchar *name;
-    guint value;
+    guint intval;
+    gchar *strval;
 } IpcamVideoPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE(IpcamVideo, ipcam_video, GOM_TYPE_RESOURCE);
@@ -23,6 +25,7 @@ static void ipcam_video_finalize(GObject *object)
 {
     IpcamVideoPrivate *priv = ipcam_video_get_instance_private(IPCAM_VIDEO(object));
     g_free(priv->name);
+	g_free(priv->strval);
     G_OBJECT_CLASS(ipcam_video_parent_class)->finalize(object);
 }
 static void ipcam_video_set_property(GObject      *object,
@@ -45,9 +48,15 @@ static void ipcam_video_set_property(GObject      *object,
             priv->name = g_value_dup_string(value);
         }
         break;
-    case PROP_VALUE:
+    case PROP_INTVAL:
         {
-            priv->value = g_value_get_int(value);
+            priv->intval = g_value_get_int(value);
+        }
+        break;
+    case PROP_STRVAL:
+        {
+            g_free(priv->strval);
+            priv->strval = g_value_dup_string(value);
         }
         break;
     default:
@@ -74,9 +83,14 @@ static void ipcam_video_get_property(GObject    *object,
             g_value_set_string(value, priv->name);
         }
         break;
-    case PROP_VALUE:
+    case PROP_INTVAL:
         {
-            g_value_set_int(value, priv->value);
+            g_value_set_int(value, priv->intval);
+        }
+        break;
+    case PROP_STRVAL:
+        {
+            g_value_set_string(value, priv->strval);
         }
         break;
     default:
@@ -96,7 +110,7 @@ static void ipcam_video_class_init(IpcamVideoClass *klass)
 
     GomResourceClass *resource_class = GOM_RESOURCE_CLASS(klass);
     gom_resource_class_set_table(resource_class, "video");
-  
+
     obj_properties[PROP_ID] =
         g_param_spec_int("id",
                          "ID",
@@ -111,14 +125,20 @@ static void ipcam_video_class_init(IpcamVideoClass *klass)
                             "Video parameter name.",
                             NULL, // default value
                             G_PARAM_READWRITE);
-    obj_properties[PROP_VALUE] =
-        g_param_spec_int("value",
-                         "Parameter value",
-                         "Video parameter value.",
+    obj_properties[PROP_INTVAL] =
+        g_param_spec_int("intval",
+                         "Parameter int value",
+                         "Video parameter int value.",
                          0,
                          65535,
                          0, // default value
                          G_PARAM_READWRITE);
+    obj_properties[PROP_STRVAL] =
+        g_param_spec_string("strval",
+                            "Parameter string value",
+                            "Video parameter int value.",
+                            NULL, // default value
+                            G_PARAM_READWRITE);
 
     g_object_class_install_properties(object_class, N_PROPERTIES, obj_properties);
     gom_resource_class_set_primary_key(resource_class, "id");

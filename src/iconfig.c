@@ -1,3 +1,7 @@
+
+#define _GNU_SOURCE
+
+#include <stdio.h>
 #include <stdlib.h>
 #include <json-glib/json-glib.h>
 #include "iconfig.h"
@@ -120,20 +124,58 @@ void ipcam_iconfig_set_osd(IpcamIConfig *iconfig,
     ipcam_database_set_osd(priv->database, (gchar *)name, isshow, size, x, y, color);
 }
 
-gint ipcam_iconfig_get_video(IpcamIConfig *iconfig, const gchar *name)
+gint ipcam_iconfig_get_video_int(IpcamIConfig *iconfig,
+                                 const gchar *profile, const gchar *name)
 {
     g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), -1);
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
+    gchar *key = NULL;
 
-    return ipcam_database_get_video(priv->database, (gchar *)name);
+    asprintf(&key, "%s:%s", profile, name);
+    gint ret = ipcam_database_get_video_int(priv->database, key);
+    free(key);
+
+	return ret;
 }
 
-void ipcam_iconfig_set_video(IpcamIConfig *iconfig, const gchar *name, gint value)
+void ipcam_iconfig_set_video_int(IpcamIConfig *iconfig,
+                                 const gchar *profile, const gchar *name,
+                                 gint value)
 {
     g_return_if_fail(IPCAM_IS_ICONFIG(iconfig));
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
+    gchar *key = NULL;
 
-	ipcam_database_set_video(priv->database, (gchar *)name, value);
+    asprintf(&key, "%s:%s", profile, name);
+	ipcam_database_set_video_int(priv->database, key, value);
+    free(key);
+}
+
+gchar *ipcam_iconfig_get_video_string(IpcamIConfig *iconfig,
+                                      const gchar *profile, const gchar *name)
+{
+    g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), -1);
+    IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
+    gchar *key = NULL;
+
+    asprintf(&key, "%s:%s", profile, name);
+    gchar *ret = ipcam_database_get_video_string(priv->database, key);
+    free(key);
+
+	return ret;
+}
+
+void ipcam_iconfig_set_video_string(IpcamIConfig *iconfig,
+                                    const gchar *profile, const gchar *name,
+                                    const gchar *value)
+{
+    g_return_if_fail(IPCAM_IS_ICONFIG(iconfig));
+    IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
+    gchar *key = NULL;
+
+    asprintf(&key, "%s:%s", profile, name);
+	ipcam_database_set_video_string(priv->database, key, value);
+    free(key);
 }
 
 gint ipcam_iconfig_get_scene(IpcamIConfig *iconfig, const gchar *name)

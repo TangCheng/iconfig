@@ -47,8 +47,10 @@ gboolean ipcam_database_get_osd(IpcamDatabase *database,
                                 guint *x,
                                 guint *y,
                                 guint *color);
-void ipcam_database_set_video(IpcamDatabase *database, const gchar *name, guint value);
-gint ipcam_database_get_video(IpcamDatabase *database, const gchar *name);
+void ipcam_database_set_video_int(IpcamDatabase *database, const gchar *name, guint value);
+gint ipcam_database_get_video_int(IpcamDatabase *database, const gchar *name);
+void ipcam_database_set_video_string(IpcamDatabase *database, const gchar *name, const gchar *value);
+gchar *ipcam_database_get_video_string(IpcamDatabase *database, const gchar *name);
 void ipcam_database_set_scene(IpcamDatabase *database, const gchar *name, guint value);
 gint ipcam_database_get_scene(IpcamDatabase *database, const gchar *name);
 void ipcam_database_set_network(IpcamDatabase *database, const gchar *name, guint value);

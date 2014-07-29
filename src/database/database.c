@@ -114,20 +114,39 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS video ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
-                     "value    INTEGER"
+                     "intval   INTEGER,"
+                     "strval   TEXT"
                      ");");
-        EXEC_OR_FAIL("INSERT INTO video (name, value) "
-                     "VALUES ('profile', 0);");
-        EXEC_OR_FAIL("INSERT INTO video (name, value) "
-                     "VALUES ('flip', 0);");
-        EXEC_OR_FAIL("INSERT INTO video (name, value) "
-                     "VALUES ('quanlity', 0);");
-        EXEC_OR_FAIL("INSERT INTO video (name, value) "
-                     "VALUES ('frame_rate', 25);");
-        EXEC_OR_FAIL("INSERT INTO video (name, value) "
-                     "VALUES ('bit_rate', 0);");
-        EXEC_OR_FAIL("INSERT INTO video (name, value) "
-                     "VALUES ('bit_rate_value', 300);");
+        /* Main profile */
+        EXEC_OR_FAIL("INSERT INTO video (name, intval, strval) "
+                     "VALUES ('main_profile:flip', 0, '');");
+        EXEC_OR_FAIL("INSERT INTO video (name, intval, strval) "
+                     "VALUES ('main_profile:quanlity', 0, '');");
+        EXEC_OR_FAIL("INSERT INTO video (name, intval, strval) "
+                     "VALUES ('main_profile:frame_rate', 25, '');");
+        EXEC_OR_FAIL("INSERT INTO video (name, intval, strval) "
+                     "VALUES ('main_profile:bit_rate', 0, '');");
+        EXEC_OR_FAIL("INSERT INTO video (name, intval, strval) "
+                     "VALUES ('main_profile:bit_rate_value', 300, '');");
+        EXEC_OR_FAIL("INSERT INTO video (name, intval, strval) "
+                     "VALUES ('main_profile:resolution', 0, '');");
+        EXEC_OR_FAIL("INSERT INTO video (name, intval, strval) "
+                     "VALUES ('main_profile:stream_path', 0, 'main_video');");
+        /* Sub profile */
+        EXEC_OR_FAIL("INSERT INTO video (name, intval, strval) "
+                     "VALUES ('sub_profile:flip', 0, '');");
+        EXEC_OR_FAIL("INSERT INTO video (name, intval, strval) "
+                     "VALUES ('sub_profile:quanlity', 0, '');");
+        EXEC_OR_FAIL("INSERT INTO video (name, intval, strval) "
+                     "VALUES ('sub_profile:frame_rate', 25, '');");
+        EXEC_OR_FAIL("INSERT INTO video (name, intval, strval) "
+                     "VALUES ('sub_profile:bit_rate', 0, '');");
+        EXEC_OR_FAIL("INSERT INTO video (name, intval, strval) "
+                     "VALUES ('sub_profile:bit_rate_value', 300, '');");
+        EXEC_OR_FAIL("INSERT INTO video (name, intval, strval) "
+                     "VALUES ('sub_profile:resolution', 0, '');");
+        EXEC_OR_FAIL("INSERT INTO video (name, intval, strval) "
+                     "VALUES ('sub_profile:stream_path', 0, 'sub_video');");
 
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS scene ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -261,6 +280,7 @@ static GomResource *ipcam_database_get_resource(IpcamDatabase *database, GType r
     
     return resource;
 }
+
 static GomResourceGroup *ipcam_database_get_resource_group(IpcamDatabase *database, GType resource_type)
 {
     IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);;
@@ -502,7 +522,8 @@ gboolean ipcam_database_get_osd(IpcamDatabase *database,
     
     return ret;
 }
-void ipcam_database_set_video(IpcamDatabase *database, const gchar *name, guint value)
+
+void ipcam_database_set_video_int(IpcamDatabase *database, const gchar *name, guint value)
 {
     g_return_if_fail(IPCAM_IS_DATABASE(database));
     GomResource *resource = NULL;
@@ -511,7 +532,7 @@ void ipcam_database_set_video(IpcamDatabase *database, const gchar *name, guint 
     resource = ipcam_database_get_resource(database, IPCAM_VIDEO_TYPE, name);
     if (resource)
     {
-        g_object_set(resource, "value", value, NULL);
+        g_object_set(resource, "intval", value, NULL);
         gom_resource_save_sync(resource, &error);
         g_object_unref(resource);
     }
@@ -522,7 +543,8 @@ void ipcam_database_set_video(IpcamDatabase *database, const gchar *name, guint 
         g_error_free(error);
     }
 }
-gint ipcam_database_get_video(IpcamDatabase *database, const gchar *name)
+
+gint ipcam_database_get_video_int(IpcamDatabase *database, const gchar *name)
 {
     g_return_val_if_fail(IPCAM_IS_DATABASE(database), -1);
     GomResource *resource = NULL;
@@ -531,12 +553,50 @@ gint ipcam_database_get_video(IpcamDatabase *database, const gchar *name)
     resource = ipcam_database_get_resource(database, IPCAM_VIDEO_TYPE, name);
     if (resource)
     {
-        g_object_get(resource, "value", &value, NULL);
+        g_object_get(resource, "intval", &value, NULL);
         g_object_unref(resource);
     }
-    
+
     return value;
 }
+
+void ipcam_database_set_video_string(IpcamDatabase *database, const gchar *name, const gchar *value)
+{
+    g_return_if_fail(IPCAM_IS_DATABASE(database));
+    GomResource *resource = NULL;
+    GError *error = NULL;
+
+    resource = ipcam_database_get_resource(database, IPCAM_VIDEO_TYPE, name);
+    if (resource)
+    {
+        g_object_set(resource, "strval", value, NULL);
+        gom_resource_save_sync(resource, &error);
+        g_object_unref(resource);
+    }
+
+    if (error)
+    {
+        g_print("set video_str record failed: %s\n", error->message);
+        g_error_free(error);
+    }
+}
+
+gchar *ipcam_database_get_video_string(IpcamDatabase *database, const gchar *name)
+{
+    g_return_val_if_fail(IPCAM_IS_DATABASE(database), -1);
+    GomResource *resource = NULL;
+    gchar *value = NULL;
+    
+    resource = ipcam_database_get_resource(database, IPCAM_VIDEO_TYPE, name);
+    if (resource)
+    {
+        g_object_get(resource, "strval", &value, NULL);
+        g_object_unref(resource);
+    }
+
+    return value;
+}
+
 void ipcam_database_set_scene(IpcamDatabase *database, const gchar *name, guint value)
 {
     g_return_if_fail(IPCAM_IS_DATABASE(database));
