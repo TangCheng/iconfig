@@ -1,4 +1,8 @@
+#include <string.h>
+#include <stdlib.h>
+#include <sys/stat.h>
 #include <gom/gom.h>
+#include <sysutils.h>
 #include "database.h"
 #include "base_info.h"
 #include "users.h"
@@ -11,7 +15,9 @@
 #include "network_port.h"
 #include "datetime.h"
 
-#define DATABASE_PATH_NAME "/data/configuration.sqlite3"
+#define DATABASE_PATH "/data"
+#define DATABASE_NAME "configuration.sqlite3"
+#define DATABASE_PATH_NAME DATABASE_PATH "/" DATABASE_NAME
 
 typedef struct _IpcamDatabasePrivate
 {
@@ -235,8 +241,14 @@ static void ipcam_database_open(IpcamDatabase *database)
     GError *error = NULL;
     gchar *uri = NULL;
     GFile *db = NULL;
+	struct stat st;
     
     priv->adapter = gom_adapter_new();
+	if (stat(DATABASE_PATH, &st) < 0) {
+		char *path = strdup(DATABASE_PATH);
+		sysutils_make_directory(path, 0775);
+		free(path);
+	}
     db = g_file_new_for_path(DATABASE_PATH_NAME);
     uri = g_file_get_uri(db);
     gom_adapter_open_sync(priv->adapter, uri, &error);
