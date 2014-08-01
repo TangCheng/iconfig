@@ -107,15 +107,15 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "color    INTEGER"
                      ");");
         EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, x, y, color) "
-                     "VALUES ('datetime', 1, 5, 10, 20, 0);");
+                     "VALUES ('datetime', 1, 20, 1, 5, 0);");
         EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, x, y, color) "
-                     "VALUES ('device_name', 1, 5, 10, 10, 0);");
+                     "VALUES ('device_name', 1, 20, 1, 1, 0);");
         EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, x, y, color) "
-                     "VALUES ('comment', 1, 5, 70, 10, 0);");
+                     "VALUES ('comment', 1, 20, 70, 1, 0);");
         EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, x, y, color) "
-                     "VALUES ('frame_rate', 1, 5, 10, 80, 0);");
+                     "VALUES ('frame_rate', 1, 20, 1, 85, 0);");
         EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, x, y, color) "
-                     "VALUES ('bit_rate', 1, 5, 10, 90, 0);");
+                     "VALUES ('bit_rate', 1, 20, 1, 90, 0);");
 
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS video ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"

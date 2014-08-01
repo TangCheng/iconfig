@@ -171,7 +171,7 @@ static void ipcam_osd_class_init(IpcamOsdClass *klass)
                          "Font size of the content.",
                          1,
                          100,
-                         5, // default value
+                         20, // default value
                          G_PARAM_READWRITE);
     obj_properties[PROP_X] =
         g_param_spec_int("x",
