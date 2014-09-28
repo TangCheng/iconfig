@@ -178,7 +178,7 @@ static void ipcam_osd_class_init(IpcamOsdClass *klass)
                          "x position",
                          "X axsis position, percent of image resolution.",
                          0,
-                         100,
+                         1000,
                          0, // default value
                          G_PARAM_READWRITE);
     obj_properties[PROP_Y] =
@@ -186,7 +186,7 @@ static void ipcam_osd_class_init(IpcamOsdClass *klass)
                          "y position",
                          "Y Axsis position, percent of image resolution.",
                          0,
-                         100,
+                         1000,
                          0, // default value
                          G_PARAM_READWRITE);
     obj_properties[PROP_COLOR] =
