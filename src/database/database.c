@@ -177,11 +177,11 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
         EXEC_OR_FAIL("INSERT INTO network_static (name, value) "
                      "VALUES ('hwaddr', '00:00:12:23:34:45');");
         EXEC_OR_FAIL("INSERT INTO network_static (name, value) "
-                     "VALUES ('ipaddr', '192.168.0.100');");
+                     "VALUES ('ipaddr', '192.168.1.217');");
         EXEC_OR_FAIL("INSERT INTO network_static (name, value) "
                      "VALUES ('netmask', '255.255.255.0');");
         EXEC_OR_FAIL("INSERT INTO network_static (name, value) "
-                     "VALUES ('gateway', '192.168.0.1');");
+                     "VALUES ('gateway', '192.168.1.1');");
         EXEC_OR_FAIL("INSERT INTO network_static (name, value) "
                      "VALUES ('dns1', '');");
         EXEC_OR_FAIL("INSERT INTO network_static (name, value) "
