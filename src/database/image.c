@@ -1,4 +1,4 @@
-#include "video.h"
+#include "image.h"
 
 enum {
   PROP_0,
@@ -8,31 +8,31 @@ enum {
   N_PROPERTIES
 };
 
-typedef struct _IpcamVideoPrivate
+typedef struct _IpcamImagePrivate
 {
     guint id;
     gchar *name;
     GVariant *value;
-} IpcamVideoPrivate;
+} IpcamImagePrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE(IpcamVideo, ipcam_video, GOM_TYPE_RESOURCE);
+G_DEFINE_TYPE_WITH_PRIVATE(IpcamImage, ipcam_image, GOM_TYPE_RESOURCE);
 
 static GParamSpec *obj_properties[N_PROPERTIES] = {NULL, };
 
-static void ipcam_video_finalize(GObject *object)
+static void ipcam_image_finalize(GObject *object)
 {
-    IpcamVideoPrivate *priv = ipcam_video_get_instance_private(IPCAM_VIDEO(object));
+    IpcamImagePrivate *priv = ipcam_image_get_instance_private(IPCAM_IMAGE(object));
     g_free(priv->name);
-	g_free(priv->value);
-    G_OBJECT_CLASS(ipcam_video_parent_class)->finalize(object);
+    g_free(priv->value);
+    G_OBJECT_CLASS(ipcam_image_parent_class)->finalize(object);
 }
-static void ipcam_video_set_property(GObject      *object,
+static void ipcam_image_set_property(GObject      *object,
                                    guint        property_id,
                                    const GValue *value,
                                    GParamSpec   *pspec)
 {
-    IpcamVideo *self = IPCAM_VIDEO(object);
-    IpcamVideoPrivate *priv = ipcam_video_get_instance_private(self);
+    IpcamImage *self = IPCAM_IMAGE(object);
+    IpcamImagePrivate *priv = ipcam_image_get_instance_private(self);
     switch(property_id)
     {
     case PROP_ID:
@@ -48,7 +48,6 @@ static void ipcam_video_set_property(GObject      *object,
         break;
     case PROP_VALUE:
         {
-            g_free(priv->value);
             priv->value = g_value_dup_variant(value);
         }
         break;
@@ -57,13 +56,13 @@ static void ipcam_video_set_property(GObject      *object,
         break;
     }
 }
-static void ipcam_video_get_property(GObject    *object,
+static void ipcam_image_get_property(GObject    *object,
                                    guint       property_id,
                                    GValue     *value,
                                    GParamSpec *pspec)
 {
-    IpcamVideo *self = IPCAM_VIDEO(object);
-    IpcamVideoPrivate *priv = ipcam_video_get_instance_private(self);
+    IpcamImage *self = IPCAM_IMAGE(object);
+    IpcamImagePrivate *priv = ipcam_image_get_instance_private(self);
     switch(property_id)
     {
     case PROP_ID:
@@ -86,19 +85,19 @@ static void ipcam_video_get_property(GObject    *object,
         break;
     }
 }
-static void ipcam_video_init(IpcamVideo *self)
+static void ipcam_image_init(IpcamImage *self)
 {
 }
-static void ipcam_video_class_init(IpcamVideoClass *klass)
+static void ipcam_image_class_init(IpcamImageClass *klass)
 {
     GObjectClass *object_class = G_OBJECT_CLASS(klass);
-    object_class->set_property = &ipcam_video_set_property;
-    object_class->get_property = &ipcam_video_get_property;
-    object_class->finalize = &ipcam_video_finalize;
+    object_class->set_property = &ipcam_image_set_property;
+    object_class->get_property = &ipcam_image_get_property;
+    object_class->finalize = &ipcam_image_finalize;
 
     GomResourceClass *resource_class = GOM_RESOURCE_CLASS(klass);
-    gom_resource_class_set_table(resource_class, "video");
-
+    gom_resource_class_set_table(resource_class, "image");
+  
     obj_properties[PROP_ID] =
         g_param_spec_int("id",
                          "ID",
@@ -109,14 +108,14 @@ static void ipcam_video_class_init(IpcamVideoClass *klass)
                          G_PARAM_READWRITE);
     obj_properties[PROP_NAME] =
         g_param_spec_string("name",
-                            "Parameter name",
-                            "Video parameter name.",
+                            "Parameter Name",
+                            "Image parameter name.",
                             NULL, // default value
                             G_PARAM_READWRITE);
     obj_properties[PROP_VALUE] =
         g_param_spec_variant("value",
-                             "Video parameter value",
-                             "Video parameter value.",
+                             "Parameter value",
+                             "Image parameter value.",
                              G_VARIANT_TYPE_ANY,
                              NULL, // default value
                              G_PARAM_READWRITE);

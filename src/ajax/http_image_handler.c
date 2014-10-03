@@ -1,11 +1,11 @@
-#include "http_scene_handler.h"
+#include "http_image_handler.h"
 #include "http_request.h"
 #include "http_response.h"
 #include "http_query_string_parser.h"
 #include "iconfig.h"
-#include "../msg-handler/ipcam-scene-handler.h"
+#include "../msg-handler/ipcam-image-handler.h"
 
-G_DEFINE_TYPE(IpcamHttpSceneHandler, ipcam_http_scene_handler, IPCAM_HTTP_REQUEST_HANDLER_TYPE)
+G_DEFINE_TYPE(IpcamHttpImageHandler, ipcam_http_image_handler, IPCAM_HTTP_REQUEST_HANDLER_TYPE)
 
 static gchar* do_get_action(IpcamIConfig *iconfig, GList *item_list)
 {
@@ -29,10 +29,10 @@ static gchar* do_get_action(IpcamIConfig *iconfig, GList *item_list)
 
     req_node = json_builder_get_root(builder);
 
-    IpcamMessageHandler *msg_handler = g_object_new(IPCAM_TYPE_SCENE_MSG_HANDLER,
+    IpcamMessageHandler *msg_handler = g_object_new(IPCAM_TYPE_IMAGE_MSG_HANDLER,
                                                       "app", iconfig, NULL);
 
-    ipcam_message_handler_do_get(msg_handler, "get_scene", req_node, &res_node);
+    ipcam_message_handler_do_get(msg_handler, "get_image", req_node, &res_node);
 
     json_generator_set_root(generator, res_node);
     json_generator_set_pretty(generator, TRUE);
@@ -48,7 +48,7 @@ static gchar* do_get_action(IpcamIConfig *iconfig, GList *item_list)
     return result;
 }
 
-START_HANDLER(get_scene, HTTP_GET, "/api/1.0/scene.json", http_request, http_response)
+START_HANDLER(get_image, HTTP_GET, "/api/1.0/image.json", http_request, http_response)
 {
     IpcamIConfig *iconfig;
     IpcamHttpQueryStringParser *parser;
@@ -57,7 +57,7 @@ START_HANDLER(get_scene, HTTP_GET, "/api/1.0/scene.json", http_request, http_res
     GHashTable *query_hash = NULL;
     gboolean success = FALSE;
     
-    g_object_get(get_scene, "app", &iconfig, NULL);
+    g_object_get(get_image, "app", &iconfig, NULL);
     g_object_get(http_request, "query-string", &query_string, NULL);
     if (query_string) 
     {
@@ -97,10 +97,10 @@ static gchar* do_put_action(IpcamIConfig *iconfig, JsonNode *request)
 
     generator = json_generator_new();
 
-    IpcamMessageHandler *msg_handler = g_object_new(IPCAM_TYPE_SCENE_MSG_HANDLER,
+    IpcamMessageHandler *msg_handler = g_object_new(IPCAM_TYPE_IMAGE_MSG_HANDLER,
                                                       "app", iconfig, NULL);
 
-    ipcam_message_handler_do_put(msg_handler, "set_scene", request, &response);
+    ipcam_message_handler_do_put(msg_handler, "set_image", request, &response);
 
     json_generator_set_root(generator, response);
     json_generator_set_pretty(generator, TRUE);
@@ -114,13 +114,13 @@ static gchar* do_put_action(IpcamIConfig *iconfig, JsonNode *request)
     return result;
 }
 
-START_HANDLER(put_scene, HTTP_PUT, "/api/1.0/scene.json", http_request, http_response)
+START_HANDLER(put_image, HTTP_PUT, "/api/1.0/image.json", http_request, http_response)
 {
     gchar *body = NULL;
     IpcamIConfig *iconfig;
     gboolean success = FALSE;
 
-    g_object_get(put_scene, "app", &iconfig, NULL);
+    g_object_get(put_image, "app", &iconfig, NULL);
     g_object_get(http_request, "body", &body, NULL);
     if (body)
     {
@@ -147,12 +147,12 @@ START_HANDLER(put_scene, HTTP_PUT, "/api/1.0/scene.json", http_request, http_res
 }
 END_HANDLER
 
-static void ipcam_http_scene_handler_init(IpcamHttpSceneHandler *self)
+static void ipcam_http_image_handler_init(IpcamHttpImageHandler *self)
 {
-    ipcam_http_request_handler_register(IPCAM_HTTP_REQUEST_HANDLER(self), get_scene);
-    ipcam_http_request_handler_register(IPCAM_HTTP_REQUEST_HANDLER(self), put_scene);
+    ipcam_http_request_handler_register(IPCAM_HTTP_REQUEST_HANDLER(self), get_image);
+    ipcam_http_request_handler_register(IPCAM_HTTP_REQUEST_HANDLER(self), put_image);
 }
 
-static void ipcam_http_scene_handler_class_init(IpcamHttpSceneHandlerClass *klass)
+static void ipcam_http_image_handler_class_init(IpcamHttpImageHandlerClass *klass)
 {
 }

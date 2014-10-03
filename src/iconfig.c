@@ -64,8 +64,8 @@ static void ipcam_iconfig_before_start(IpcamBaseService *base_service)
     ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "set_osd", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
     ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "get_video", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
     ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "set_video", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
-    ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "get_scene", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
-    ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "set_scene", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
+    ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "get_image", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
+    ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "set_image", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
     ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "get_network", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
     ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "set_network", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
     ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "get_datetime", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
@@ -124,74 +124,47 @@ void ipcam_iconfig_set_osd(IpcamIConfig *iconfig,
     ipcam_database_set_osd(priv->database, (gchar *)name, isshow, size, x, y, color);
 }
 
-gint ipcam_iconfig_get_video_int(IpcamIConfig *iconfig,
-                                 const gchar *profile, const gchar *name)
+GVariant *ipcam_iconfig_get_video(IpcamIConfig *iconfig,
+                             const gchar *profile, const gchar *name)
 {
-    g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), -1);
+    g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), NULL);
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
     gchar *key = NULL;
 
     asprintf(&key, "%s:%s", profile, name);
-    gint ret = ipcam_database_get_video_int(priv->database, key);
+    GVariant *ret = ipcam_database_get_video(priv->database, key);
     free(key);
 
 	return ret;
 }
 
-void ipcam_iconfig_set_video_int(IpcamIConfig *iconfig,
-                                 const gchar *profile, const gchar *name,
-                                 gint value)
+void ipcam_iconfig_set_video(IpcamIConfig *iconfig,
+                             const gchar *profile, const gchar *name,
+                             GVariant *value)
 {
     g_return_if_fail(IPCAM_IS_ICONFIG(iconfig));
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
     gchar *key = NULL;
 
     asprintf(&key, "%s:%s", profile, name);
-	ipcam_database_set_video_int(priv->database, key, value);
+	ipcam_database_set_video(priv->database, key, value);
     free(key);
 }
 
-gchar *ipcam_iconfig_get_video_string(IpcamIConfig *iconfig,
-                                      const gchar *profile, const gchar *name)
+GVariant *ipcam_iconfig_get_image(IpcamIConfig *iconfig, const gchar *name)
 {
-    g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), -1);
-    IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
-    gchar *key = NULL;
-
-    asprintf(&key, "%s:%s", profile, name);
-    gchar *ret = ipcam_database_get_video_string(priv->database, key);
-    free(key);
-
-	return ret;
-}
-
-void ipcam_iconfig_set_video_string(IpcamIConfig *iconfig,
-                                    const gchar *profile, const gchar *name,
-                                    const gchar *value)
-{
-    g_return_if_fail(IPCAM_IS_ICONFIG(iconfig));
-    IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
-    gchar *key = NULL;
-
-    asprintf(&key, "%s:%s", profile, name);
-	ipcam_database_set_video_string(priv->database, key, value);
-    free(key);
-}
-
-gint ipcam_iconfig_get_scene(IpcamIConfig *iconfig, const gchar *name)
-{
-    g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), -1);
+    g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), NULL);
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
 
-    return ipcam_database_get_scene(priv->database, (gchar *)name);
+    return ipcam_database_get_image(priv->database, (gchar *)name);
 }
 
-void ipcam_iconfig_set_scene(IpcamIConfig *iconfig, const gchar *name, gint value)
+void ipcam_iconfig_set_image(IpcamIConfig *iconfig, const gchar *name, GVariant *value)
 {
     g_return_if_fail(IPCAM_IS_ICONFIG(iconfig));
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
 
-	ipcam_database_set_scene(priv->database, (gchar *)name, value);
+	ipcam_database_set_image(priv->database, (gchar *)name, value);
 }
 
 gint ipcam_iconfig_get_network(IpcamIConfig *iconfig, const gchar *name)

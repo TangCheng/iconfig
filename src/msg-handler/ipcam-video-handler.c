@@ -55,19 +55,18 @@ ipcam_video_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode *
     for (i = 0; i < json_array_get_length(req_array); i++)
     {
         const gchar *profile = json_array_get_string_element(req_array, i);
-        gint intval;
-        gchar *strval;
+        GVariant *value;
         int i;
         static struct {
             const gchar *name;
             gboolean is_strval;
         } kv[] = {
             { "flip", 0 },
-            { "quanlity", 0 },
+            { "quanlity", 1 },
             { "frame_rate", 0 },
-            { "bit_rate", 0 },
+            { "bit_rate", 1 },
             { "bit_rate_value", 0 },
-            { "resolution", 0 },
+            { "resolution", 1 },
             { "stream_path", 1 }
         };
 
@@ -75,14 +74,12 @@ ipcam_video_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode *
         json_builder_begin_object(builder);
         for (i = 0; i < ARRAY_SIZE(kv); i++) {
             json_builder_set_member_name(builder, kv[i].name);
+            value = ipcam_iconfig_get_video(iconfig, profile, kv[i].name);
             if (kv[i].is_strval) {
-                strval = ipcam_iconfig_get_video_string(iconfig, profile, kv[i].name);
-                json_builder_add_string_value(builder, strval);
-                g_free(strval);
+                json_builder_add_string_value(builder, g_variant_get_string(value, NULL));
             }
             else {
-                intval = ipcam_iconfig_get_video_int(iconfig, profile, kv[i].name);
-                json_builder_add_int_value(builder, intval);
+                json_builder_add_int_value(builder, g_variant_get_uint32(value));
             }
         }
         json_builder_end_object(builder);
@@ -134,14 +131,17 @@ ipcam_video_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode *
             json_builder_set_member_name(builder, name);
             if (g_type_is_a(json_node_get_value_type(node), G_TYPE_STRING)) {
                 const gchar *strval = json_node_get_string(node);
-                ipcam_iconfig_set_video_string(iconfig, profile, name, strval);
+                GVariant *value = g_variant_new_string(strval);
+                ipcam_iconfig_set_video(iconfig, profile, name, value);
                 json_builder_add_string_value(builder, strval);
+                g_object_unref(value);
             }
             else {
                 gint intval = json_node_get_int(node);
-                ipcam_iconfig_set_video_int(iconfig, profile, name, intval);
-                intval = ipcam_iconfig_get_video_int(iconfig, profile, name);
+                GVariant *value = g_variant_new_uint32(intval);
+                ipcam_iconfig_set_video(iconfig, profile, name, value);
                 json_builder_add_int_value(builder, (gint64)intval);
+                g_object_unref(value);
             }
         }
         g_list_free(p_members);

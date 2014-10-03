@@ -5,7 +5,7 @@
 #include "http_base_info_handler.h"
 #include "http_osd_handler.h"
 #include "http_video_handler.h"
-#include "http_scene_handler.h"
+#include "http_image_handler.h"
 #include "http_network_handler.h"
 #include "http_datetime_handler.h"
 #include "http_users_handler.h"
@@ -53,7 +53,7 @@ static void ipcam_http_proc_init(IpcamHttpProc *self)
     priv->request_handler_list = g_list_append(priv->request_handler_list, req_handler);
     req_handler = g_object_new(IPCAM_HTTP_VIDEO_HANDLER_TYPE, "app", priv->iconfig, NULL);
     priv->request_handler_list = g_list_append(priv->request_handler_list, req_handler);
-    req_handler = g_object_new(IPCAM_HTTP_SCENE_HANDLER_TYPE, "app", priv->iconfig, NULL);
+    req_handler = g_object_new(IPCAM_HTTP_IMAGE_HANDLER_TYPE, "app", priv->iconfig, NULL);
     priv->request_handler_list = g_list_append(priv->request_handler_list, req_handler);
     req_handler = g_object_new(IPCAM_HTTP_NETWORK_HANDLER_TYPE, "app", priv->iconfig, NULL);
     priv->request_handler_list = g_list_append(priv->request_handler_list, req_handler);

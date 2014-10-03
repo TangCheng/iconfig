@@ -22,9 +22,12 @@ iconfig_SOURCES = \
 	database/database.c \
 	database/base_info.c \
 	database/users.c \
+	database/privacy_block.c \
+	database/day_night_mode.c \
+	database/szyc.c \
 	database/osd.c \
 	database/video.c \
-	database/scene.c \
+	database/image.c \
 	database/network.c \
 	database/network_static.c \
 	database/network_pppoe.c \
@@ -43,7 +46,7 @@ iconfig_SOURCES = \
 	main.c \
 	ajax/http_osd_handler.c \
 	ajax/http_video_handler.c \
-	ajax/http_scene_handler.c \
+	ajax/http_image_handler.c \
 	ajax/http_network_handler.c \
     ajax/http_datetime_handler.c \
     ajax/http_users_handler.c \
@@ -55,8 +58,8 @@ iconfig_SOURCES = \
 	msg-handler/ipcam-osd-handler.h \
 	msg-handler/ipcam-video-handler.c \
 	msg-handler/ipcam-video-handler.h \
-	msg-handler/ipcam-scene-handler.c \
-	msg-handler/ipcam-scene-handler.h \
+	msg-handler/ipcam-image-handler.c \
+	msg-handler/ipcam-image-handler.h \
 	action-handler/generic_action_handler.c \
 	action-handler/generic_action_handler.h \
 	msg-handler/ipcam-network-handler.c \

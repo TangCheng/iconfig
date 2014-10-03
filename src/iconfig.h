@@ -30,13 +30,11 @@ gboolean ipcam_iconfig_get_osd(IpcamIConfig *iconfig, const char *name, gboolean
                              guint *size, guint *x, guint *y, guint *color);
 void ipcam_iconfig_set_osd(IpcamIConfig *iconfig, const gchar *name, gboolean isshow,
                            guint size, guint x, guint y, guint color);
-gint ipcam_iconfig_get_video_int(IpcamIConfig *iconfig, const gchar *profile, const gchar *name);
-void ipcam_iconfig_set_video_int(IpcamIConfig *iconfig, const gchar *profile, const gchar *name, gint value);
-gchar *ipcam_iconfig_get_video_string(IpcamIConfig *iconfig, const gchar *profile, const gchar *name);
-void ipcam_iconfig_set_video_string(IpcamIConfig *iconfig, const gchar *profile, const gchar *name, const gchar *value);
+GVariant *ipcam_iconfig_get_video(IpcamIConfig *iconfig, const gchar *profile, const gchar *name);
+void ipcam_iconfig_set_video(IpcamIConfig *iconfig, const gchar *profile, const gchar *name, GVariant *value);
 
-gint ipcam_iconfig_get_scene(IpcamIConfig *iconfig, const gchar *name);
-void ipcam_iconfig_set_scene(IpcamIConfig *iconfig, const gchar *name, gint value);
+GVariant *ipcam_iconfig_get_image(IpcamIConfig *iconfig, const gchar *name);
+void ipcam_iconfig_set_image(IpcamIConfig *iconfig, const gchar *name, GVariant *value);
 
 gint ipcam_iconfig_get_network(IpcamIConfig *iconfig, const gchar *name);
 void ipcam_iconfig_set_network(IpcamIConfig *iconfig, const gchar *name, guint value);

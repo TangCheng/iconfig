@@ -6,14 +6,17 @@
 #include "database.h"
 #include "base_info.h"
 #include "users.h"
-#include "osd.h"
+#include "datetime.h"
 #include "video.h"
-#include "scene.h"
+#include "image.h"
+#include "privacy_block.h"
+#include "day_night_mode.h"
+#include "osd.h"
+#include "szyc.h"
 #include "network.h"
 #include "network_static.h"
 #include "network_pppoe.h"
 #include "network_port.h"
-#include "datetime.h"
 
 #define DATABASE_PATH "/data"
 #define DATABASE_NAME "configuration.sqlite3"
@@ -86,89 +89,167 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
         EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
                      "VALUES ('serial', '0123456789', 0);");
         EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
-                     "VALUES ('hardware', 'Hi3518', 0);");
+                     "VALUES ('hardware', '', 0);");
 
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS users ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
                      "password TEXT NOT NULL,"
-                     "privilege INTEGER"
+                     "role     TEXT NOT NULL"
                      ");");
-        EXEC_OR_FAIL("INSERT INTO users (name, password, privilege) "
-                     "VALUES ('admin', 'admin', 1);");
+        EXEC_OR_FAIL("INSERT INTO users (name, password, role) "
+                     "VALUES ('admin', 'admin', 'administrator');");
+        EXEC_OR_FAIL("INSERT INTO users (name, password, role) "
+                     "VALUES ('operator', 'operator', 'operator');");
+        EXEC_OR_FAIL("INSERT INTO users (name, password, role) "
+                     "VALUES ('user', 'user', 'user');");
+
+        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS datetime ("
+                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
+                     "name     TEXT UNIQUE NOT NULL,"
+                     "value"
+                     ");");
+        EXEC_OR_FAIL("INSERT INTO datetime (name, value) "
+                     "VALUES ('timezone', 0);");
+        EXEC_OR_FAIL("INSERT INTO datetime (name, value) "
+                     "VALUES ('use_ntp', 0);");
+        EXEC_OR_FAIL("INSERT INTO datetime (name, value) "
+                     "VALUES ('ntp_server', 'pool.ntp.org');");
+
+        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS video ("
+                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
+                     "name     TEXT UNIQUE NOT NULL,"
+                     "value"
+                     ");");
+        /* Main profile */
+        EXEC_OR_FAIL("INSERT INTO video (name, value) "
+                     "VALUES ('main_profile:flip', 0);");
+        EXEC_OR_FAIL("INSERT INTO video (name, value) "
+                     "VALUES ('main_profile:quanlity', 'baseline');");
+        EXEC_OR_FAIL("INSERT INTO video (name, value) "
+                     "VALUES ('main_profile:frame_rate', 25);");
+        EXEC_OR_FAIL("INSERT INTO video (name, value) "
+                     "VALUES ('main_profile:bit_rate', 'CBR');");
+        EXEC_OR_FAIL("INSERT INTO video (name, value) "
+                     "VALUES ('main_profile:bit_rate_value', 4096);");
+        EXEC_OR_FAIL("INSERT INTO video (name, value) "
+                     "VALUES ('main_profile:resolution', 'UXGA');");
+        EXEC_OR_FAIL("INSERT INTO video (name, value) "
+                     "VALUES ('main_profile:stream_path', 'main_stream');");
+        /* Sub profile */
+        EXEC_OR_FAIL("INSERT INTO video (name, value) "
+                     "VALUES ('sub_profile:flip', 0);");
+        EXEC_OR_FAIL("INSERT INTO video (name, value) "
+                     "VALUES ('sub_profile:quanlity', 'baseline');");
+        EXEC_OR_FAIL("INSERT INTO video (name, value) "
+                     "VALUES ('sub_profile:frame_rate', 25);");
+        EXEC_OR_FAIL("INSERT INTO video (name, value) "
+                     "VALUES ('sub_profile:bit_rate', 'CBR');");
+        EXEC_OR_FAIL("INSERT INTO video (name, value) "
+                     "VALUES ('sub_profile:bit_rate_value', 1024);");
+        EXEC_OR_FAIL("INSERT INTO video (name, value) "
+                     "VALUES ('sub_profile:resolution', 'D1');");
+        EXEC_OR_FAIL("INSERT INTO video (name, value) "
+                     "VALUES ('sub_profile:stream_path', 'sub_stream');");
+
+        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS image ("
+                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
+                     "name     TEXT UNIQUE NOT NULL,"
+                     "value"
+                     ");");
+        EXEC_OR_FAIL("INSERT INTO image (name, value) "
+                     "VALUES ('watermark', 0);");
+        EXEC_OR_FAIL("INSERT INTO image (name, value) "
+                     "VALUES ('3ddnr', 0);");
+        EXEC_OR_FAIL("INSERT INTO image (name, value) "
+                     "VALUES ('brightness', 128);");
+        EXEC_OR_FAIL("INSERT INTO image (name, value) "
+                     "VALUES ('chrominance', 128);");
+        EXEC_OR_FAIL("INSERT INTO image (name, value) "
+                     "VALUES ('contrast', 128);");
+        EXEC_OR_FAIL("INSERT INTO image (name, value) "
+                     "VALUES ('saturation', 128);");
+        EXEC_OR_FAIL("INSERT INTO image (name, value) "
+                     "VALUES ('scenario', '50Hz');");
+
+        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS privacy_block ("
+                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
+                     "name     TEXT UNIQUE NOT NULL,"
+                     "enable   INTEGER NOT NULL,"
+                     "left     INTEGER NOT NULL,"
+                     "top      INTEGER NOT NULL,"
+                     "width    INTEGER NOT NULL,"
+                     "height   INTEGER NOT NULL,"
+                     "color    INTEGER NOT NULL"
+                     ");");
+        EXEC_OR_FAIL("INSERT INTO privacy_block (name, enable, left, top, width, height, color) "
+                     "VALUES ('region1', 0, 0, 0, 0, 0, 0);");
+        EXEC_OR_FAIL("INSERT INTO privacy_block (name, enable, left, top, width, height, color) "
+                     "VALUES ('region2', 0, 0, 0, 0, 0, 0);");
+
+        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS day_night_mode ("
+                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
+                     "name     TEXT UNIQUE NOT NULL,"
+                     "value    INTEGER NOT NULL"
+                     ");");
+        EXEC_OR_FAIL("INSERT INTO day_night_mode (name, value) "
+                     "VALUES ('force_night_mode', 0);");
+        EXEC_OR_FAIL("INSERT INTO day_night_mode (name, value) "
+                     "VALUES ('night_mode_threshold', 50);");
+        EXEC_OR_FAIL("INSERT INTO day_night_mode (name, value) "
+                     "VALUES ('ir_intensity', 80);");
         
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS osd ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name     TEXT UNIQUE NOT NULL,"
+                     "name     TEXT NOT NULL,"
+                     "stream   TEXT NOT NULL,"
                      "isshow   BOOLEAN,"
                      "size     INTEGER,"
                      "x        INTEGER,"
                      "y        INTEGER,"
                      "color    INTEGER"
                      ");");
-        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, x, y, color) "
-                     "VALUES ('datetime', 1, 20, 10, 35, 0);");
-        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, x, y, color) "
-                     "VALUES ('device_name', 1, 20, 10, 10, 0);");
-        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, x, y, color) "
-                     "VALUES ('comment', 1, 20, 800, 10, 0);");
-        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, x, y, color) "
-                     "VALUES ('frame_rate', 1, 20, 10, 945, 0);");
-        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, x, y, color) "
-                     "VALUES ('bit_rate', 1, 20, 10, 970, 0);");
+        EXEC_OR_FAIL("INSERT INTO osd (name, stream, isshow, size, x, y, color) "
+                     "VALUES ('datetime', 'master', 1, 20, 10, 35, 0);");
+        EXEC_OR_FAIL("INSERT INTO osd (name, stream, isshow, size, x, y, color) "
+                     "VALUES ('device_name', 'master', 1, 20, 10, 10, 0);");
+        EXEC_OR_FAIL("INSERT INTO osd (name, stream, isshow, size, x, y, color) "
+                     "VALUES ('comment', 'master', 1, 20, 800, 10, 0);");
+        EXEC_OR_FAIL("INSERT INTO osd (name, stream, isshow, size, x, y, color) "
+                     "VALUES ('frame_rate', 'master', 1, 20, 10, 945, 0);");
+        EXEC_OR_FAIL("INSERT INTO osd (name, stream, isshow, size, x, y, color) "
+                     "VALUES ('bit_rate', 'master', 1, 20, 10, 970, 0);");
+        
+        EXEC_OR_FAIL("INSERT INTO osd (name, stream, isshow, size, x, y, color) "
+                     "VALUES ('datetime', 'slave', 1, 20, 10, 35, 0);");
+        EXEC_OR_FAIL("INSERT INTO osd (name, stream, isshow, size, x, y, color) "
+                     "VALUES ('device_name', 'slave', 1, 20, 10, 10, 0);");
+        EXEC_OR_FAIL("INSERT INTO osd (name, stream, isshow, size, x, y, color) "
+                     "VALUES ('comment', 'slave', 1, 20, 800, 10, 0);");
+        EXEC_OR_FAIL("INSERT INTO osd (name, stream, isshow, size, x, y, color) "
+                     "VALUES ('frame_rate', 'slave', 1, 20, 10, 945, 0);");
+        EXEC_OR_FAIL("INSERT INTO osd (name, stream, isshow, size, x, y, color) "
+                     "VALUES ('bit_rate', 'slave', 1, 20, 10, 970, 0);");
 
-        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS video ("
+        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS szyc ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
-                     "intval   INTEGER,"
-                     "strval   TEXT"
+                     "value    TEXT"
                      ");");
-        /* Main profile */
-        EXEC_OR_FAIL("INSERT INTO video (name, intval, strval) "
-                     "VALUES ('main_profile:flip', 0, '');");
-        EXEC_OR_FAIL("INSERT INTO video (name, intval, strval) "
-                     "VALUES ('main_profile:quanlity', 0, '');");
-        EXEC_OR_FAIL("INSERT INTO video (name, intval, strval) "
-                     "VALUES ('main_profile:frame_rate', 25, '');");
-        EXEC_OR_FAIL("INSERT INTO video (name, intval, strval) "
-                     "VALUES ('main_profile:bit_rate', 0, '');");
-        EXEC_OR_FAIL("INSERT INTO video (name, intval, strval) "
-                     "VALUES ('main_profile:bit_rate_value', 300, '');");
-        EXEC_OR_FAIL("INSERT INTO video (name, intval, strval) "
-                     "VALUES ('main_profile:resolution', 0, '');");
-        EXEC_OR_FAIL("INSERT INTO video (name, intval, strval) "
-                     "VALUES ('main_profile:stream_path', 0, 'main_video');");
-        /* Sub profile */
-        EXEC_OR_FAIL("INSERT INTO video (name, intval, strval) "
-                     "VALUES ('sub_profile:flip', 0, '');");
-        EXEC_OR_FAIL("INSERT INTO video (name, intval, strval) "
-                     "VALUES ('sub_profile:quanlity', 0, '');");
-        EXEC_OR_FAIL("INSERT INTO video (name, intval, strval) "
-                     "VALUES ('sub_profile:frame_rate', 25, '');");
-        EXEC_OR_FAIL("INSERT INTO video (name, intval, strval) "
-                     "VALUES ('sub_profile:bit_rate', 0, '');");
-        EXEC_OR_FAIL("INSERT INTO video (name, intval, strval) "
-                     "VALUES ('sub_profile:bit_rate_value', 300, '');");
-        EXEC_OR_FAIL("INSERT INTO video (name, intval, strval) "
-                     "VALUES ('sub_profile:resolution', 0, '');");
-        EXEC_OR_FAIL("INSERT INTO video (name, intval, strval) "
-                     "VALUES ('sub_profile:stream_path', 0, 'sub_video');");
-
-        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS scene ("
-                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name     TEXT UNIQUE NOT NULL,"
-                     "value    INTEGER"
-                     ");");
-        EXEC_OR_FAIL("INSERT INTO scene (name, value) "
-                     "VALUES ('scenario', 0);");
+        EXEC_OR_FAIL("INSERT INTO szyc (name, value) "
+                     "VALUES ('train_num', '');");
+        EXEC_OR_FAIL("INSERT INTO szyc (name, value) "
+                     "VALUES ('trunk_num', '');");
+        EXEC_OR_FAIL("INSERT INTO szyc (name, value) "
+                     "VALUES ('position_num', '');");
 
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS network ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
-                     "value    INTEGER"
+                     "value    TEXT NOT NULL"
                      ");");
         EXEC_OR_FAIL("INSERT INTO network (name, value) "
-                     "VALUES ('method', 0);");
+                     "VALUES ('method', 'static');");
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS network_static ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
@@ -195,6 +276,7 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "VALUES ('username', '');");
         EXEC_OR_FAIL("INSERT INTO network_pppoe (name, value) "
                      "VALUES ('password', '');");
+        
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS network_port ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
@@ -203,20 +285,118 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
         EXEC_OR_FAIL("INSERT INTO network_port (name, value) "
                      "VALUES ('http', 80);");
         EXEC_OR_FAIL("INSERT INTO network_port (name, value) "
+                     "VALUES ('ftp', 21);");
+        EXEC_OR_FAIL("INSERT INTO network_port (name, value) "
                      "VALUES ('rtsp', 554);");
 
-        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS datetime ("
+        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS event_input ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
-                     "intvalue INTEGER,"
-                     "strvalue TEXT"
+                     "enable   INTEGER NOT NULL,"
+                     "mon      BLOB,"
+                     "tue      BLOB,"
+                     "wed      BLOB,"
+                     "thu      BLOB,"
+                     "fri      BLOB,"
+                     "sat      BLOB,"
+                     "sun      BLOB"
                      ");");
-        EXEC_OR_FAIL("INSERT INTO datetime (name, intvalue, strvalue) "
-                     "VALUES ('timezone', 0, '');");
-        EXEC_OR_FAIL("INSERT INTO datetime (name, intvalue, strvalue) "
-                     "VALUES ('use_ntp', 0, '');");
-        EXEC_OR_FAIL("INSERT INTO datetime (name, intvalue, strvalue) "
-                     "VALUES ('ntp_server', 0, '');");
+        EXEC_OR_FAIL("INSERT INTO event_input (name, enable) "
+                     "VALUES ('intput1', 0);");
+
+        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS event_output ("
+                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
+                     "name     TEXT UNIQUE NOT NULL,"
+                     "normal   TEXT NOT NULL,"
+                     "period   INTEGER NOT NULL"
+                     ");");
+        EXEC_OR_FAIL("INSERT INTO event_output (name, normal, period) "
+                     "VALUES ('output1', 'open', 0);");
+
+        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS event_motion ("
+                     "id            INTEGER PRIMARY KEY AUTOINCREMENT,"
+                     "name          TEXT UNIQUE NOT NULL,"
+                     "enable        INTEGER NOT NULL,"
+                     "sensitivity   INTEGER NOT NULL,"
+                     "left          INTEGER NOT NULL,"
+                     "top           INTEGER NOT NULL,"
+                     "width         INTEGER NOT NULL,"
+                     "height        INTEGER NOT NULL,"
+                     "mon           BLOB,"
+                     "tue           BLOB,"
+                     "wed           BLOB,"
+                     "thu           BLOB,"
+                     "fri           BLOB,"
+                     "sat           BLOB,"
+                     "sun           BLOB"
+                     ");");
+        EXEC_OR_FAIL("INSERT INTO event_motion (name, enable, sensitivity, left, top, width, height) "
+                     "VALUES ('region1', 0, 50, 0, 0, 0, 0);");
+        EXEC_OR_FAIL("INSERT INTO event_motion (name, enable, sensitivity, left, top, width, height) "
+                     "VALUES ('region2', 0, 50, 0, 0, 0, 0);");
+
+        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS event_cover ("
+                     "id            INTEGER PRIMARY KEY AUTOINCREMENT,"
+                     "name          TEXT UNIQUE NOT NULL,"
+                     "enable        INTEGER NOT NULL,"
+                     "sensitivity   INTEGER NOT NULL,"
+                     "left          INTEGER NOT NULL,"
+                     "top           INTEGER NOT NULL,"
+                     "width         INTEGER NOT NULL,"
+                     "height        INTEGER NOT NULL,"
+                     "mon           BLOB,"
+                     "tue           BLOB,"
+                     "wed           BLOB,"
+                     "thu           BLOB,"
+                     "fri           BLOB,"
+                     "sat           BLOB,"
+                     "sun           BLOB"
+                     ");");
+        EXEC_OR_FAIL("INSERT INTO event_cover (name, enable, sensitivity, left, top, width, height) "
+                     "VALUES ('region1', 0, 50, 0, 0, 0, 0);");
+        EXEC_OR_FAIL("INSERT INTO event_cover (name, enable, sensitivity, left, top, width, height) "
+                     "VALUES ('region2', 0, 50, 0, 0, 0, 0);");
+
+        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS event_proc ("
+                     "id            INTEGER PRIMARY KEY AUTOINCREMENT,"
+                     "name          TEXT UNIQUE NOT NULL,"
+                     "record        INTEGER NOT NULL,"
+                     "sound         INTEGER NOT NULL,"
+                     "output1       INTEGER NOT NULL"
+                     ");");
+        EXEC_OR_FAIL("INSERT INTO event_proc (name, record, sound, output1) "
+                     "VALUES ('intput1', 0, 0, 0);");
+        EXEC_OR_FAIL("INSERT INTO event_proc (name, record, sound, output1) "
+                     "VALUES ('motion', 0, 0, 0);");
+        EXEC_OR_FAIL("INSERT INTO event_proc (name, record, sound, output1) "
+                     "VALUES ('cover', 0, 0, 0);");
+
+        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS record_schedule ("
+                     "id            INTEGER PRIMARY KEY AUTOINCREMENT,"
+                     "mon           BLOB,"
+                     "tue           BLOB,"
+                     "wed           BLOB,"
+                     "thu           BLOB,"
+                     "fri           BLOB,"
+                     "sat           BLOB,"
+                     "sun           BLOB"
+                     ");");
+
+        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS record_strategy ("
+                     "id            INTEGER PRIMARY KEY AUTOINCREMENT,"
+                     "name          TEXT UNIQUE NOT NULL,"
+                     "value"
+                     ");");
+        EXEC_OR_FAIL("INSERT INTO record_strategy (name, value) "
+                     "VALUES ('nr_file_switch', 'size');");
+        EXEC_OR_FAIL("INSERT INTO record_strategy (name, value) "
+                     "VALUES ('nr_file_size', 50);");
+        EXEC_OR_FAIL("INSERT INTO record_strategy (name, value) "
+                     "VALUES ('nr_file_period', 10);");
+        EXEC_OR_FAIL("INSERT INTO record_strategy (name, value) "
+                     "VALUES ('er_file_period', 10);");
+        EXEC_OR_FAIL("INSERT INTO record_strategy (name, value) "
+                     "VALUES ('storage_full', 'stop');");
         
         return TRUE;
     }
@@ -535,7 +715,7 @@ gboolean ipcam_database_get_osd(IpcamDatabase *database,
     return ret;
 }
 
-void ipcam_database_set_video_int(IpcamDatabase *database, const gchar *name, guint value)
+void ipcam_database_set_video(IpcamDatabase *database, const gchar *name, GVariant *value)
 {
     g_return_if_fail(IPCAM_IS_DATABASE(database));
     GomResource *resource = NULL;
@@ -544,7 +724,7 @@ void ipcam_database_set_video_int(IpcamDatabase *database, const gchar *name, gu
     resource = ipcam_database_get_resource(database, IPCAM_VIDEO_TYPE, name);
     if (resource)
     {
-        g_object_set(resource, "intval", value, NULL);
+        g_object_set(resource, "value", value, NULL);
         gom_resource_save_sync(resource, &error);
         g_object_unref(resource);
     }
@@ -556,11 +736,11 @@ void ipcam_database_set_video_int(IpcamDatabase *database, const gchar *name, gu
     }
 }
 
-gint ipcam_database_get_video_int(IpcamDatabase *database, const gchar *name)
+GVariant *ipcam_database_get_video(IpcamDatabase *database, const gchar *name)
 {
-    g_return_val_if_fail(IPCAM_IS_DATABASE(database), -1);
+    g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
     GomResource *resource = NULL;
-    gint value = -1;
+    GVariant *value = NULL;
     
     resource = ipcam_database_get_resource(database, IPCAM_VIDEO_TYPE, name);
     if (resource)
@@ -572,50 +752,13 @@ gint ipcam_database_get_video_int(IpcamDatabase *database, const gchar *name)
     return value;
 }
 
-void ipcam_database_set_video_string(IpcamDatabase *database, const gchar *name, const gchar *value)
+void ipcam_database_set_image(IpcamDatabase *database, const gchar *name, GVariant *value)
 {
     g_return_if_fail(IPCAM_IS_DATABASE(database));
     GomResource *resource = NULL;
     GError *error = NULL;
 
-    resource = ipcam_database_get_resource(database, IPCAM_VIDEO_TYPE, name);
-    if (resource)
-    {
-        g_object_set(resource, "strval", value, NULL);
-        gom_resource_save_sync(resource, &error);
-        g_object_unref(resource);
-    }
-
-    if (error)
-    {
-        g_print("set video_str record failed: %s\n", error->message);
-        g_error_free(error);
-    }
-}
-
-gchar *ipcam_database_get_video_string(IpcamDatabase *database, const gchar *name)
-{
-    g_return_val_if_fail(IPCAM_IS_DATABASE(database), -1);
-    GomResource *resource = NULL;
-    gchar *value = NULL;
-    
-    resource = ipcam_database_get_resource(database, IPCAM_VIDEO_TYPE, name);
-    if (resource)
-    {
-        g_object_get(resource, "strval", &value, NULL);
-        g_object_unref(resource);
-    }
-
-    return value;
-}
-
-void ipcam_database_set_scene(IpcamDatabase *database, const gchar *name, guint value)
-{
-    g_return_if_fail(IPCAM_IS_DATABASE(database));
-    GomResource *resource = NULL;
-    GError *error = NULL;
-
-    resource = ipcam_database_get_resource(database, IPCAM_SCENE_TYPE, name);
+    resource = ipcam_database_get_resource(database, IPCAM_IMAGE_TYPE, name);
     if (resource)
     {
         g_object_set(resource, "value", value, NULL);
@@ -625,17 +768,17 @@ void ipcam_database_set_scene(IpcamDatabase *database, const gchar *name, guint 
 
     if (error)
     {
-        g_print("set scene record failed: %s\n", error->message);
+        g_print("set image record failed: %s\n", error->message);
         g_error_free(error);
     }
 }
-gint ipcam_database_get_scene(IpcamDatabase *database, const gchar *name)
+GVariant *ipcam_database_get_image(IpcamDatabase *database, const gchar *name)
 {
-    g_return_val_if_fail(IPCAM_IS_DATABASE(database), -1);
+    g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
     GomResource *resource = NULL;
-    gint value = -1;
+    GVariant *value = NULL;
     
-    resource = ipcam_database_get_resource(database, IPCAM_SCENE_TYPE, name);
+    resource = ipcam_database_get_resource(database, IPCAM_IMAGE_TYPE, name);
     if (resource)
     {
         g_object_get(resource, "value", &value, NULL);

@@ -1,6 +1,6 @@
 /* -*- Mode: C; indent-tabs-mode: nil; c-basic-offset: 4; tab-width: 4 -*-  */
 /*
- * ipcam-scene-handler.c
+ * ipcam-image-handler.c
  * Copyright (C) 2014 Watson Xu <xuhuashan@gmail.com>
  *
  * iconfig is free software: you can redistribute it and/or modify it
@@ -19,24 +19,24 @@
 
 #include <glib.h>
 #include <glib/gprintf.h>
-#include "ipcam-scene-handler.h"
+#include "ipcam-image-handler.h"
 #include "iconfig.h"
 
-G_DEFINE_TYPE (IpcamSceneMsgHandler, ipcam_scene_msg_handler, IPCAM_TYPE_MESSAGE_HANDLER);
+G_DEFINE_TYPE (IpcamImageMsgHandler, ipcam_image_msg_handler, IPCAM_TYPE_MESSAGE_HANDLER);
 
 static void
-ipcam_scene_msg_handler_init (IpcamSceneMsgHandler *ipcam_scene_msg_handler)
+ipcam_image_msg_handler_init (IpcamImageMsgHandler *ipcam_image_msg_handler)
 {
 }
 
 static void
-ipcam_scene_msg_handler_finalize (GObject *object)
+ipcam_image_msg_handler_finalize (GObject *object)
 {
-    G_OBJECT_CLASS (ipcam_scene_msg_handler_parent_class)->finalize (object);
+    G_OBJECT_CLASS (ipcam_image_msg_handler_parent_class)->finalize (object);
 }
 
 static gboolean
-ipcam_scene_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode *request, JsonNode **response)
+ipcam_image_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode *request, JsonNode **response)
 {
     IpcamIConfig *iconfig;
     g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
@@ -53,10 +53,22 @@ ipcam_scene_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode *
     for (i = 0; i < json_array_get_length(req_array); i++)
     {
         const gchar *name = json_array_get_string_element(req_array, i);
-        gint value = ipcam_iconfig_get_scene(iconfig, name);
+        GVariant *value = ipcam_iconfig_get_image(iconfig, name);
 
         json_builder_set_member_name(builder, name);
-        json_builder_add_int_value(builder, value);
+        if (g_variant_is_of_type(value, G_VARIANT_TYPE_STRING))
+        {
+            json_builder_add_string_value(builder, g_variant_get_string(value, NULL));
+        }
+        else if (g_variant_is_of_type(value, G_VARIANT_TYPE_UINT32))
+        {
+            json_builder_add_int_value(builder, g_variant_get_uint32(value));
+        }
+        else
+        {
+            g_warning("NOT excepted data type of value: %s\n", g_variant_get_type_string(value));
+        }
+        
     }
     json_builder_end_object(builder);
     json_builder_end_object(builder);
@@ -69,7 +81,7 @@ ipcam_scene_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode *
 }
 
 static gboolean
-ipcam_scene_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode *request, JsonNode **response)
+ipcam_image_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode *request, JsonNode **response)
 {
     IpcamIConfig *iconfig;
     g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
@@ -87,13 +99,30 @@ ipcam_scene_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode *
     for (item = g_list_first(members); item; item = g_list_next(item))
     {
         const gchar *name = item->data;
-        gint value = json_object_get_int_member(req_obj, name);
-        ipcam_iconfig_set_scene(iconfig, name, value);
-
-        value = ipcam_iconfig_get_scene(iconfig, name);
+        GVariant *value = NULL;
+        JsonNode *node = json_object_get_member(req_obj, name);
+        
+        if (g_type_is_a(json_node_get_value_type(node), G_TYPE_STRING))
+        {
+            value = g_variant_new_string(json_node_get_string(node));
+        }
+        else
+        {
+            value = g_variant_new_uint32(json_node_get_int(node));
+        }
+        ipcam_iconfig_set_image(iconfig, name, value);
 
         json_builder_set_member_name(builder, name);
-        json_builder_add_int_value(builder, value);
+        if (g_variant_is_of_type(value, G_VARIANT_TYPE_STRING))
+        {
+            json_builder_add_string_value(builder, g_variant_get_string(value, NULL));
+        }
+        else
+        {
+            json_builder_add_int_value(builder, g_variant_get_uint32(value));
+        }
+
+        g_object_unref(value);
     }
     json_builder_end_object(builder);
     json_builder_end_object(builder);
@@ -108,15 +137,15 @@ ipcam_scene_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode *
 }
 
 static void
-ipcam_scene_msg_handler_class_init (IpcamSceneMsgHandlerClass *klass)
+ipcam_image_msg_handler_class_init (IpcamImageMsgHandlerClass *klass)
 {
     GObjectClass* object_class = G_OBJECT_CLASS (klass);
     IpcamMessageHandlerClass *parent_class = IPCAM_MESSAGE_HANDLER_CLASS(klass);
 
-    object_class->finalize = ipcam_scene_msg_handler_finalize;
+    object_class->finalize = ipcam_image_msg_handler_finalize;
 
-    parent_class->get_action = ipcam_scene_msg_handler_get_action_impl;
-    parent_class->put_action = ipcam_scene_msg_handler_put_action_impl;
+    parent_class->get_action = ipcam_image_msg_handler_get_action_impl;
+    parent_class->put_action = ipcam_image_msg_handler_put_action_impl;
 }
 
 

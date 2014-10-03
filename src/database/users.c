@@ -5,7 +5,7 @@ enum {
   PROP_ID,
   PROP_NAME,
   PROP_PASSWORD,
-  PROP_PRIVILEGE,
+  PROP_ROLE,
   N_PROPERTIES
 };
 
@@ -14,7 +14,7 @@ typedef struct _IpcamUsersPrivate
     guint id;
     gchar *name;
     gchar *password;
-    guint privilege;
+    gchar *role;
 } IpcamUsersPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE(IpcamUsers, ipcam_users, GOM_TYPE_RESOURCE);
@@ -26,6 +26,7 @@ static void ipcam_users_finalize(GObject *object)
     IpcamUsersPrivate *priv = ipcam_users_get_instance_private(IPCAM_USERS(object));
     g_free(priv->name);
     g_free(priv->password);
+    g_free(priv->role);
     G_OBJECT_CLASS(ipcam_users_parent_class)->finalize(object);
 }
 static void ipcam_users_set_property(GObject      *object,
@@ -54,9 +55,9 @@ static void ipcam_users_set_property(GObject      *object,
             priv->password = g_value_dup_string(value);
         }
         break;
-    case PROP_PRIVILEGE:
+    case PROP_ROLE:
         {
-            priv->privilege = g_value_get_uint(value);
+            priv->role = g_value_dup_string(value);
         }
         break;
     default:
@@ -88,9 +89,9 @@ static void ipcam_users_get_property(GObject    *object,
             g_value_set_string(value, priv->password);
         }
         break;
-    case PROP_PRIVILEGE:
+    case PROP_ROLE:
         {
-            g_value_set_uint(value, priv->privilege);
+            g_value_set_string(value, priv->role);
         }
         break;
     default:
@@ -131,14 +132,12 @@ static void ipcam_users_class_init(IpcamUsersClass *klass)
                             "User's password.",
                             NULL, // default value
                             G_PARAM_READWRITE);
-    obj_properties[PROP_PRIVILEGE] =
-        g_param_spec_uint("privilege",
-                          "User Privilege Level",
-                          "User Privilege Level",
-                          0,
-                          65536,
-                          0,
-                          G_PARAM_READWRITE);
+    obj_properties[PROP_ROLE] =
+        g_param_spec_string("role",
+                            "User's role",
+                            "User's role",
+                            NULL, // default value
+                            G_PARAM_READWRITE);
 
     g_object_class_install_properties(object_class, N_PROPERTIES, obj_properties);
     gom_resource_class_set_primary_key(resource_class, "id");

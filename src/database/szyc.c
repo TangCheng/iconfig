@@ -1,4 +1,4 @@
-#include "scene.h"
+#include "szyc.h"
 
 enum {
   PROP_0,
@@ -8,30 +8,31 @@ enum {
   N_PROPERTIES
 };
 
-typedef struct _IpcamScenePrivate
+typedef struct _IpcamSzycPrivate
 {
     guint id;
     gchar *name;
-    guint value;
-} IpcamScenePrivate;
+    gchar *value;
+} IpcamSzycPrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE(IpcamScene, ipcam_scene, GOM_TYPE_RESOURCE);
+G_DEFINE_TYPE_WITH_PRIVATE(IpcamSzyc, ipcam_szyc, GOM_TYPE_RESOURCE);
 
 static GParamSpec *obj_properties[N_PROPERTIES] = {NULL, };
 
-static void ipcam_scene_finalize(GObject *object)
+static void ipcam_szyc_finalize(GObject *object)
 {
-    IpcamScenePrivate *priv = ipcam_scene_get_instance_private(IPCAM_SCENE(object));
+    IpcamSzycPrivate *priv = ipcam_szyc_get_instance_private(IPCAM_SZYC(object));
     g_free(priv->name);
-    G_OBJECT_CLASS(ipcam_scene_parent_class)->finalize(object);
+    g_free(priv->value);
+    G_OBJECT_CLASS(ipcam_szyc_parent_class)->finalize(object);
 }
-static void ipcam_scene_set_property(GObject      *object,
+static void ipcam_szyc_set_property(GObject      *object,
                                    guint        property_id,
                                    const GValue *value,
                                    GParamSpec   *pspec)
 {
-    IpcamScene *self = IPCAM_SCENE(object);
-    IpcamScenePrivate *priv = ipcam_scene_get_instance_private(self);
+    IpcamSzyc *self = IPCAM_SZYC(object);
+    IpcamSzycPrivate *priv = ipcam_szyc_get_instance_private(self);
     switch(property_id)
     {
     case PROP_ID:
@@ -47,7 +48,8 @@ static void ipcam_scene_set_property(GObject      *object,
         break;
     case PROP_VALUE:
         {
-            priv->value = g_value_get_int(value);
+            g_free(priv->value);
+            priv->value = g_value_dup_string(value);
         }
         break;
     default:
@@ -55,13 +57,13 @@ static void ipcam_scene_set_property(GObject      *object,
         break;
     }
 }
-static void ipcam_scene_get_property(GObject    *object,
+static void ipcam_szyc_get_property(GObject    *object,
                                    guint       property_id,
                                    GValue     *value,
                                    GParamSpec *pspec)
 {
-    IpcamScene *self = IPCAM_SCENE(object);
-    IpcamScenePrivate *priv = ipcam_scene_get_instance_private(self);
+    IpcamSzyc *self = IPCAM_SZYC(object);
+    IpcamSzycPrivate *priv = ipcam_szyc_get_instance_private(self);
     switch(property_id)
     {
     case PROP_ID:
@@ -76,7 +78,7 @@ static void ipcam_scene_get_property(GObject    *object,
         break;
     case PROP_VALUE:
         {
-            g_value_set_int(value, priv->value);
+            g_value_set_string(value, priv->value);
         }
         break;
     default:
@@ -84,18 +86,18 @@ static void ipcam_scene_get_property(GObject    *object,
         break;
     }
 }
-static void ipcam_scene_init(IpcamScene *self)
+static void ipcam_szyc_init(IpcamSzyc *self)
 {
 }
-static void ipcam_scene_class_init(IpcamSceneClass *klass)
+static void ipcam_szyc_class_init(IpcamSzycClass *klass)
 {
     GObjectClass *object_class = G_OBJECT_CLASS(klass);
-    object_class->set_property = &ipcam_scene_set_property;
-    object_class->get_property = &ipcam_scene_get_property;
-    object_class->finalize = &ipcam_scene_finalize;
+    object_class->set_property = &ipcam_szyc_set_property;
+    object_class->get_property = &ipcam_szyc_get_property;
+    object_class->finalize = &ipcam_szyc_finalize;
 
     GomResourceClass *resource_class = GOM_RESOURCE_CLASS(klass);
-    gom_resource_class_set_table(resource_class, "scene");
+    gom_resource_class_set_table(resource_class, "szyc");
   
     obj_properties[PROP_ID] =
         g_param_spec_int("id",
@@ -107,18 +109,16 @@ static void ipcam_scene_class_init(IpcamSceneClass *klass)
                          G_PARAM_READWRITE);
     obj_properties[PROP_NAME] =
         g_param_spec_string("name",
-                            "Parameter Name",
-                            "Scene parameter name.",
+                            "Name",
+                            "Username.",
                             NULL, // default value
                             G_PARAM_READWRITE);
     obj_properties[PROP_VALUE] =
-        g_param_spec_int("value",
-                         "Parameter value",
-                         "Scene parameter value.",
-                         0,
-                         65535,
-                         0, // default value
-                         G_PARAM_READWRITE);
+        g_param_spec_string("value",
+                            "value",
+                            "value",
+                            NULL, // default value
+                            G_PARAM_READWRITE);
 
     g_object_class_install_properties(object_class, N_PROPERTIES, obj_properties);
     gom_resource_class_set_primary_key(resource_class, "id");

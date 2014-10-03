@@ -4,10 +4,11 @@ enum {
   PROP_0,
   PROP_ID,
   PROP_NAME,
+  PROP_STREAM,
   PROP_IS_SHOW,
   PROP_SIZE,
-  PROP_X,
-  PROP_Y,
+  PROP_LEFT,
+  PROP_TOP,
   PROP_COLOR,
   N_PROPERTIES
 };
@@ -16,10 +17,11 @@ typedef struct _IpcamOsdPrivate
 {
     guint id;
     gchar *name;
+    gchar *stream;
     gboolean is_show;
     guint size;
-    guint x;
-    guint y;
+    guint left;
+    guint top;
     guint color;
 } IpcamOsdPrivate;
 
@@ -31,6 +33,7 @@ static void ipcam_osd_finalize(GObject *object)
 {
     IpcamOsdPrivate *priv = ipcam_osd_get_instance_private(IPCAM_OSD(object));
     g_free(priv->name);
+    g_free(priv->stream);
     G_OBJECT_CLASS(ipcam_osd_parent_class)->finalize(object);
 }
 static void ipcam_osd_set_property(GObject      *object,
@@ -53,6 +56,12 @@ static void ipcam_osd_set_property(GObject      *object,
             priv->name = g_value_dup_string(value);
         }
         break;
+    case PROP_STREAM:
+        {
+            g_free(priv->stream);
+            priv->stream = g_value_dup_string(value);
+        }
+        break;
     case PROP_IS_SHOW:
         {
             priv->is_show = g_value_get_boolean(value);
@@ -63,14 +72,14 @@ static void ipcam_osd_set_property(GObject      *object,
             priv->size = g_value_get_int(value);
         }
         break;
-    case PROP_X:
+    case PROP_LEFT:
         {
-            priv->x = g_value_get_int(value);
+            priv->left = g_value_get_int(value);
         }
         break;
-    case PROP_Y:
+    case PROP_TOP:
         {
-            priv->y = g_value_get_int(value);
+            priv->top = g_value_get_int(value);
         }
         break;
     case PROP_COLOR:
@@ -102,6 +111,11 @@ static void ipcam_osd_get_property(GObject    *object,
             g_value_set_string(value, priv->name);
         }
         break;
+     case PROP_STREAM:
+        {
+            g_value_set_string(value, priv->stream);
+        }
+        break;
     case PROP_IS_SHOW:
         {
             g_value_set_boolean(value, priv->is_show);
@@ -112,14 +126,14 @@ static void ipcam_osd_get_property(GObject    *object,
             g_value_set_int(value, priv->size);
         }
         break;
-    case PROP_X:
+    case PROP_LEFT:
         {
-            g_value_set_int(value, priv->x);
+            g_value_set_int(value, priv->left);
         }
         break;
-    case PROP_Y:
+    case PROP_TOP:
         {
-            g_value_set_int(value, priv->y);
+            g_value_set_int(value, priv->top);
         }
         break;
     case PROP_COLOR:
@@ -156,7 +170,13 @@ static void ipcam_osd_class_init(IpcamOsdClass *klass)
     obj_properties[PROP_NAME] =
         g_param_spec_string("name",
                             "Name",
-                            "Username.",
+                            "Name.",
+                            NULL, // default value
+                            G_PARAM_READWRITE);
+    obj_properties[PROP_STREAM] =
+        g_param_spec_string("stream",
+                            "Stream",
+                            "Stream.",
                             NULL, // default value
                             G_PARAM_READWRITE);
     obj_properties[PROP_IS_SHOW] =
@@ -173,17 +193,17 @@ static void ipcam_osd_class_init(IpcamOsdClass *klass)
                          100,
                          20, // default value
                          G_PARAM_READWRITE);
-    obj_properties[PROP_X] =
-        g_param_spec_int("x",
-                         "x position",
+    obj_properties[PROP_LEFT] =
+        g_param_spec_int("left",
+                         "left position",
                          "X axsis position, percent of image resolution.",
                          0,
                          1000,
                          0, // default value
                          G_PARAM_READWRITE);
-    obj_properties[PROP_Y] =
-        g_param_spec_int("y",
-                         "y position",
+    obj_properties[PROP_TOP] =
+        g_param_spec_int("top",
+                         "top position",
                          "Y Axsis position, percent of image resolution.",
                          0,
                          1000,
@@ -200,6 +220,6 @@ static void ipcam_osd_class_init(IpcamOsdClass *klass)
 
     g_object_class_install_properties(object_class, N_PROPERTIES, obj_properties);
     gom_resource_class_set_primary_key(resource_class, "id");
-    gom_resource_class_set_unique(resource_class, "name");
     gom_resource_class_set_notnull(resource_class, "name");
+    gom_resource_class_set_notnull(resource_class, "stream");
 }

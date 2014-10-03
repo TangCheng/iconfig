@@ -1,4 +1,4 @@
-#include "video.h"
+#include "day_night_mode.h"
 
 enum {
   PROP_0,
@@ -8,31 +8,30 @@ enum {
   N_PROPERTIES
 };
 
-typedef struct _IpcamVideoPrivate
+typedef struct _IpcamDayNightModePrivate
 {
     guint id;
     gchar *name;
-    GVariant *value;
-} IpcamVideoPrivate;
+    guint value;
+} IpcamDayNightModePrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE(IpcamVideo, ipcam_video, GOM_TYPE_RESOURCE);
+G_DEFINE_TYPE_WITH_PRIVATE(IpcamDayNightMode, ipcam_day_night_mode, GOM_TYPE_RESOURCE);
 
 static GParamSpec *obj_properties[N_PROPERTIES] = {NULL, };
 
-static void ipcam_video_finalize(GObject *object)
+static void ipcam_day_night_mode_finalize(GObject *object)
 {
-    IpcamVideoPrivate *priv = ipcam_video_get_instance_private(IPCAM_VIDEO(object));
+    IpcamDayNightModePrivate *priv = ipcam_day_night_mode_get_instance_private(IPCAM_DAY_NIGHT_MODE(object));
     g_free(priv->name);
-	g_free(priv->value);
-    G_OBJECT_CLASS(ipcam_video_parent_class)->finalize(object);
+    G_OBJECT_CLASS(ipcam_day_night_mode_parent_class)->finalize(object);
 }
-static void ipcam_video_set_property(GObject      *object,
+static void ipcam_day_night_mode_set_property(GObject      *object,
                                    guint        property_id,
                                    const GValue *value,
                                    GParamSpec   *pspec)
 {
-    IpcamVideo *self = IPCAM_VIDEO(object);
-    IpcamVideoPrivate *priv = ipcam_video_get_instance_private(self);
+    IpcamDayNightMode *self = IPCAM_DAY_NIGHT_MODE(object);
+    IpcamDayNightModePrivate *priv = ipcam_day_night_mode_get_instance_private(self);
     switch(property_id)
     {
     case PROP_ID:
@@ -48,8 +47,7 @@ static void ipcam_video_set_property(GObject      *object,
         break;
     case PROP_VALUE:
         {
-            g_free(priv->value);
-            priv->value = g_value_dup_variant(value);
+            priv->value = g_value_get_int(value);
         }
         break;
     default:
@@ -57,13 +55,13 @@ static void ipcam_video_set_property(GObject      *object,
         break;
     }
 }
-static void ipcam_video_get_property(GObject    *object,
+static void ipcam_day_night_mode_get_property(GObject    *object,
                                    guint       property_id,
                                    GValue     *value,
                                    GParamSpec *pspec)
 {
-    IpcamVideo *self = IPCAM_VIDEO(object);
-    IpcamVideoPrivate *priv = ipcam_video_get_instance_private(self);
+    IpcamDayNightMode *self = IPCAM_DAY_NIGHT_MODE(object);
+    IpcamDayNightModePrivate *priv = ipcam_day_night_mode_get_instance_private(self);
     switch(property_id)
     {
     case PROP_ID:
@@ -78,7 +76,7 @@ static void ipcam_video_get_property(GObject    *object,
         break;
     case PROP_VALUE:
         {
-            g_value_set_variant(value, priv->value);
+            g_value_set_int(value, priv->value);
         }
         break;
     default:
@@ -86,19 +84,19 @@ static void ipcam_video_get_property(GObject    *object,
         break;
     }
 }
-static void ipcam_video_init(IpcamVideo *self)
+static void ipcam_day_night_mode_init(IpcamDayNightMode *self)
 {
 }
-static void ipcam_video_class_init(IpcamVideoClass *klass)
+static void ipcam_day_night_mode_class_init(IpcamDayNightModeClass *klass)
 {
     GObjectClass *object_class = G_OBJECT_CLASS(klass);
-    object_class->set_property = &ipcam_video_set_property;
-    object_class->get_property = &ipcam_video_get_property;
-    object_class->finalize = &ipcam_video_finalize;
+    object_class->set_property = &ipcam_day_night_mode_set_property;
+    object_class->get_property = &ipcam_day_night_mode_get_property;
+    object_class->finalize = &ipcam_day_night_mode_finalize;
 
     GomResourceClass *resource_class = GOM_RESOURCE_CLASS(klass);
-    gom_resource_class_set_table(resource_class, "video");
-
+    gom_resource_class_set_table(resource_class, "day_night_mode");
+  
     obj_properties[PROP_ID] =
         g_param_spec_int("id",
                          "ID",
@@ -109,17 +107,18 @@ static void ipcam_video_class_init(IpcamVideoClass *klass)
                          G_PARAM_READWRITE);
     obj_properties[PROP_NAME] =
         g_param_spec_string("name",
-                            "Parameter name",
-                            "Video parameter name.",
+                            "Name",
+                            "name.",
                             NULL, // default value
                             G_PARAM_READWRITE);
     obj_properties[PROP_VALUE] =
-        g_param_spec_variant("value",
-                             "Video parameter value",
-                             "Video parameter value.",
-                             G_VARIANT_TYPE_ANY,
-                             NULL, // default value
-                             G_PARAM_READWRITE);
+        g_param_spec_int("value",
+                         "value",
+                         "value",
+                         0,
+                         100,
+                         0, // default value
+                         G_PARAM_READWRITE);
 
     g_object_class_install_properties(object_class, N_PROPERTIES, obj_properties);
     gom_resource_class_set_primary_key(resource_class, "id");

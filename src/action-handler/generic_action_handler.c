@@ -4,7 +4,7 @@
 #include "../msg-handler/ipcam-base-info-handler.h"
 #include "../msg-handler/ipcam-osd-handler.h"
 #include "../msg-handler/ipcam-video-handler.h"
-#include "../msg-handler/ipcam-scene-handler.h"
+#include "../msg-handler/ipcam-image-handler.h"
 #include "../msg-handler/ipcam-network-handler.h"
 #include "../msg-handler/ipcam-datetime-handler.h"
 #include "../msg-handler/ipcam-users-handler.h"
@@ -66,10 +66,10 @@ static void ipcam_generic_action_handler_init(IpcamGenericActionHandler *self)
     g_hash_table_insert(priv->action_hash, "set_video", 
                         _(ACT_SET, IPCAM_TYPE_VIDEO_MSG_HANDLER));
 
-    g_hash_table_insert(priv->action_hash, "get_scene", 
-                        _(ACT_GET, IPCAM_TYPE_SCENE_MSG_HANDLER));
-    g_hash_table_insert(priv->action_hash, "set_scene", 
-                        _(ACT_SET, IPCAM_TYPE_SCENE_MSG_HANDLER));
+    g_hash_table_insert(priv->action_hash, "get_image", 
+                        _(ACT_GET, IPCAM_TYPE_IMAGE_MSG_HANDLER));
+    g_hash_table_insert(priv->action_hash, "set_image", 
+                        _(ACT_SET, IPCAM_TYPE_IMAGE_MSG_HANDLER));
 
     g_hash_table_insert(priv->action_hash, "get_network", 
                         _(ACT_GET, IPCAM_TYPE_NETWORK_MSG_HANDLER));
