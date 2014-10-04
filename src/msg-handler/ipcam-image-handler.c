@@ -53,7 +53,11 @@ ipcam_image_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode *
     for (i = 0; i < json_array_get_length(req_array); i++)
     {
         const gchar *name = json_array_get_string_element(req_array, i);
-        GVariant *value = ipcam_iconfig_get_image(iconfig, name);
+        //GVariant *value = ipcam_iconfig_get_image(iconfig, name);
+        guint *data = g_new(guint, 1);
+        *data = 128;
+        GBytes *value = g_bytes_new(&data, sizeof(guint));
+        ipcam_iconfig_set_image(iconfig, name, value);
 
         json_builder_set_member_name(builder, name);
         if (g_variant_is_of_type(value, G_VARIANT_TYPE_STRING))

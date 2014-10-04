@@ -12,18 +12,23 @@ typedef struct _IpcamImagePrivate
 {
     guint id;
     gchar *name;
-    GVariant *value;
+    GBytes *value;
 } IpcamImagePrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE(IpcamImage, ipcam_image, GOM_TYPE_RESOURCE);
 
 static GParamSpec *obj_properties[N_PROPERTIES] = {NULL, };
 
+static void ipcam_image_from_bytes(GBytes *bytes, GValue *value)
+{
+}
+
 static void ipcam_image_finalize(GObject *object)
 {
     IpcamImagePrivate *priv = ipcam_image_get_instance_private(IPCAM_IMAGE(object));
     g_free(priv->name);
     g_free(priv->value);
+    g_param_spec_set_qdata(obj_properties[PROP_VALUE], GOM_RESOURCE_FROM_BYTES_FUNC, NULL);
     G_OBJECT_CLASS(ipcam_image_parent_class)->finalize(object);
 }
 static void ipcam_image_set_property(GObject      *object,
@@ -48,7 +53,7 @@ static void ipcam_image_set_property(GObject      *object,
         break;
     case PROP_VALUE:
         {
-            priv->value = g_value_dup_variant(value);
+            priv->value = g_value_get_boxed(value);
         }
         break;
     default:
@@ -77,7 +82,7 @@ static void ipcam_image_get_property(GObject    *object,
         break;
     case PROP_VALUE:
         {
-            g_value_set_variant(value, priv->value);
+            g_value_set_boxed(value, priv->value);
         }
         break;
     default:
@@ -113,12 +118,14 @@ static void ipcam_image_class_init(IpcamImageClass *klass)
                             NULL, // default value
                             G_PARAM_READWRITE);
     obj_properties[PROP_VALUE] =
-        g_param_spec_variant("value",
+        g_param_spec_boxed("value",
                              "Parameter value",
                              "Image parameter value.",
-                             G_VARIANT_TYPE_ANY,
-                             NULL, // default value
+                             G_TYPE_BYTES,
                              G_PARAM_READWRITE);
+    g_param_spec_set_qdata(obj_properties[PROP_VALUE],
+                           GOM_RESOURCE_FROM_BYTES_FUNC,
+                           ipcam_image_from_bytes);
 
     g_object_class_install_properties(object_class, N_PROPERTIES, obj_properties);
     gom_resource_class_set_primary_key(resource_class, "id");

@@ -55,17 +55,17 @@ ipcam_network_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode
     json_builder_set_member_name(builder, "items");
     json_builder_begin_object(builder);
 
-    gint dhcp = ipcam_iconfig_get_network(iconfig, "method");
+    gchar *method = ipcam_iconfig_get_network(iconfig, "method");
 
     for (idx = 0; idx < json_array_get_length(req_array); idx++)
     {
         const gchar *name = json_array_get_string_element(req_array, idx);
 
-        if (g_strcmp0(name, "autoconf") == 0) {
+        if (g_str_equal(name, "autoconf")) {
             json_builder_set_member_name(builder, name);
-            json_builder_add_int_value(builder, dhcp);
+            json_builder_add_string_value(builder, method);
         }
-        else if ((!g_strcmp0(name, "address") && dhcp) || !g_strcmp0(name, "dyn-address"))
+        else if (!g_strcmp0(name, "address") || !g_strcmp0(name, "dyn-address"))
         {
             gchar *hwaddr = NULL, *ipaddr = NULL, *netmask = NULL, *gateway = NULL;
             char *dns[2] = { [0 ... (ARRAY_SIZE(dns) - 1)] = NULL };
@@ -107,7 +107,7 @@ ipcam_network_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode
             }
             json_builder_end_object(builder);
         }
-        else if ((g_strcmp0(name, "address") == 0) && !dhcp)
+        else if ((g_strcmp0(name, "address") == 0))
         {
             static gchar *keys[] = { "hwaddr", "ipaddr", "netmask", "gateway", "dns1", "dns2" };
             int i;
@@ -156,7 +156,7 @@ ipcam_network_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode
         }
         else if (g_strcmp0(name, "server_port") == 0)
         {
-            static gchar *subitems[] = { "http", "rtsp" };
+            static gchar *subitems[] = { "http", "ftp", "rtsp" };
             int i;
 
             json_builder_set_member_name(builder, name);
@@ -190,7 +190,7 @@ ipcam_network_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode
     JsonBuilder *builder = json_builder_new();
     JsonObject *req_obj;
 
-    gint dhcp = ipcam_iconfig_get_network(iconfig, "method");
+    gchar *method = ipcam_iconfig_get_network(iconfig, "method");
 
     req_obj = json_object_get_object_member(json_node_get_object(request), "items");
 
@@ -199,12 +199,12 @@ ipcam_network_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode
     json_builder_begin_object(builder);
     if (json_object_has_member(req_obj, "autoconf"))
     {
-        dhcp = json_object_get_int_member(req_obj, "autoconf");
+        method = json_object_get_string_member(req_obj, "autoconf");
 
-        ipcam_iconfig_set_network(iconfig, "method", dhcp);
-        dhcp = ipcam_iconfig_get_network(iconfig, "method");
+        ipcam_iconfig_set_network(iconfig, "method", method);
+        method = ipcam_iconfig_get_network(iconfig, "method");
         json_builder_set_member_name(builder, "autoconf");
-        json_builder_add_int_value(builder, dhcp);
+        json_builder_add_string_value(builder, method);
     }
     if (json_object_has_member(req_obj, "hostname"))
     {
@@ -345,5 +345,3 @@ ipcam_network_msg_handler_class_init (IpcamNetworkMsgHandlerClass *klass)
     parent_class->get_action = ipcam_network_msg_handler_get_action_impl;
     parent_class->put_action = ipcam_network_msg_handler_put_action_impl;
 }
-
-

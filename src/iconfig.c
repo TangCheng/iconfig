@@ -159,7 +159,7 @@ GVariant *ipcam_iconfig_get_image(IpcamIConfig *iconfig, const gchar *name)
     return ipcam_database_get_image(priv->database, (gchar *)name);
 }
 
-void ipcam_iconfig_set_image(IpcamIConfig *iconfig, const gchar *name, GVariant *value)
+void ipcam_iconfig_set_image(IpcamIConfig *iconfig, const gchar *name, GBytes *value)
 {
     g_return_if_fail(IPCAM_IS_ICONFIG(iconfig));
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
@@ -167,7 +167,7 @@ void ipcam_iconfig_set_image(IpcamIConfig *iconfig, const gchar *name, GVariant 
 	ipcam_database_set_image(priv->database, (gchar *)name, value);
 }
 
-gint ipcam_iconfig_get_network(IpcamIConfig *iconfig, const gchar *name)
+gchar *ipcam_iconfig_get_network(IpcamIConfig *iconfig, const gchar *name)
 {
     g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), -1);
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
@@ -175,7 +175,7 @@ gint ipcam_iconfig_get_network(IpcamIConfig *iconfig, const gchar *name)
     return ipcam_database_get_network(priv->database, name);
 }
 
-void ipcam_iconfig_set_network(IpcamIConfig *iconfig, const gchar *name, guint value)
+void ipcam_iconfig_set_network(IpcamIConfig *iconfig, const gchar *name, const gchar *value)
 {
     g_return_if_fail(IPCAM_IS_ICONFIG(iconfig));
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
@@ -271,20 +271,20 @@ gchar *ipcam_iconfig_get_user_password(IpcamIConfig *iconfig, const gchar *usern
     return ipcam_database_get_user_password (priv->database, username);
 }
 
-void ipcam_iconfig_set_user_privilege(IpcamIConfig *iconfig, const gchar *username, guint privilege)
+void ipcam_iconfig_set_user_role(IpcamIConfig *iconfig, const gchar *username, const gchar *role)
 {
     g_return_if_fail(IPCAM_IS_ICONFIG(iconfig));
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
 
-	ipcam_database_set_user_privilege (priv->database, username, privilege);
+	ipcam_database_set_user_role (priv->database, username, role);
 }
 
-guint ipcam_iconfig_get_user_privilege(IpcamIConfig *iconfig, const gchar *username)
+gchar *ipcam_iconfig_get_user_role(IpcamIConfig *iconfig, const gchar *username)
 {
     g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), 0);
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
 
-    return ipcam_database_get_user_privilege (priv->database, username);
+    return ipcam_database_get_user_role (priv->database, username);
 }
 
 void ipcam_iconfig_del_user(IpcamIConfig *iconfig, const gchar *username)

@@ -44,15 +44,15 @@ ipcam_users_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode *
     JsonBuilder *builder = json_builder_new();
     JsonArray *req_array;
     int i;
-    gboolean need_password = FALSE, need_privilege = FALSE;
+    gboolean need_password = FALSE, need_role = FALSE;
 
     req_array = json_object_get_array_member (json_node_get_object(request), "items");
     for (i = 0; i < json_array_get_length (req_array); i++) {
         const gchar *item = json_array_get_string_element (req_array, i);
         if (g_strcmp0(item, "password") == 0)
             need_password = TRUE;
-        else if (g_strcmp0(item, "privilege") == 0)
-            need_privilege = TRUE;
+        else if (g_strcmp0(item, "role") == 0)
+            need_role = TRUE;
     }
 
     json_builder_begin_object(builder);
@@ -74,11 +74,12 @@ ipcam_users_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode *
             json_builder_add_string_value(builder, passwd);
             g_free(passwd);
         }
-        if (need_privilege)
+        if (need_role)
         {
-            guint privilege = ipcam_iconfig_get_user_privilege(iconfig, username);
-            json_builder_set_member_name(builder, "privilege");
-            json_builder_add_int_value(builder, privilege);
+            gchar *role = ipcam_iconfig_get_user_role(iconfig, username);
+            json_builder_set_member_name(builder, "role");
+            json_builder_add_string_value(builder, role);
+            g_free(role);
         }
         json_builder_end_object(builder);
     }
@@ -113,23 +114,24 @@ ipcam_users_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode *
         JsonObject *user_obj = json_array_get_object_element(req_array, i);
         const gchar *username = json_object_get_string_member(user_obj, "username");
         const gchar *password = json_object_get_string_member(user_obj, "password");
-        guint privilege = json_object_get_int_member(user_obj, "privilege");
+        const gchar *role = json_object_get_string_member(user_obj, "role");
 
         ipcam_iconfig_set_user_password (iconfig, username, (gchar *)password);
-        ipcam_iconfig_set_user_privilege (iconfig, username, privilege);
+        ipcam_iconfig_set_user_role (iconfig, username, role);
 
         password = ipcam_iconfig_get_user_password (iconfig, username);
-        privilege = ipcam_iconfig_get_user_privilege (iconfig, username);
+        role = ipcam_iconfig_get_user_role (iconfig, username);
         json_builder_begin_object(builder);
         json_builder_set_member_name (builder, "username");
         json_builder_add_string_value (builder, username);
         json_builder_set_member_name (builder, "password");
         json_builder_add_string_value (builder, password);
-        json_builder_set_member_name (builder, "privilege");
-        json_builder_add_int_value (builder, privilege);
+        json_builder_set_member_name (builder, "role");
+        json_builder_add_string_value (builder, role);
         json_builder_end_object(builder);
 
         g_free((gchar *)password);
+        g_free((gchar *)role);
     }
     json_builder_end_array(builder);
     json_builder_end_object(builder);
@@ -161,23 +163,24 @@ ipcam_users_msg_handler_post_action_impl(IpcamMessageHandler *handler, JsonNode 
         JsonObject *user_obj = json_array_get_object_element(req_array, i);
         const gchar *username = json_object_get_string_member(user_obj, "username");
         const gchar *password = json_object_get_string_member(user_obj, "password");
-        guint privilege = json_object_get_int_member(user_obj, "privilege");
+        const gchar *role = json_object_get_string_member(user_obj, "role");
 
         ipcam_iconfig_set_user_password (iconfig, username, (gchar *)password);
-        ipcam_iconfig_set_user_privilege (iconfig, username, privilege);
+        ipcam_iconfig_set_user_role (iconfig, username, role);
 
         password = ipcam_iconfig_get_user_password (iconfig, username);
-        privilege = ipcam_iconfig_get_user_privilege (iconfig, username);
+        role = ipcam_iconfig_get_user_role (iconfig, username);
         json_builder_begin_object(builder);
         json_builder_set_member_name (builder, "username");
         json_builder_add_string_value (builder, username);
         json_builder_set_member_name (builder, "password");
         json_builder_add_string_value (builder, password);
-        json_builder_set_member_name (builder, "privilege");
-        json_builder_add_int_value (builder, privilege);
+        json_builder_set_member_name (builder, "role");
+        json_builder_add_string_value (builder, role);
         json_builder_end_object(builder);
 
         g_free((gchar *)password);
+        g_free((gchar *)role);
     }
     json_builder_end_array(builder);
     json_builder_end_object(builder);

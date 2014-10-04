@@ -107,70 +107,77 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS datetime ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
-                     "value"
+                     "value    TEXT,"
+                     "vtype    TEXT NOT NULL"
                      ");");
-        EXEC_OR_FAIL("INSERT INTO datetime (name, value) "
-                     "VALUES ('timezone', 0);");
-        EXEC_OR_FAIL("INSERT INTO datetime (name, value) "
-                     "VALUES ('use_ntp', 0);");
-        EXEC_OR_FAIL("INSERT INTO datetime (name, value) "
-                     "VALUES ('ntp_server', 'pool.ntp.org');");
+        EXEC_OR_FAIL("INSERT INTO datetime (name, value, vtype) "
+                     "VALUES ('timezone', 'Beijing', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO datetime (name, value, vtype) "
+                     "VALUES ('use_ntp', '0', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO datetime (name, value, vtype) "
+                     "VALUES ('ntp_server', 'pool.ntp.org', 'STRING');");
 
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS video ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
-                     "value"
+                     "value    TEXT,"
+                     "vtype    TEXT NOT NULL"
                      ");");
         /* Main profile */
-        EXEC_OR_FAIL("INSERT INTO video (name, value) "
-                     "VALUES ('main_profile:flip', 0);");
-        EXEC_OR_FAIL("INSERT INTO video (name, value) "
-                     "VALUES ('main_profile:quanlity', 'baseline');");
-        EXEC_OR_FAIL("INSERT INTO video (name, value) "
-                     "VALUES ('main_profile:frame_rate', 25);");
-        EXEC_OR_FAIL("INSERT INTO video (name, value) "
-                     "VALUES ('main_profile:bit_rate', 'CBR');");
-        EXEC_OR_FAIL("INSERT INTO video (name, value) "
-                     "VALUES ('main_profile:bit_rate_value', 4096);");
-        EXEC_OR_FAIL("INSERT INTO video (name, value) "
-                     "VALUES ('main_profile:resolution', 'UXGA');");
-        EXEC_OR_FAIL("INSERT INTO video (name, value) "
-                     "VALUES ('main_profile:stream_path', 'main_stream');");
+        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
+                     "VALUES ('main_profile:flip', '0', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
+                     "VALUES ('main_profile:mirror', '0', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
+                     "VALUES ('main_profile:quanlity', 'baseline', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
+                     "VALUES ('main_profile:frame_rate', '25', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
+                     "VALUES ('main_profile:bit_rate', 'CBR', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
+                     "VALUES ('main_profile:bit_rate_value', '4096', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
+                     "VALUES ('main_profile:resolution', 'UXGA', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
+                     "VALUES ('main_profile:stream_path', 'main_stream', 'STRING');");
         /* Sub profile */
-        EXEC_OR_FAIL("INSERT INTO video (name, value) "
-                     "VALUES ('sub_profile:flip', 0);");
-        EXEC_OR_FAIL("INSERT INTO video (name, value) "
-                     "VALUES ('sub_profile:quanlity', 'baseline');");
-        EXEC_OR_FAIL("INSERT INTO video (name, value) "
-                     "VALUES ('sub_profile:frame_rate', 25);");
-        EXEC_OR_FAIL("INSERT INTO video (name, value) "
-                     "VALUES ('sub_profile:bit_rate', 'CBR');");
-        EXEC_OR_FAIL("INSERT INTO video (name, value) "
-                     "VALUES ('sub_profile:bit_rate_value', 1024);");
-        EXEC_OR_FAIL("INSERT INTO video (name, value) "
-                     "VALUES ('sub_profile:resolution', 'D1');");
-        EXEC_OR_FAIL("INSERT INTO video (name, value) "
-                     "VALUES ('sub_profile:stream_path', 'sub_stream');");
+        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
+                     "VALUES ('sub_profile:flip', '0', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
+                     "VALUES ('sub_profile:mirror', '0', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
+                     "VALUES ('sub_profile:quanlity', 'baseline', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
+                     "VALUES ('sub_profile:frame_rate', '25', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
+                     "VALUES ('sub_profile:bit_rate', 'CBR', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
+                     "VALUES ('sub_profile:bit_rate_value', '1024', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
+                     "VALUES ('sub_profile:resolution', 'D1', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
+                     "VALUES ('sub_profile:stream_path', 'sub_stream', 'STRING');");
 
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS image ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
-                     "value"
+                     "value    TEXT,"
+                     "vtype    TEXT NOT NULL"
                      ");");
-        EXEC_OR_FAIL("INSERT INTO image (name, value) "
-                     "VALUES ('watermark', 0);");
-        EXEC_OR_FAIL("INSERT INTO image (name, value) "
-                     "VALUES ('3ddnr', 0);");
-        EXEC_OR_FAIL("INSERT INTO image (name, value) "
-                     "VALUES ('brightness', 128);");
-        EXEC_OR_FAIL("INSERT INTO image (name, value) "
-                     "VALUES ('chrominance', 128);");
-        EXEC_OR_FAIL("INSERT INTO image (name, value) "
-                     "VALUES ('contrast', 128);");
-        EXEC_OR_FAIL("INSERT INTO image (name, value) "
-                     "VALUES ('saturation', 128);");
-        EXEC_OR_FAIL("INSERT INTO image (name, value) "
-                     "VALUES ('scenario', '50Hz');");
+        EXEC_OR_FAIL("INSERT INTO image (name, value, vtype) "
+                     "VALUES ('watermark', '0', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO image (name, value, vtype) "
+                     "VALUES ('3ddnr', '0', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO image (name, value, vtype) "
+                     "VALUES ('brightness', '128', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO image (name, value, vtype) "
+                     "VALUES ('chrominance', '128', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO image (name, value, vtype) "
+                     "VALUES ('contrast', '128', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO image (name, value, vtype) "
+                     "VALUES ('saturation', '128', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO image (name, value, vtype) "
+                     "VALUES ('scenario', '50Hz', 'STRING');");
 
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS privacy_block ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -293,13 +300,13 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
                      "enable   INTEGER NOT NULL,"
-                     "mon      BLOB,"
-                     "tue      BLOB,"
-                     "wed      BLOB,"
-                     "thu      BLOB,"
-                     "fri      BLOB,"
-                     "sat      BLOB,"
-                     "sun      BLOB"
+                     "mon      TEXT,"
+                     "tue      TEXT,"
+                     "wed      TEXT,"
+                     "thu      TEXT,"
+                     "fri      TEXT,"
+                     "sat      TEXT,"
+                     "sun      TEXT"
                      ");");
         EXEC_OR_FAIL("INSERT INTO event_input (name, enable) "
                      "VALUES ('intput1', 0);");
@@ -322,13 +329,13 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "top           INTEGER NOT NULL,"
                      "width         INTEGER NOT NULL,"
                      "height        INTEGER NOT NULL,"
-                     "mon           BLOB,"
-                     "tue           BLOB,"
-                     "wed           BLOB,"
-                     "thu           BLOB,"
-                     "fri           BLOB,"
-                     "sat           BLOB,"
-                     "sun           BLOB"
+                     "mon           TEXT,"
+                     "tue           TEXT,"
+                     "wed           TEXT,"
+                     "thu           TEXT,"
+                     "fri           TEXT,"
+                     "sat           TEXT,"
+                     "sun           TEXT"
                      ");");
         EXEC_OR_FAIL("INSERT INTO event_motion (name, enable, sensitivity, left, top, width, height) "
                      "VALUES ('region1', 0, 50, 0, 0, 0, 0);");
@@ -344,13 +351,13 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "top           INTEGER NOT NULL,"
                      "width         INTEGER NOT NULL,"
                      "height        INTEGER NOT NULL,"
-                     "mon           BLOB,"
-                     "tue           BLOB,"
-                     "wed           BLOB,"
-                     "thu           BLOB,"
-                     "fri           BLOB,"
-                     "sat           BLOB,"
-                     "sun           BLOB"
+                     "mon           TEXT,"
+                     "tue           TEXT,"
+                     "wed           TEXT,"
+                     "thu           TEXT,"
+                     "fri           TEXT,"
+                     "sat           TEXT,"
+                     "sun           TEXT"
                      ");");
         EXEC_OR_FAIL("INSERT INTO event_cover (name, enable, sensitivity, left, top, width, height) "
                      "VALUES ('region1', 0, 50, 0, 0, 0, 0);");
@@ -373,30 +380,31 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
 
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS record_schedule ("
                      "id            INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "mon           BLOB,"
-                     "tue           BLOB,"
-                     "wed           BLOB,"
-                     "thu           BLOB,"
-                     "fri           BLOB,"
-                     "sat           BLOB,"
-                     "sun           BLOB"
+                     "mon           TEXT,"
+                     "tue           TEXT,"
+                     "wed           TEXT,"
+                     "thu           TEXT,"
+                     "fri           TEXT,"
+                     "sat           TEXT,"
+                     "sun           TEXT"
                      ");");
 
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS record_strategy ("
                      "id            INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name          TEXT UNIQUE NOT NULL,"
-                     "value"
+                     "value         TEXT,"
+                     "vtype         TEXT NOT NULL"
                      ");");
-        EXEC_OR_FAIL("INSERT INTO record_strategy (name, value) "
-                     "VALUES ('nr_file_switch', 'size');");
-        EXEC_OR_FAIL("INSERT INTO record_strategy (name, value) "
-                     "VALUES ('nr_file_size', 50);");
-        EXEC_OR_FAIL("INSERT INTO record_strategy (name, value) "
-                     "VALUES ('nr_file_period', 10);");
-        EXEC_OR_FAIL("INSERT INTO record_strategy (name, value) "
-                     "VALUES ('er_file_period', 10);");
-        EXEC_OR_FAIL("INSERT INTO record_strategy (name, value) "
-                     "VALUES ('storage_full', 'stop');");
+        EXEC_OR_FAIL("INSERT INTO record_strategy (name, value, vtype) "
+                     "VALUES ('nr_file_switch', 'size', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO record_strategy (name, value, vtype) "
+                     "VALUES ('nr_file_size', '50', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO record_strategy (name, value, vtype) "
+                     "VALUES ('nr_file_period', '10', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO record_strategy (name, value, vtype) "
+                     "VALUES ('er_file_period', '10', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO record_strategy (name, value, vtype) "
+                     "VALUES ('storage_full', 'stop', 'STRING');");
         
         return TRUE;
     }
@@ -612,7 +620,7 @@ gchar *ipcam_database_get_user_password(IpcamDatabase *database, const gchar *us
     
     return password;
 }
-void ipcam_database_set_user_privilege(IpcamDatabase *database, const gchar *username, guint privilege)
+void ipcam_database_set_user_role(IpcamDatabase *database, const gchar *username, const gchar *role)
 {
     g_return_if_fail(IPCAM_IS_DATABASE(database));
     GomResource *resource = NULL;
@@ -621,31 +629,31 @@ void ipcam_database_set_user_privilege(IpcamDatabase *database, const gchar *use
     resource = ipcam_database_get_resource(database, IPCAM_USERS_TYPE, username);
     if (resource)
     {
-        g_object_set(resource, "privilege", privilege, NULL);
+        g_object_set(resource, "role", role, NULL);
         gom_resource_save_sync(resource, &error);
         g_object_unref(resource);
     }
 
     if (error)
     {
-        g_print("save users privilege error: %s\n", error->message);
+        g_print("save users role error: %s\n", error->message);
         g_error_free(error);
     }
 }
-guint ipcam_database_get_user_privilege(IpcamDatabase *database, const gchar *username)
+gchar *ipcam_database_get_user_role(IpcamDatabase *database, const gchar *username)
 {
-    g_return_val_if_fail(IPCAM_IS_DATABASE(database), FALSE);
+    g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
     GomResource *resource = NULL;
-    guint privilege = 0;
+    gchar *role = NULL;
 
     resource = ipcam_database_get_resource(database, IPCAM_USERS_TYPE, username);
     if (resource)
     {
-        g_object_get(resource, "privilege", &privilege, NULL);
+        g_object_get(resource, "role", &role, NULL);
         g_object_unref(resource);
     }
     
-    return privilege;
+    return role;
 }
 void ipcam_database_del_user(IpcamDatabase *database, const gchar *username)
 {
@@ -715,7 +723,7 @@ gboolean ipcam_database_get_osd(IpcamDatabase *database,
     return ret;
 }
 
-void ipcam_database_set_video(IpcamDatabase *database, const gchar *name, GVariant *value)
+void ipcam_database_set_video(IpcamDatabase *database, const gchar *name, const GVariant *value)
 {
     g_return_if_fail(IPCAM_IS_DATABASE(database));
     GomResource *resource = NULL;
@@ -752,7 +760,7 @@ GVariant *ipcam_database_get_video(IpcamDatabase *database, const gchar *name)
     return value;
 }
 
-void ipcam_database_set_image(IpcamDatabase *database, const gchar *name, GVariant *value)
+void ipcam_database_set_image(IpcamDatabase *database, const gchar *name, const GVariant *value)
 {
     g_return_if_fail(IPCAM_IS_DATABASE(database));
     GomResource *resource = NULL;
@@ -787,7 +795,7 @@ GVariant *ipcam_database_get_image(IpcamDatabase *database, const gchar *name)
     
     return value;
 }
-void ipcam_database_set_network(IpcamDatabase *database, const gchar *name, guint value)
+void ipcam_database_set_network(IpcamDatabase *database, const gchar *name, const gchar *value)
 {
     g_return_if_fail(IPCAM_IS_DATABASE(database));
     GomResource *resource = NULL;
@@ -807,11 +815,11 @@ void ipcam_database_set_network(IpcamDatabase *database, const gchar *name, guin
         g_error_free(error);
     }
 }
-gint ipcam_database_get_network(IpcamDatabase *database, const gchar *name)
+gchar *ipcam_database_get_network(IpcamDatabase *database, const gchar *name)
 {
-    g_return_val_if_fail(IPCAM_IS_DATABASE(database), -1);
+    g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
     GomResource *resource = NULL;
-    gint value = -1;
+    gchar *value = NULL;
     
     resource = ipcam_database_get_resource(database, IPCAM_NETWORK_TYPE, name);
     if (resource)

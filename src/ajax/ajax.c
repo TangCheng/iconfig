@@ -177,7 +177,9 @@ static gpointer ajax_worker(gpointer data)
     gchar *address;
     guint port;
     g_object_get(ajax, "address", &address, "port", &port, NULL);
-    GSocketAddress *socket_address = g_inet_socket_address_new_from_string(address, port);
+    GInetAddress *inet_address = g_inet_address_new_from_string(address);
+    GSocketAddress *socket_address = g_inet_socket_address_new(inet_address, port);
+    //g_free(inet_address);
     g_free(address);
     GSocket *server = g_socket_new(G_SOCKET_FAMILY_IPV4,
                                    G_SOCKET_TYPE_STREAM,
