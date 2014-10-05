@@ -208,35 +208,34 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
         
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS osd ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name     TEXT NOT NULL,"
-                     "stream   TEXT NOT NULL,"
+                     "name     TEXT UNIQUE NOT NULL,"
                      "isshow   BOOLEAN,"
                      "size     INTEGER,"
-                     "x        INTEGER,"
-                     "y        INTEGER,"
+                     "left     INTEGER,"
+                     "top      INTEGER,"
                      "color    INTEGER"
                      ");");
-        EXEC_OR_FAIL("INSERT INTO osd (name, stream, isshow, size, x, y, color) "
-                     "VALUES ('datetime', 'master', 1, 20, 10, 35, 0);");
-        EXEC_OR_FAIL("INSERT INTO osd (name, stream, isshow, size, x, y, color) "
-                     "VALUES ('device_name', 'master', 1, 20, 10, 10, 0);");
-        EXEC_OR_FAIL("INSERT INTO osd (name, stream, isshow, size, x, y, color) "
-                     "VALUES ('comment', 'master', 1, 20, 800, 10, 0);");
-        EXEC_OR_FAIL("INSERT INTO osd (name, stream, isshow, size, x, y, color) "
-                     "VALUES ('frame_rate', 'master', 1, 20, 10, 945, 0);");
-        EXEC_OR_FAIL("INSERT INTO osd (name, stream, isshow, size, x, y, color) "
-                     "VALUES ('bit_rate', 'master', 1, 20, 10, 970, 0);");
+        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, left, top, color) "
+                     "VALUES ('master:datetime', 1, 20, 10, 35, 0);");
+        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, left, top, color) "
+                     "VALUES ('master:device_name', 1, 20, 10, 10, 0);");
+        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, left, top, color) "
+                     "VALUES ('master:comment', 1, 20, 800, 10, 0);");
+        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, left, top, color) "
+                     "VALUES ('master:frame_rate', 1, 20, 10, 945, 0);");
+        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, left, top, color) "
+                     "VALUES ('master:bit_rate', 1, 20, 10, 970, 0);");
         
-        EXEC_OR_FAIL("INSERT INTO osd (name, stream, isshow, size, x, y, color) "
-                     "VALUES ('datetime', 'slave', 1, 20, 10, 35, 0);");
-        EXEC_OR_FAIL("INSERT INTO osd (name, stream, isshow, size, x, y, color) "
-                     "VALUES ('device_name', 'slave', 1, 20, 10, 10, 0);");
-        EXEC_OR_FAIL("INSERT INTO osd (name, stream, isshow, size, x, y, color) "
-                     "VALUES ('comment', 'slave', 1, 20, 800, 10, 0);");
-        EXEC_OR_FAIL("INSERT INTO osd (name, stream, isshow, size, x, y, color) "
-                     "VALUES ('frame_rate', 'slave', 1, 20, 10, 945, 0);");
-        EXEC_OR_FAIL("INSERT INTO osd (name, stream, isshow, size, x, y, color) "
-                     "VALUES ('bit_rate', 'slave', 1, 20, 10, 970, 0);");
+        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, left, top, color) "
+                     "VALUES ('slave:datetime', 1, 20, 10, 35, 0);");
+        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, left, top, color) "
+                     "VALUES ('slave:device_name', 1, 20, 10, 10, 0);");
+        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, left, top, color) "
+                     "VALUES ('slave:comment', 1, 20, 800, 10, 0);");
+        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, left, top, color) "
+                     "VALUES ('slave:frame_rate', 1, 20, 10, 945, 0);");
+        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, left, top, color) "
+                     "VALUES ('slave:bit_rate', 1, 20, 10, 970, 0);");
 
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS szyc ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -246,7 +245,7 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
         EXEC_OR_FAIL("INSERT INTO szyc (name, value) "
                      "VALUES ('train_num', '');");
         EXEC_OR_FAIL("INSERT INTO szyc (name, value) "
-                     "VALUES ('trunk_num', '');");
+                     "VALUES ('carriage_num', '');");
         EXEC_OR_FAIL("INSERT INTO szyc (name, value) "
                      "VALUES ('position_num', '');");
 
@@ -262,8 +261,6 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "name     TEXT UNIQUE NOT NULL,"
                      "value    TEXT"
                      ");");
-        EXEC_OR_FAIL("INSERT INTO network_static (name, value) "
-                     "VALUES ('hwaddr', '00:00:12:23:34:45');");
         EXEC_OR_FAIL("INSERT INTO network_static (name, value) "
                      "VALUES ('ipaddr', '192.168.1.217');");
         EXEC_OR_FAIL("INSERT INTO network_static (name, value) "
@@ -678,8 +675,8 @@ void ipcam_database_set_osd(IpcamDatabase *database,
                             const gchar *name,
                             gboolean isshow,
                             guint size,
-                            guint x,
-                            guint y,
+                            guint left,
+                            guint top,
                             guint color)
 {
     g_return_if_fail(IPCAM_IS_DATABASE(database));
@@ -689,7 +686,13 @@ void ipcam_database_set_osd(IpcamDatabase *database,
     resource = ipcam_database_get_resource(database, IPCAM_OSD_TYPE, name);
     if (resource)
     {
-        g_object_set(resource, "isshow", isshow, "size", size, "x", x, "y", y, "color", color, NULL);
+        g_object_set(resource,
+                     "isshow", isshow,
+                     "size", size,
+                     "left", left,
+                     "top", top,
+                     "color", color,
+                     NULL);
         gom_resource_save_sync(resource, &error);
         g_object_unref(resource);
     }
@@ -704,8 +707,8 @@ gboolean ipcam_database_get_osd(IpcamDatabase *database,
                                 const gchar *name,
                                 gboolean *isshow,
                                 guint *size,
-                                guint *x,
-                                guint *y,
+                                guint *left,
+                                guint *top,
                                 guint *color)
 {
     g_return_val_if_fail(IPCAM_IS_DATABASE(database), FALSE);
@@ -715,7 +718,13 @@ gboolean ipcam_database_get_osd(IpcamDatabase *database,
     resource = ipcam_database_get_resource(database, IPCAM_OSD_TYPE, name);
     if (resource)
     {
-        g_object_get(resource, "isshow", isshow, "size", size, "x", x, "y", y, "color", color, NULL);
+        g_object_get(resource,
+                     "isshow", isshow,
+                     "size", size,
+                     "left", left,
+                     "top", top,
+                     "color", color,
+                     NULL);
         g_object_unref(resource);
         ret = TRUE;
     }
@@ -765,11 +774,35 @@ void ipcam_database_set_image(IpcamDatabase *database, const gchar *name, const 
     g_return_if_fail(IPCAM_IS_DATABASE(database));
     GomResource *resource = NULL;
     GError *error = NULL;
+    gchar *vtype = NULL;
 
     resource = ipcam_database_get_resource(database, IPCAM_IMAGE_TYPE, name);
     if (resource)
     {
-        g_object_set(resource, "value", value, NULL);
+        g_object_get(resource, "vtype", &vtype, NULL);
+        if (vtype && g_str_equal(vtype, "INTEGER"))
+        {
+            gchar *temp_value = g_malloc0(16);
+            g_snprintf(temp_value, 16, "%u", g_variant_get_uint32((GVariant *)value));
+            g_object_set(resource, "value", temp_value, NULL);
+            g_free(temp_value);
+        }
+        else if (vtype && g_str_equal(vtype, "BOOLEAN"))
+        {
+            gchar *temp_value = g_malloc0(8);
+            g_snprintf(temp_value, 16, "%u", g_variant_get_boolean((GVariant *)value));
+            g_object_set(resource, "value", temp_value, NULL);
+            g_free(temp_value);
+        }
+        else if (vtype && g_str_equal(vtype, "STRING"))
+        {
+            g_object_set(resource, "value", g_variant_get_string((GVariant *)value, NULL), NULL);
+        }
+        else
+        {
+            g_warn_if_reached();
+        }
+        g_free(vtype);
         gom_resource_save_sync(resource, &error);
         g_object_unref(resource);
     }
@@ -785,12 +818,37 @@ GVariant *ipcam_database_get_image(IpcamDatabase *database, const gchar *name)
     g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
     GomResource *resource = NULL;
     GVariant *value = NULL;
+    gchar *vtype = NULL;
+    gchar *temp_value = NULL;
     
     resource = ipcam_database_get_resource(database, IPCAM_IMAGE_TYPE, name);
     if (resource)
     {
-        g_object_get(resource, "value", &value, NULL);
+        g_object_get(resource, "value", &temp_value, "vtype", &vtype, NULL);
         g_object_unref(resource);
+    }
+
+    if (temp_value)
+    {
+        if (vtype && g_str_equal(vtype, "INTEGER"))
+        {
+            value = g_variant_new_uint32(g_ascii_strtoull(temp_value, NULL, 10));
+        }
+        else if (vtype && g_str_equal(vtype, "BOOLEAN"))
+        {
+            value = g_variant_new_boolean(g_ascii_strtoull(temp_value, NULL, 10));
+        }
+        else if (vtype && g_str_equal(vtype, "STRING"))
+        {
+            value = g_variant_new_string(temp_value);
+        }
+        else
+        {
+            g_warn_if_reached();
+        }
+        
+        g_free(temp_value);
+        g_free(vtype);
     }
     
     return value;
@@ -935,7 +993,7 @@ gint ipcam_database_get_network_port(IpcamDatabase *database, const gchar *name)
     
     return value;
 }
-void ipcam_database_set_datetime(IpcamDatabase *database, const gchar *name, guint int_value, gchar *str_value)
+void ipcam_database_set_datetime(IpcamDatabase *database, const gchar *name, const GVariant *value)
 {
     g_return_if_fail(IPCAM_IS_DATABASE(database));
     GomResource *resource = NULL;
@@ -944,13 +1002,29 @@ void ipcam_database_set_datetime(IpcamDatabase *database, const gchar *name, gui
     resource = ipcam_database_get_resource(database, IPCAM_DATETIME_TYPE, name);
     if (resource)
     {
-        g_object_set(resource, "intvalue", int_value, NULL);
-        if (str_value)
+        gchar *temp_value = NULL;
+        if (g_variant_is_of_type((GVariant *)value, G_VARIANT_TYPE_STRING))
         {
-            g_object_set(resource, "strvalue", str_value, NULL);
+            temp_value = g_strdup(g_variant_get_string((GVariant *)value, NULL));
         }
-        gom_resource_save_sync(resource, &error);
+        else if (g_variant_is_of_type((GVariant *)value, G_VARIANT_TYPE_BOOLEAN))
+        {
+            temp_value = g_malloc0(8);
+            g_snprintf(temp_value, 8, "%u", g_variant_get_boolean((GVariant *)value));
+        }
+        else
+        {
+            g_warn_if_reached();
+        }
+
+        if (temp_value)
+        {
+            g_object_set(resource, "value", &temp_value, NULL);
+            gom_resource_save_sync(resource, &error);
+        }
+        
         g_object_unref(resource);
+        g_free(temp_value);
     }
 
     if (error)
@@ -959,15 +1033,35 @@ void ipcam_database_set_datetime(IpcamDatabase *database, const gchar *name, gui
         g_error_free(error);
     }
 }
-void ipcam_database_get_datetime(IpcamDatabase *database, const gchar *name, guint *int_value, gchar **str_value)
+GVariant *ipcam_database_get_datetime(IpcamDatabase *database, const gchar *name)
 {
-    g_return_if_fail(IPCAM_IS_DATABASE(database));
+    g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
     GomResource *resource = NULL;
+    gchar *temp_value = NULL;
+    gchar *vtype = NULL;
+    GVariant *value = NULL;
     
     resource = ipcam_database_get_resource(database, IPCAM_DATETIME_TYPE, name);
     if (resource)
     {
-        g_object_get(resource, "intvalue", int_value, "strvalue", str_value, NULL);
+        g_object_get(resource, "value", &temp_value, "vtype", &vtype, NULL);
         g_object_unref(resource);
     }
+
+    if (vtype && g_str_equal(vtype, "STRING"))
+    {
+        value = g_variant_new_string(temp_value);
+    }
+    else if (vtype && g_str_equal(vtype, "BOOLEAN"))
+    {
+        value = g_variant_new_boolean(g_ascii_strtoull(temp_value, NULL, 10));
+    }
+    else
+    {
+        g_warn_if_reached();
+    }
+
+    g_free(temp_value);
+    g_free(vtype);
+    return value;
 }

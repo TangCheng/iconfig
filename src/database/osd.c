@@ -4,7 +4,6 @@ enum {
   PROP_0,
   PROP_ID,
   PROP_NAME,
-  PROP_STREAM,
   PROP_IS_SHOW,
   PROP_SIZE,
   PROP_LEFT,
@@ -17,7 +16,6 @@ typedef struct _IpcamOsdPrivate
 {
     guint id;
     gchar *name;
-    gchar *stream;
     gboolean is_show;
     guint size;
     guint left;
@@ -33,7 +31,6 @@ static void ipcam_osd_finalize(GObject *object)
 {
     IpcamOsdPrivate *priv = ipcam_osd_get_instance_private(IPCAM_OSD(object));
     g_free(priv->name);
-    g_free(priv->stream);
     G_OBJECT_CLASS(ipcam_osd_parent_class)->finalize(object);
 }
 static void ipcam_osd_set_property(GObject      *object,
@@ -54,12 +51,6 @@ static void ipcam_osd_set_property(GObject      *object,
         {
             g_free(priv->name);
             priv->name = g_value_dup_string(value);
-        }
-        break;
-    case PROP_STREAM:
-        {
-            g_free(priv->stream);
-            priv->stream = g_value_dup_string(value);
         }
         break;
     case PROP_IS_SHOW:
@@ -109,11 +100,6 @@ static void ipcam_osd_get_property(GObject    *object,
     case PROP_NAME:
         {
             g_value_set_string(value, priv->name);
-        }
-        break;
-     case PROP_STREAM:
-        {
-            g_value_set_string(value, priv->stream);
         }
         break;
     case PROP_IS_SHOW:
@@ -173,12 +159,6 @@ static void ipcam_osd_class_init(IpcamOsdClass *klass)
                             "Name.",
                             NULL, // default value
                             G_PARAM_READWRITE);
-    obj_properties[PROP_STREAM] =
-        g_param_spec_string("stream",
-                            "Stream",
-                            "Stream.",
-                            NULL, // default value
-                            G_PARAM_READWRITE);
     obj_properties[PROP_IS_SHOW] =
         g_param_spec_boolean("isshow",
                              "Show?",
@@ -220,6 +200,6 @@ static void ipcam_osd_class_init(IpcamOsdClass *klass)
 
     g_object_class_install_properties(object_class, N_PROPERTIES, obj_properties);
     gom_resource_class_set_primary_key(resource_class, "id");
+    gom_resource_class_set_unique(resource_class, "name");
     gom_resource_class_set_notnull(resource_class, "name");
-    gom_resource_class_set_notnull(resource_class, "stream");
 }

@@ -5,6 +5,7 @@ enum {
   PROP_ID,
   PROP_NAME,
   PROP_VALUE,
+  PROP_VTYPE,
   N_PROPERTIES
 };
 
@@ -12,7 +13,8 @@ typedef struct _IpcamDatetimePrivate
 {
     guint id;
     gchar *name;
-    GVariant *value;
+    gchar *value;
+    gchar *vtype;
 } IpcamDatetimePrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE(IpcamDatetime, ipcam_datetime, GOM_TYPE_RESOURCE);
@@ -24,6 +26,7 @@ static void ipcam_datetime_finalize(GObject *object)
     IpcamDatetimePrivate *priv = ipcam_datetime_get_instance_private(IPCAM_DATETIME(object));
     g_free(priv->name);
     g_free(priv->value);
+    g_free(priv->vtype);
     G_OBJECT_CLASS(ipcam_datetime_parent_class)->finalize(object);
 }
 static void ipcam_datetime_set_property(GObject      *object,
@@ -49,7 +52,13 @@ static void ipcam_datetime_set_property(GObject      *object,
     case PROP_VALUE:
         {
             g_free(priv->value);
-            priv->value = g_value_dup_variant(value);
+            priv->value = g_value_dup_string(value);
+        }
+        break;
+    case PROP_VTYPE:
+        {
+            g_free(priv->vtype);
+            priv->vtype = g_value_dup_string(value);
         }
         break;
     default:
@@ -78,7 +87,12 @@ static void ipcam_datetime_get_property(GObject    *object,
         break;
     case PROP_VALUE:
         {
-            g_value_set_variant(value, priv->value);
+            g_value_set_string(value, priv->value);
+        }
+        break;
+    case PROP_VTYPE:
+        {
+            g_value_set_string(value, priv->vtype);
         }
         break;
     default:
@@ -114,15 +128,21 @@ static void ipcam_datetime_class_init(IpcamDatetimeClass *klass)
                             NULL, // default value
                             G_PARAM_READWRITE);
     obj_properties[PROP_VALUE] =
-        g_param_spec_variant("value",
-                             "Parameter value",
-                             "Datetime parameter value.",
-                             G_VARIANT_TYPE_ANY,
-                             NULL, // default value
-                             G_PARAM_READWRITE);
+        g_param_spec_string("value",
+                            "Parameter value",
+                            "Datetime parameter value.",
+                            NULL, // default value
+                            G_PARAM_READWRITE);
+    obj_properties[PROP_VTYPE] =
+        g_param_spec_string("vtype",
+                            "Parameter value",
+                            "Datetime parameter value.",
+                            NULL, // default value
+                            G_PARAM_READWRITE);
 
     g_object_class_install_properties(object_class, N_PROPERTIES, obj_properties);
     gom_resource_class_set_primary_key(resource_class, "id");
     gom_resource_class_set_unique(resource_class, "name");
     gom_resource_class_set_notnull(resource_class, "name");
+    gom_resource_class_set_notnull(resource_class, "vtype");
 }

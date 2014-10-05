@@ -54,30 +54,46 @@ ipcam_datetime_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNod
     for (i = 0; i < json_array_get_length(req_array); i++)
     {
         const gchar *name = json_array_get_string_element(req_array, i);
-        gchar *str_val = NULL;
-        guint int_val = 0;
+        GVariant *value = NULL;
+        gchar *datetime = NULL;
 
         if (g_str_equal(name, "datetime"))
         {
-            sysutils_datetime_get_datetime(&str_val);
+            sysutils_datetime_get_datetime(&datetime);
         }
         else
         {
-            ipcam_iconfig_get_datetime(iconfig, name, &int_val, &str_val);
+            value = ipcam_iconfig_get_datetime(iconfig, name);
         }
 
-        json_builder_set_member_name(builder, name);
-        json_builder_begin_object(builder);
-        json_builder_set_member_name(builder, "int_value");
-        json_builder_add_int_value(builder, int_val);
-        if (str_val)
+        if (datetime)
         {
-            json_builder_set_member_name(builder, "str_value");
-            json_builder_add_string_value(builder, str_val);
-
-            g_free(str_val);
+            json_builder_set_member_name(builder, name);
+            json_builder_add_string_value(builder, datetime);
+            g_free(datetime);
         }
-        json_builder_end_object(builder);
+        else if (value)
+        {
+            if (g_variant_is_of_type(value, G_VARIANT_TYPE_STRING))
+            {
+                json_builder_set_member_name(builder, name);
+                json_builder_add_string_value(builder, g_variant_get_string(value, NULL));
+            }
+            else if (g_variant_is_of_type(value, G_VARIANT_TYPE_BOOLEAN))
+            {
+                json_builder_set_member_name(builder, name);
+                json_builder_add_boolean_value(builder, g_variant_get_boolean(value));
+            }
+            else
+            {
+                g_warn_if_reached();
+            }
+            g_variant_unref(value);
+        }
+        else
+        {
+            g_warn_if_reached();
+        }
     }
     json_builder_end_object(builder);
     json_builder_end_object(builder);
@@ -107,38 +123,35 @@ ipcam_datetime_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNod
     json_builder_begin_object(builder);
     for (item = g_list_first(members); item; item = g_list_next(item))
     {
-        JsonObject *val_obj;
+        JsonNode *val_node;
         const gchar *name = item->data;
-        guint int_val;
-        gchar *str_val = NULL;
+        GVariant *value = NULL;
 
-        val_obj = json_object_get_object_member (req_obj, name);
-        int_val = json_object_get_int_member (val_obj, "int_value");
-        str_val = (gchar *)json_object_get_string_member(val_obj, "str_value");
+        val_node = json_object_get_member (req_obj, name);
 
         if (g_strcmp0 (name, "datetime") == 0)
         {
-            sysutils_datetime_set_datetime(str_val);
-            sysutils_datetime_get_datetime(&str_val);
+            sysutils_datetime_set_datetime((gchar *)json_node_get_string(val_node));
         }
         else
         {
-            ipcam_iconfig_set_datetime(iconfig, name, int_val, str_val);
-            ipcam_iconfig_get_datetime(iconfig, name, &int_val, &str_val);
+            switch (json_node_get_value_type(val_node))
+            {
+            case G_TYPE_STRING:
+                value = g_variant_new_string(json_node_get_string(val_node));
+                break;
+            case G_TYPE_BOOLEAN:
+                value = g_variant_new_boolean(json_node_get_boolean(val_node));
+                break;
+            default:
+                g_warn_if_reached();
+                break;
+            }
+            if (value)
+            {
+                ipcam_iconfig_set_datetime(iconfig, name, value);
+            }
         }
-
-        json_builder_set_member_name (builder, name);
-        json_builder_begin_object(builder);
-        json_builder_set_member_name(builder, "int_value");
-        json_builder_add_int_value(builder, int_val);
-        if (str_val)
-        {
-            json_builder_set_member_name(builder, "str_value");
-            json_builder_add_string_value(builder, str_val);
-
-            g_free(str_val);
-        }
-        json_builder_end_object(builder);
     }
     json_builder_end_object(builder);
     json_builder_end_object(builder);

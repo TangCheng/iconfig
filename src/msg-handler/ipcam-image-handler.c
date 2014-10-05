@@ -53,20 +53,22 @@ ipcam_image_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode *
     for (i = 0; i < json_array_get_length(req_array); i++)
     {
         const gchar *name = json_array_get_string_element(req_array, i);
-        //GVariant *value = ipcam_iconfig_get_image(iconfig, name);
-        guint *data = g_new(guint, 1);
-        *data = 128;
-        GBytes *value = g_bytes_new(&data, sizeof(guint));
-        ipcam_iconfig_set_image(iconfig, name, value);
+        GVariant *value = ipcam_iconfig_get_image(iconfig, name);
 
-        json_builder_set_member_name(builder, name);
         if (g_variant_is_of_type(value, G_VARIANT_TYPE_STRING))
         {
+            json_builder_set_member_name(builder, name);
             json_builder_add_string_value(builder, g_variant_get_string(value, NULL));
         }
         else if (g_variant_is_of_type(value, G_VARIANT_TYPE_UINT32))
         {
+            json_builder_set_member_name(builder, name);
             json_builder_add_int_value(builder, g_variant_get_uint32(value));
+        }
+        else if (g_variant_is_of_type(value, G_VARIANT_TYPE_BOOLEAN))
+        {
+            json_builder_set_member_name(builder, name);            
+            json_builder_add_boolean_value(builder, g_variant_get_boolean(value));
         }
         else
         {
@@ -110,20 +112,42 @@ ipcam_image_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode *
         {
             value = g_variant_new_string(json_node_get_string(node));
         }
-        else
+        else if (g_type_is_a(json_node_get_value_type(node), G_TYPE_UINT))
         {
             value = g_variant_new_uint32(json_node_get_int(node));
         }
-        ipcam_iconfig_set_image(iconfig, name, value);
-
-        json_builder_set_member_name(builder, name);
-        if (g_variant_is_of_type(value, G_VARIANT_TYPE_STRING))
+        else if (g_type_is_a(json_node_get_value_type(node), G_TYPE_BOOLEAN))
         {
-            json_builder_add_string_value(builder, g_variant_get_string(value, NULL));
+            value = g_variant_new_boolean(json_node_get_boolean(node));
         }
         else
         {
+            g_warn_if_reached();
+        }
+        
+        if (value)
+        {
+            ipcam_iconfig_set_image(iconfig, name, value);
+        }
+
+        if (g_variant_is_of_type(value, G_VARIANT_TYPE_STRING))
+        {
+            json_builder_set_member_name(builder, name);
+            json_builder_add_string_value(builder, g_variant_get_string(value, NULL));
+        }
+        else if (g_variant_is_of_type(value, G_VARIANT_TYPE_UINT32))
+        {
+            json_builder_set_member_name(builder, name);
             json_builder_add_int_value(builder, g_variant_get_uint32(value));
+        }
+        else if (g_variant_is_of_type(value, G_VARIANT_TYPE_BOOLEAN))
+        {
+            json_builder_set_member_name(builder, name);
+            json_builder_add_boolean_value(builder, g_variant_get_boolean(value));
+        }
+        else
+        {
+            g_warn_if_reached();
         }
 
         g_object_unref(value);

@@ -21,6 +21,7 @@
 #include <glib/gprintf.h>
 #include "ipcam-base-info-handler.h"
 #include "iconfig.h"
+#include "sysutils.h"
 
 G_DEFINE_TYPE (IpcamBaseInfoMsgHandler, ipcam_base_info_msg_handler, IPCAM_TYPE_MESSAGE_HANDLER);
 
@@ -53,7 +54,16 @@ ipcam_base_info_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNo
     for (i = 0; i < json_array_get_length(req_array); i++)
     {
         const gchar *name = json_array_get_string_element(req_array, i);
-        gchar *value = ipcam_iconfig_get_base_info(iconfig, name);
+        gchar *value = NULL;
+        if (g_str_equal(name, "hwaddr"))
+        {
+            const gchar *netif = ipcam_base_app_get_config(IPCAM_BASE_APP(iconfig), "netif");
+            sysutils_network_get_hwaddr(netif, &value);
+        }
+        else
+        {
+            value = ipcam_iconfig_get_base_info(iconfig, name);
+        }
 
         json_builder_set_member_name(builder, name);
         json_builder_add_string_value(builder, value);
@@ -90,14 +100,17 @@ ipcam_base_info_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNo
     {
         const gchar *name = item->data;
         const gchar *value = json_object_get_string_member(req_obj, name);
-        ipcam_iconfig_set_base_info(iconfig, name, value);
-        value = ipcam_iconfig_get_base_info(iconfig, name);
-        if (value)
+        if (!g_str_equal(name, "hwaddr"))
         {
-            json_builder_set_member_name(builder, name);
-            json_builder_add_string_value(builder, value);
+            ipcam_iconfig_set_base_info(iconfig, name, value);
+            value = ipcam_iconfig_get_base_info(iconfig, name);
+            if (value)
+            {
+                json_builder_set_member_name(builder, name);
+                json_builder_add_string_value(builder, value);
 
-            g_free((gpointer)value);
+                g_free((gpointer)value);
+            }
         }
     }
     json_builder_end_object(builder);

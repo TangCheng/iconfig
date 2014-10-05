@@ -5,6 +5,7 @@ enum {
   PROP_ID,
   PROP_NAME,
   PROP_VALUE,
+  PROP_VTYPE,
   N_PROPERTIES
 };
 
@@ -12,23 +13,20 @@ typedef struct _IpcamImagePrivate
 {
     guint id;
     gchar *name;
-    GBytes *value;
+    gchar *value;
+    gchar *vtype;
 } IpcamImagePrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE(IpcamImage, ipcam_image, GOM_TYPE_RESOURCE);
 
 static GParamSpec *obj_properties[N_PROPERTIES] = {NULL, };
 
-static void ipcam_image_from_bytes(GBytes *bytes, GValue *value)
-{
-}
-
 static void ipcam_image_finalize(GObject *object)
 {
     IpcamImagePrivate *priv = ipcam_image_get_instance_private(IPCAM_IMAGE(object));
     g_free(priv->name);
     g_free(priv->value);
-    g_param_spec_set_qdata(obj_properties[PROP_VALUE], GOM_RESOURCE_FROM_BYTES_FUNC, NULL);
+    g_free(priv->vtype);
     G_OBJECT_CLASS(ipcam_image_parent_class)->finalize(object);
 }
 static void ipcam_image_set_property(GObject      *object,
@@ -53,7 +51,12 @@ static void ipcam_image_set_property(GObject      *object,
         break;
     case PROP_VALUE:
         {
-            priv->value = g_value_get_boxed(value);
+            priv->value = g_value_dup_string(value);
+        }
+        break;
+    case PROP_VTYPE:
+        {
+            priv->vtype = g_value_dup_string(value);
         }
         break;
     default:
@@ -82,7 +85,12 @@ static void ipcam_image_get_property(GObject    *object,
         break;
     case PROP_VALUE:
         {
-            g_value_set_boxed(value, priv->value);
+            g_value_set_string(value, priv->value);
+        }
+        break;
+    case PROP_VTYPE:
+        {
+            g_value_set_string(value, priv->vtype);
         }
         break;
     default:
@@ -118,17 +126,21 @@ static void ipcam_image_class_init(IpcamImageClass *klass)
                             NULL, // default value
                             G_PARAM_READWRITE);
     obj_properties[PROP_VALUE] =
-        g_param_spec_boxed("value",
-                             "Parameter value",
-                             "Image parameter value.",
-                             G_TYPE_BYTES,
-                             G_PARAM_READWRITE);
-    g_param_spec_set_qdata(obj_properties[PROP_VALUE],
-                           GOM_RESOURCE_FROM_BYTES_FUNC,
-                           ipcam_image_from_bytes);
+        g_param_spec_string("value",
+                            "Parameter value",
+                            "Image parameter value.",
+                            NULL,
+                            G_PARAM_READWRITE);
+    obj_properties[PROP_VTYPE] =
+        g_param_spec_string("vtype",
+                            "Parameter value data type",
+                            "Image parameter value data type.",
+                            NULL,
+                            G_PARAM_READWRITE);
 
     g_object_class_install_properties(object_class, N_PROPERTIES, obj_properties);
     gom_resource_class_set_primary_key(resource_class, "id");
     gom_resource_class_set_unique(resource_class, "name");
     gom_resource_class_set_notnull(resource_class, "name");
+    gom_resource_class_set_notnull(resource_class, "vtype");
 }

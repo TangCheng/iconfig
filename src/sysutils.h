@@ -27,6 +27,7 @@ int sysutils_make_directory(char *path, long mode);
 
 int sysutils_network_if_indextoname(unsigned int ifindex, char *ifname);
 int sysutils_network_set_hwaddr(const char *ifname, const char *hwaddr);
+int sysutils_network_get_hwaddr(const char *ifname, char **hwaddr);
 int sysutils_network_get_address(const char *ifname,
                                  char **ipaddr,
                                  char **netmask,

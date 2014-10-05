@@ -159,7 +159,7 @@ GVariant *ipcam_iconfig_get_image(IpcamIConfig *iconfig, const gchar *name)
     return ipcam_database_get_image(priv->database, (gchar *)name);
 }
 
-void ipcam_iconfig_set_image(IpcamIConfig *iconfig, const gchar *name, GBytes *value)
+void ipcam_iconfig_set_image(IpcamIConfig *iconfig, const gchar *name, GVariant *value)
 {
     g_return_if_fail(IPCAM_IS_ICONFIG(iconfig));
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
@@ -231,20 +231,20 @@ void ipcam_iconfig_set_network_port(IpcamIConfig *iconfig, const gchar *name, gu
     ipcam_database_set_network_port(priv->database, name, value);
 }
 
-void ipcam_iconfig_set_datetime(IpcamIConfig *iconfig, const gchar *name, guint int_value, gchar *str_value)
+void ipcam_iconfig_set_datetime(IpcamIConfig *iconfig, const gchar *name, const GVariant *value)
 {
     g_return_if_fail(IPCAM_IS_ICONFIG(iconfig));
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
 
-    ipcam_database_set_datetime (priv->database, name, int_value, str_value);
+    ipcam_database_set_datetime (priv->database, name, value);
 }
 
-void ipcam_iconfig_get_datetime(IpcamIConfig *iconfig, const gchar *name, guint *int_value, gchar **str_value)
+GVariant *ipcam_iconfig_get_datetime(IpcamIConfig *iconfig, const gchar *name)
 {
-    g_return_if_fail(IPCAM_IS_ICONFIG(iconfig));
+    g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), NULL);
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
 
-    ipcam_database_get_datetime (priv->database, name, int_value, str_value);
+    return ipcam_database_get_datetime (priv->database, name);
 }
 
 GList *ipcam_iconfig_get_users(IpcamIConfig *iconfig)

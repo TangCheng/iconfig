@@ -256,6 +256,25 @@ int sysutils_network_set_hwaddr(const char *ifname, const char *hwaddr)
     return 0;
 }
 
+int sysutils_network_get_hwaddr(const char *ifname, char **hwaddr)
+{
+    char *cmd;
+    FILE *fp;
+    int ret = -1;
+
+    asprintf(&cmd, "ifconfig %s | grep HWaddr | awk \'{print $5}\'", ifname);
+    fp = popen(cmd, "r");
+    free(cmd);
+    if (fp == NULL)
+        return ret;
+
+    *hwaddr = calloc(18, sizeof(char));
+    ret = fread(*hwaddr, sizeof(char), 17, fp);
+    pclose(fp);
+    
+    return ret;
+}
+
 int sysutils_network_get_address(const char *ifname,
                                  char **ipaddr,
                                  char **netmask,

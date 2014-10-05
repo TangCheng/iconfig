@@ -21,6 +21,7 @@
 #include <glib/gprintf.h>
 #include "ipcam-osd-handler.h"
 #include "iconfig.h"
+#include "common.h"
 
 G_DEFINE_TYPE (IpcamOsdMsgHandler, ipcam_osd_msg_handler, IPCAM_TYPE_MESSAGE_HANDLER);
 
@@ -54,10 +55,10 @@ ipcam_osd_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode *re
     {
         gboolean isshow;
         guint size;
-        guint x, y;
-        guint color;
+        guint left, top;
+        Color color;
         const gchar *name = json_array_get_string_element(req_array, i);
-        if (ipcam_iconfig_get_osd(iconfig, name, &isshow, &size, &x, &y, &color))
+        if (ipcam_iconfig_get_osd(iconfig, name, &isshow, &size, &left, &top, &color.value))
         {
             json_builder_begin_object(builder);
             json_builder_set_member_name(builder, "name");
@@ -66,12 +67,21 @@ ipcam_osd_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode *re
             json_builder_add_boolean_value(builder, isshow);
             json_builder_set_member_name(builder, "size");
             json_builder_add_int_value(builder, size);
-            json_builder_set_member_name(builder, "x");
-            json_builder_add_int_value(builder, x);
-            json_builder_set_member_name(builder, "y");
-            json_builder_add_int_value(builder, y);
+            json_builder_set_member_name(builder, "left");
+            json_builder_add_int_value(builder, left);
+            json_builder_set_member_name(builder, "top");
+            json_builder_add_int_value(builder, top);
             json_builder_set_member_name(builder, "color");
-            json_builder_add_int_value(builder, color);
+            json_builder_begin_object(builder);
+            json_builder_set_member_name(builder, "red");
+            json_builder_add_int_value(builder, color.red);
+            json_builder_set_member_name(builder, "green");
+            json_builder_add_int_value(builder, color.green);
+            json_builder_set_member_name(builder, "blue");
+            json_builder_add_int_value(builder, color.blue);
+            json_builder_set_member_name(builder, "alpha");
+            json_builder_add_int_value(builder, color.alpha);
+            json_builder_end_object(builder);
             json_builder_end_object(builder);
         }
     }
@@ -94,6 +104,7 @@ ipcam_osd_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode *re
     JsonBuilder *builder = json_builder_new();
     JsonArray *req_arr;
     JsonObject *req_obj;
+    JsonObject *color_obj;
     int i;
 
     req_arr = json_object_get_array_member(json_node_get_object(request), "items");
@@ -105,19 +116,24 @@ ipcam_osd_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode *re
     {
         const gchar *name;
         gboolean isshow;
-        guint size, x, y, color;
+        guint size, left, top;
+        Color color;
 
         req_obj = json_array_get_object_element(req_arr, i);
         name = json_object_get_string_member(req_obj, "name");
         isshow = json_object_get_boolean_member(req_obj, "isshow");
         size = json_object_get_int_member(req_obj, "size");
-        x = json_object_get_int_member(req_obj, "x");
-        y = json_object_get_int_member(req_obj, "y");
-        color = json_object_get_int_member(req_obj, "color");
+        left = json_object_get_int_member(req_obj, "left");
+        top = json_object_get_int_member(req_obj, "top");
+        color_obj = json_object_get_object_member(req_obj, "color");
+        color.red = json_object_get_int_member(color_obj, "red");
+        color.green = json_object_get_int_member(color_obj, "green");
+        color.blue = json_object_get_int_member(color_obj, "blue");
+        color.alpha = json_object_get_int_member(color_obj, "alpha");
 
-        ipcam_iconfig_set_osd(iconfig, name, isshow, size, x, y, color);
+        ipcam_iconfig_set_osd(iconfig, name, isshow, size, left, top, color.value);
 
-        ipcam_iconfig_get_osd(iconfig, name, &isshow, &size, &x, &y, &color);
+        ipcam_iconfig_get_osd(iconfig, name, &isshow, &size, &left, &top, &color.value);
         json_builder_begin_object(builder);
         json_builder_set_member_name (builder, "name");
         json_builder_add_string_value (builder, name);
@@ -125,12 +141,21 @@ ipcam_osd_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode *re
         json_builder_add_int_value (builder, isshow);
         json_builder_set_member_name (builder, "size");
         json_builder_add_int_value (builder, size);
-        json_builder_set_member_name (builder, "x");
-        json_builder_add_int_value (builder, x);
-        json_builder_set_member_name (builder, "y");
-        json_builder_add_int_value (builder, y);
+        json_builder_set_member_name (builder, "left");
+        json_builder_add_int_value (builder, left);
+        json_builder_set_member_name (builder, "top");
+        json_builder_add_int_value (builder, top);
         json_builder_set_member_name (builder, "color");
-        json_builder_add_int_value (builder, color);
+        json_builder_begin_object(builder);
+        json_builder_set_member_name(builder, "red");
+        json_builder_add_int_value(builder, color.red);
+        json_builder_set_member_name(builder, "green");
+        json_builder_add_int_value(builder, color.green);
+        json_builder_set_member_name(builder, "blue");
+        json_builder_add_int_value(builder, color.blue);
+        json_builder_set_member_name(builder, "alpha");
+        json_builder_add_int_value(builder, color.alpha);
+        json_builder_end_object(builder);
         json_builder_end_object (builder);
     }
     json_builder_end_array(builder);

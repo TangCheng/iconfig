@@ -59,7 +59,7 @@ void ipcam_database_set_network_pppoe(IpcamDatabase *database, const gchar *name
 gchar *ipcam_database_get_network_pppoe(IpcamDatabase *database, const gchar *name);
 void ipcam_database_set_network_port(IpcamDatabase *database, const gchar *name, guint value);
 gint ipcam_database_get_network_port(IpcamDatabase *database, const gchar *name);
-void ipcam_database_set_datetime(IpcamDatabase *database, const gchar *name, guint int_value, gchar *str_value);
-void ipcam_database_get_datetime(IpcamDatabase *database, const gchar *name, guint *int_value, gchar **str_value);
+void ipcam_database_set_datetime(IpcamDatabase *database, const gchar *name, const GVariant *value);
+GVariant *ipcam_database_get_datetime(IpcamDatabase *database, const gchar *name);
 
 #endif /* __DATABASE_H__ */
