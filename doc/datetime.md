@@ -20,13 +20,13 @@ PUT
  请求|参数|必选|类型及范围|说明
 ---|---|:-:|---|---|---
 GET|items|是|array: ['timezone', 'use_ntp', 'ntp_server', 'datetime']|需要查询的Datetime设置项的名称
-PUT|items|是|object: {'timezone': { int_value':0, 'str_value':'GMT+8' }, 'use_ntp':{ 'int_value':0, 'str_value':'' }, 'ntp_server': { 'int_value':0, 'str_value':'xxx.xxx.xxx.xxx' }, 'datetime': {'int_value': 1, 'str_value':'2014-06-17:13:00:00'}}|要设置的Datetime设置项的名值对
+PUT|items|是|object: {'timezone': 'Beijing', 'use_ntp': false, 'ntp_server': 'pool.ntp.org', 'datetime': '2014-06-17:13:00:00'}|要设置的Datetime设置项的名值对
 
 ### 注意事项
 无
 
 ### 调用样例
-GET http://x.x.x.x/api/1.0/datetime.json?items%5B%5D=timezone&items%5B%5D=use_ntp&items%5B%5D=ntp_server&items%5B%5D=datetime  
+GET http://x.x.x.x/api/1.0/datetime.json?items[]=timezone&items[]=use_ntp&items[]=ntp_server&items[]=datetime  
 PUT http://x.x.x.x/api/1.0/datetime.json json_data
 
 ### 返回结果
@@ -35,22 +35,10 @@ GET
 
 	{
 		'items': {
-			'timezone': {
-				'int_value':0,
-				'str_value':'GMT+8'
-			}
-			'use_ntp': {
-				'int_value':0,
-				'str_value':''
-			}
-			'ntp_server': {
-				'int_value':0
-				'str_value':'xxx.xxx.xxx.xxx'
-			},
-			'datetime': {
-				'int_value':1
-				'str_value':'2014-06-17 13:00:00'
-			}
+			'timezone': 'beijing',
+			'use_ntp': false,
+			'ntp_server': 'pool.ntp.org',
+			'datetime': '2014-06-17 13:00:00'
 		}
 	}
 	
@@ -61,9 +49,10 @@ PUT
 ### 返回字段说明
 返回值字段|字段类型|字段说明
 ---|---|---
-timezone|object|时区
-use_ntp|object|是否开启网络时间
-ntp_server|object|NTP服务器
+timezone|string|时区
+use_ntp|boolean|是否开启网络时间同步
+ntp_server|string|NTP服务器域名或IP
+datetime|string|设备当前日期时间
 
 ## 2. datetime（message）
 
@@ -92,22 +81,10 @@ ntp_server|object|NTP服务器
 		},
         'body': {
             'items': {
-                'timezone': {
-                    'int_value':0,
-                    'str_value':'GMT+8'
-                },
-                'use_ntp': {
-                    'int_value':0,
-                    'str_value':''
-                },
-                'ntp_server': {
-                    'int_value':0,
-                    'str_value':'xxx.xxx.xxx.xxx'
-                }
-                'datetime': {
-                    'int_value':1
-                    'str_value':'2014-06-17 13:00:00'
-                }
+                'timezone': 'Beijing',
+                'use_ntp': false,
+                'ntp_server': 'xxx.xxx.xxx.xxx',
+                'datetime': '2014-06-17 13:00:00'
             }
         }
     }
@@ -121,22 +98,10 @@ ntp_server|object|NTP服务器
         },
         'body': {
             'items': {
-                'timezone': {
-                    'int_value':0,
-                    'str_value':'GMT+8'
-                },
-                'use_ntp': {
-                    'int_value':0,
-                    'str_value':''
-                },
-                'ntp_server': {
-                    'int_value':0,
-                    'str_value':'xxx.xxx.xxx.xxx'
-                }
-                'datetime': {
-                    'int_value':1
-                    'str_value':'2014-06-17 13:00:00'
-                }
+                'timezone': 'Beijing',
+                'use_ntp': false,
+                'ntp_server': 'xxx.xxx.xxx.xxx',
+                'datetime': '2014-06-17 13:00:00'
 			}
 		}
     }

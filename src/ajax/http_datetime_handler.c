@@ -142,7 +142,10 @@ START_HANDLER(put_datetime, HTTP_PUT, "/api/1.0/datetime.json", http_request, ht
         g_object_unref(parser);
         g_free(body);
     }
-    ipcam_http_response_success(http_response, success);
+    if (!success)
+    {
+        ipcam_http_response_success(http_response, success);
+    }
     ret = TRUE;
 }
 END_HANDLER

@@ -1065,7 +1065,7 @@ void ipcam_database_set_datetime(IpcamDatabase *database, const gchar *name, con
 
         if (temp_value)
         {
-            g_object_set(resource, "value", &temp_value, NULL);
+            g_object_set(resource, "value", temp_value, NULL);
             gom_resource_save_sync(resource, &error);
         }
         

@@ -37,11 +37,92 @@ ipcam_datetime_msg_handler_finalize (GObject *object)
 }
 
 static gboolean
-ipcam_datetime_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode *request, JsonNode **response)
+ipcam_datetime_msg_handler_read_param(IpcamDatetimeMsgHandler *handler, JsonBuilder *builder, const gchar *name)
 {
     IpcamIConfig *iconfig;
     g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
+    GVariant *value = NULL;
+    gchar *datetime = NULL;
 
+    if (g_str_equal(name, "datetime"))
+    {
+        sysutils_datetime_get_datetime(&datetime);
+    }
+    else
+    {
+        value = ipcam_iconfig_get_datetime(iconfig, name);
+    }
+
+    if (datetime)
+    {
+        json_builder_set_member_name(builder, name);
+        json_builder_add_string_value(builder, datetime);
+        g_free(datetime);
+    }
+    else if (value)
+    {
+        if (g_variant_is_of_type(value, G_VARIANT_TYPE_STRING))
+        {
+            json_builder_set_member_name(builder, name);
+            json_builder_add_string_value(builder, g_variant_get_string(value, NULL));
+        }
+        else if (g_variant_is_of_type(value, G_VARIANT_TYPE_BOOLEAN))
+        {
+            json_builder_set_member_name(builder, name);
+            json_builder_add_boolean_value(builder, g_variant_get_boolean(value));
+        }
+        else
+        {
+            g_warn_if_reached();
+        }
+        g_variant_unref(value);
+    }
+    else
+    {
+        g_warn_if_reached();
+    }
+
+    return TRUE;
+}
+
+static gboolean
+ipcam_datetime_msg_handler_update_param(IpcamDatetimeMsgHandler *handler, const gchar *name, JsonNode *node)
+{
+    IpcamIConfig *iconfig;
+    g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
+    GVariant *value = NULL;
+
+    if (g_strcmp0 (name, "datetime") == 0)
+    {
+        sysutils_datetime_set_datetime((gchar *)json_node_get_string(node));
+    }
+    else
+    {
+        switch (json_node_get_value_type(node))
+        {
+        case G_TYPE_STRING:
+            value = g_variant_new_string(json_node_get_string(node));
+            break;
+        case G_TYPE_BOOLEAN:
+            value = g_variant_new_boolean(json_node_get_boolean(node));
+            break;
+        default:
+            g_warn_if_reached();
+            break;
+        }
+        if (value)
+        {
+            ipcam_iconfig_set_datetime(iconfig, name, value);
+            g_variant_unref(value);
+        }
+    }
+
+    return TRUE;
+}
+
+static gboolean
+ipcam_datetime_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode *request, JsonNode **response)
+{
     JsonBuilder *builder = json_builder_new();
     JsonArray *req_array;
     int i;
@@ -54,46 +135,7 @@ ipcam_datetime_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNod
     for (i = 0; i < json_array_get_length(req_array); i++)
     {
         const gchar *name = json_array_get_string_element(req_array, i);
-        GVariant *value = NULL;
-        gchar *datetime = NULL;
-
-        if (g_str_equal(name, "datetime"))
-        {
-            sysutils_datetime_get_datetime(&datetime);
-        }
-        else
-        {
-            value = ipcam_iconfig_get_datetime(iconfig, name);
-        }
-
-        if (datetime)
-        {
-            json_builder_set_member_name(builder, name);
-            json_builder_add_string_value(builder, datetime);
-            g_free(datetime);
-        }
-        else if (value)
-        {
-            if (g_variant_is_of_type(value, G_VARIANT_TYPE_STRING))
-            {
-                json_builder_set_member_name(builder, name);
-                json_builder_add_string_value(builder, g_variant_get_string(value, NULL));
-            }
-            else if (g_variant_is_of_type(value, G_VARIANT_TYPE_BOOLEAN))
-            {
-                json_builder_set_member_name(builder, name);
-                json_builder_add_boolean_value(builder, g_variant_get_boolean(value));
-            }
-            else
-            {
-                g_warn_if_reached();
-            }
-            g_variant_unref(value);
-        }
-        else
-        {
-            g_warn_if_reached();
-        }
+        ipcam_datetime_msg_handler_read_param(IPCAM_DATETIME_MSG_HANDLER(handler), builder, name);
     }
     json_builder_end_object(builder);
     json_builder_end_object(builder);
@@ -108,9 +150,6 @@ ipcam_datetime_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNod
 static gboolean
 ipcam_datetime_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode *request, JsonNode **response)
 {
-    IpcamIConfig *iconfig;
-    g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
-
     JsonBuilder *builder = json_builder_new();
     JsonObject *req_obj;
     GList *members, *item;
@@ -125,33 +164,10 @@ ipcam_datetime_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNod
     {
         JsonNode *val_node;
         const gchar *name = item->data;
-        GVariant *value = NULL;
 
         val_node = json_object_get_member (req_obj, name);
-
-        if (g_strcmp0 (name, "datetime") == 0)
-        {
-            sysutils_datetime_set_datetime((gchar *)json_node_get_string(val_node));
-        }
-        else
-        {
-            switch (json_node_get_value_type(val_node))
-            {
-            case G_TYPE_STRING:
-                value = g_variant_new_string(json_node_get_string(val_node));
-                break;
-            case G_TYPE_BOOLEAN:
-                value = g_variant_new_boolean(json_node_get_boolean(val_node));
-                break;
-            default:
-                g_warn_if_reached();
-                break;
-            }
-            if (value)
-            {
-                ipcam_iconfig_set_datetime(iconfig, name, value);
-            }
-        }
+        ipcam_datetime_msg_handler_update_param(IPCAM_DATETIME_MSG_HANDLER(handler), name, val_node);
+        ipcam_datetime_msg_handler_read_param(IPCAM_DATETIME_MSG_HANDLER(handler), builder, name);
     }
     json_builder_end_object(builder);
     json_builder_end_object(builder);
