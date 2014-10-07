@@ -679,6 +679,10 @@ gboolean ipcam_database_add_user(IpcamDatabase *database, const gchar *username,
         gom_resource_save_sync(resource, &error);
         g_object_unref(resource);
     }
+    else
+    {
+        return FALSE;
+    }
 
     if (error)
     {
@@ -699,6 +703,10 @@ gboolean ipcam_database_del_user(IpcamDatabase *database, const gchar *username)
     {
         gom_resource_delete_sync(resource, &error);
         g_object_unref(resource);
+    }
+    else
+    {
+        return FALSE;
     }
 
     if (error)

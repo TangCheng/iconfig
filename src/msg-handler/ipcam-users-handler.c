@@ -285,9 +285,12 @@ ipcam_users_msg_handler_delete_action_impl(IpcamMessageHandler *handler, JsonNod
         if (json_object_has_member(item_obj, "username"))
         {
             const gchar *username = json_object_get_string_member (item_obj, "username");
-            if (ipcam_users_msg_handler_delete_param(IPCAM_USERS_MSG_HANDLER(handler), username))
+            if (!g_str_equal(username, "admin"))
             {
-                json_builder_add_string_value (builder, username);
+                if (ipcam_users_msg_handler_delete_param(IPCAM_USERS_MSG_HANDLER(handler), username))
+                {
+                    json_builder_add_string_value (builder, username);
+                }
             }
         }
     }
