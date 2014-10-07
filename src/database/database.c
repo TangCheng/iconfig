@@ -81,15 +81,15 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
         EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
                      "VALUES ('comment', '', 1);");
         EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
-                     "VALUES ('manufacturer', 'IPNC', 0);");
+                     "VALUES ('manufacturer', 'YXG Electronic Ltd.', 0);");
         EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
-                     "VALUES ('model', 'IPCAM-100', 0);");
+                     "VALUES ('model', 'NCD108-1-L', 0);");
         EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
                      "VALUES ('firmware', 'V1.0.0', 0);");
         EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
-                     "VALUES ('serial', '0123456789', 0);");
+                     "VALUES ('serial', 'NCD1081A16000001', 0);");
         EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
-                     "VALUES ('hardware', '', 0);");
+                     "VALUES ('hardware', 'Rev1', 0);");
 
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS users ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -480,7 +480,7 @@ static GomResource *ipcam_database_get_resource(IpcamDatabase *database, GType r
 
 static GomResourceGroup *ipcam_database_get_resource_group(IpcamDatabase *database, GType resource_type)
 {
-    IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);;
+    IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);
     GError *error = NULL;
     GomResourceGroup *resource_group = NULL;
 
@@ -495,6 +495,15 @@ static GomResourceGroup *ipcam_database_get_resource_group(IpcamDatabase *databa
     }
     
     return resource_group;
+}
+static GomResource *ipcam_database_add_resource(IpcamDatabase *database, GType resource_type)
+{
+    IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);
+    GomResource *resource = NULL;
+
+    resource = g_object_new(resource_type, "repository", priv->repository, NULL);
+
+    return resource;
 }
 void ipcam_database_set_baseinfo(IpcamDatabase *database, const gchar *name, gchar *value)
 {
@@ -652,9 +661,36 @@ gchar *ipcam_database_get_user_role(IpcamDatabase *database, const gchar *userna
     
     return role;
 }
-void ipcam_database_del_user(IpcamDatabase *database, const gchar *username)
+gboolean ipcam_database_add_user(IpcamDatabase *database, const gchar *username,
+                                 const gchar *password, const gchar *role)
 {
-    g_return_if_fail(IPCAM_IS_DATABASE(database));
+    g_return_val_if_fail(IPCAM_IS_DATABASE(database), FALSE);
+    GomResource *resource = NULL;
+    GError *error = NULL;
+
+    resource = ipcam_database_add_resource(database, IPCAM_USERS_TYPE);
+    if (resource)
+    {
+        g_object_set(resource,
+                     "name", username,
+                     "password", password,
+                     "role", role,
+                     NULL);
+        gom_resource_save_sync(resource, &error);
+        g_object_unref(resource);
+    }
+
+    if (error)
+    {
+        g_print("add user error: %s\n", error->message);
+        g_error_free(error);
+        return FALSE;
+    }
+    return TRUE;
+}
+gboolean ipcam_database_del_user(IpcamDatabase *database, const gchar *username)
+{
+    g_return_val_if_fail(IPCAM_IS_DATABASE(database), FALSE);
     GomResource *resource = NULL;
     GError *error = NULL;
     
@@ -669,7 +705,9 @@ void ipcam_database_del_user(IpcamDatabase *database, const gchar *username)
     {
         g_print("delete user error: %s\n", error->message);
         g_error_free(error);
+        return FALSE;
     }
+    return TRUE;
 }
 void ipcam_database_set_osd(IpcamDatabase *database,
                             const gchar *name,

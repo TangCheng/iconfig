@@ -36,23 +36,126 @@ ipcam_users_msg_handler_finalize (GObject *object)
 }
 
 static gboolean
-ipcam_users_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode *request, JsonNode **response)
+ipcam_users_msg_handler_read_param(IpcamUsersMsgHandler *handler,
+                                   JsonBuilder *builder,
+                                   const gchar *username,
+                                   gboolean read_password,
+                                   gboolean read_role)
+{
+    g_return_val_if_fail(username, FALSE);
+    IpcamIConfig *iconfig;
+    g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
+
+    json_builder_set_member_name(builder, "username");
+    json_builder_add_string_value(builder, username);
+    if (read_password)
+    {
+        gchar *passwd = ipcam_iconfig_get_user_password(iconfig, username);
+        json_builder_set_member_name(builder, "password");
+        json_builder_add_string_value(builder, passwd);
+        g_free(passwd);
+    }
+    if (read_role)
+    {
+        gchar *role = ipcam_iconfig_get_user_role(iconfig, username);
+        json_builder_set_member_name(builder, "role");
+        json_builder_add_string_value(builder, role);
+        g_free(role);
+    }
+
+    return TRUE;
+}
+
+static gboolean
+ipcam_users_msg_handler_update_param(IpcamUsersMsgHandler *handler,
+                                     const gchar *username,
+                                     const gchar *param_name,
+                                     const gchar *value)
+{
+    g_return_val_if_fail(username, FALSE);
+    g_return_val_if_fail(param_name, FALSE);
+    g_return_val_if_fail(value, FALSE);
+    
+    IpcamIConfig *iconfig;
+    g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
+
+    if (g_str_equal(param_name, "password"))
+    {
+        ipcam_iconfig_set_user_password (iconfig, username, (gchar *)value);
+    }
+    else if (g_str_equal(param_name, "role"))
+    {
+        if (g_str_equal(value, "administrator") ||
+            g_str_equal(value, "operator") ||
+            g_str_equal(value, "user"))
+        {
+            ipcam_iconfig_set_user_role (iconfig, username, (gchar *)value);
+        }
+        else
+        {
+            return FALSE;
+        }
+    }
+    else
+    {
+        g_warn_if_reached();
+    }
+
+    return TRUE;
+}
+
+static gboolean
+ipcam_users_msg_handler_create_param(IpcamUsersMsgHandler *handler,
+                                     const gchar *username,
+                                     const gchar *password,
+                                     const gchar *role)
 {
     IpcamIConfig *iconfig;
     g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
 
+    return ipcam_iconfig_add_user(iconfig, username, password, role);
+}
+
+static gboolean
+ipcam_users_msg_handler_delete_param(IpcamUsersMsgHandler *handler,
+                                     const gchar *username)
+{
+    IpcamIConfig *iconfig;
+    g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
+    
+    return ipcam_iconfig_del_user(iconfig, username);
+}
+
+static gboolean
+ipcam_users_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode *request, JsonNode **response)
+{
+    IpcamIConfig *iconfig;
+    g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
+    
     JsonBuilder *builder = json_builder_new();
     JsonArray *req_array;
     int i;
     gboolean need_password = FALSE, need_role = FALSE;
 
-    req_array = json_object_get_array_member (json_node_get_object(request), "items");
-    for (i = 0; i < json_array_get_length (req_array); i++) {
-        const gchar *item = json_array_get_string_element (req_array, i);
-        if (g_strcmp0(item, "password") == 0)
-            need_password = TRUE;
-        else if (g_strcmp0(item, "role") == 0)
-            need_role = TRUE;
+    if (request)
+    {   
+        req_array = json_object_get_array_member (json_node_get_object(request), "items");
+        for (i = 0; i < json_array_get_length (req_array); i++)
+        {
+            const gchar *item = json_array_get_string_element (req_array, i);
+            if (g_str_equal(item, "password"))
+            {
+                need_password = TRUE;
+            }
+            else if (g_str_equal(item, "role"))
+            {
+                need_role = TRUE;
+            }
+            else
+            {
+                g_warn_if_reached();
+            }
+        }
     }
 
     json_builder_begin_object(builder);
@@ -65,22 +168,9 @@ ipcam_users_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode *
     {
         gchar *username = u->data;
         json_builder_begin_object(builder);
-        json_builder_set_member_name(builder, "username");
-        json_builder_add_string_value(builder, username);
-        if (need_password)
-        {
-            gchar *passwd = ipcam_iconfig_get_user_password(iconfig, username);
-            json_builder_set_member_name(builder, "password");
-            json_builder_add_string_value(builder, passwd);
-            g_free(passwd);
-        }
-        if (need_role)
-        {
-            gchar *role = ipcam_iconfig_get_user_role(iconfig, username);
-            json_builder_set_member_name(builder, "role");
-            json_builder_add_string_value(builder, role);
-            g_free(role);
-        }
+        ipcam_users_msg_handler_read_param(IPCAM_USERS_MSG_HANDLER(handler),
+                                           builder, (const gchar *)username,
+                                           need_password, need_role);
         json_builder_end_object(builder);
     }
     json_builder_end_array(builder);
@@ -97,9 +187,6 @@ ipcam_users_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode *
 static gboolean
 ipcam_users_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode *request, JsonNode **response)
 {
-    IpcamIConfig *iconfig;
-    g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
-
     JsonBuilder *builder = json_builder_new();
     JsonArray *req_array;
     int i;
@@ -116,22 +203,21 @@ ipcam_users_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode *
         const gchar *password = json_object_get_string_member(user_obj, "password");
         const gchar *role = json_object_get_string_member(user_obj, "role");
 
-        ipcam_iconfig_set_user_password (iconfig, username, (gchar *)password);
-        ipcam_iconfig_set_user_role (iconfig, username, role);
+        if (password)
+        {
+            ipcam_users_msg_handler_update_param(IPCAM_USERS_MSG_HANDLER(handler),
+                                                 username, "password", password);
+        }
+        if (role)
+        {
+            ipcam_users_msg_handler_update_param(IPCAM_USERS_MSG_HANDLER(handler),
+                                                 username, "role", role);
+        }
 
-        password = ipcam_iconfig_get_user_password (iconfig, username);
-        role = ipcam_iconfig_get_user_role (iconfig, username);
         json_builder_begin_object(builder);
-        json_builder_set_member_name (builder, "username");
-        json_builder_add_string_value (builder, username);
-        json_builder_set_member_name (builder, "password");
-        json_builder_add_string_value (builder, password);
-        json_builder_set_member_name (builder, "role");
-        json_builder_add_string_value (builder, role);
+        ipcam_users_msg_handler_read_param(IPCAM_USERS_MSG_HANDLER(handler), builder,
+                                           username, password != NULL, role != NULL);
         json_builder_end_object(builder);
-
-        g_free((gchar *)password);
-        g_free((gchar *)role);
     }
     json_builder_end_array(builder);
     json_builder_end_object(builder);
@@ -146,9 +232,6 @@ ipcam_users_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode *
 static gboolean
 ipcam_users_msg_handler_post_action_impl(IpcamMessageHandler *handler, JsonNode *request, JsonNode **response)
 {
-    IpcamIConfig *iconfig;
-    g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
-
     JsonBuilder *builder = json_builder_new();
     JsonArray *req_array;
     int i;
@@ -165,22 +248,14 @@ ipcam_users_msg_handler_post_action_impl(IpcamMessageHandler *handler, JsonNode 
         const gchar *password = json_object_get_string_member(user_obj, "password");
         const gchar *role = json_object_get_string_member(user_obj, "role");
 
-        ipcam_iconfig_set_user_password (iconfig, username, (gchar *)password);
-        ipcam_iconfig_set_user_role (iconfig, username, role);
-
-        password = ipcam_iconfig_get_user_password (iconfig, username);
-        role = ipcam_iconfig_get_user_role (iconfig, username);
-        json_builder_begin_object(builder);
-        json_builder_set_member_name (builder, "username");
-        json_builder_add_string_value (builder, username);
-        json_builder_set_member_name (builder, "password");
-        json_builder_add_string_value (builder, password);
-        json_builder_set_member_name (builder, "role");
-        json_builder_add_string_value (builder, role);
-        json_builder_end_object(builder);
-
-        g_free((gchar *)password);
-        g_free((gchar *)role);
+        if (ipcam_users_msg_handler_create_param(IPCAM_USERS_MSG_HANDLER(handler),
+                                                 username, password, role))
+        {
+            json_builder_begin_object(builder);
+            ipcam_users_msg_handler_read_param(IPCAM_USERS_MSG_HANDLER(handler), builder,
+                                               username, TRUE, TRUE);
+            json_builder_end_object(builder);
+        }
     }
     json_builder_end_array(builder);
     json_builder_end_object(builder);
@@ -195,9 +270,6 @@ ipcam_users_msg_handler_post_action_impl(IpcamMessageHandler *handler, JsonNode 
 static gboolean
 ipcam_users_msg_handler_delete_action_impl(IpcamMessageHandler *handler, JsonNode *request, JsonNode **response)
 {
-    IpcamIConfig *iconfig;
-    g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
-
     JsonBuilder *builder = json_builder_new();
     JsonArray *req_array;
     int i;
@@ -213,9 +285,10 @@ ipcam_users_msg_handler_delete_action_impl(IpcamMessageHandler *handler, JsonNod
         if (json_object_has_member(item_obj, "username"))
         {
             const gchar *username = json_object_get_string_member (item_obj, "username");
-            ipcam_iconfig_del_user(iconfig, username);
-
-            json_builder_add_string_value (builder, username);
+            if (ipcam_users_msg_handler_delete_param(IPCAM_USERS_MSG_HANDLER(handler), username))
+            {
+                json_builder_add_string_value (builder, username);
+            }
         }
     }
     json_builder_end_array (builder);

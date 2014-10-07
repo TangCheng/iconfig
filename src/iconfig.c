@@ -281,13 +281,25 @@ void ipcam_iconfig_set_user_role(IpcamIConfig *iconfig, const gchar *username, c
 
 gchar *ipcam_iconfig_get_user_role(IpcamIConfig *iconfig, const gchar *username)
 {
-    g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), 0);
+    g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), NULL);
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
 
     return ipcam_database_get_user_role (priv->database, username);
 }
 
-void ipcam_iconfig_del_user(IpcamIConfig *iconfig, const gchar *username)
+gboolean ipcam_iconfig_add_user(IpcamIConfig *iconfig, const gchar *username,
+                                const gchar *password, const gchar *role)
+{
+    g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), FALSE);
+    g_return_val_if_fail(username, FALSE);
+    g_return_val_if_fail(password, FALSE);
+    g_return_val_if_fail(role, FALSE);
+    IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
+
+    return ipcam_database_add_user(priv->database, username, password, role);
+}
+
+gboolean ipcam_iconfig_del_user(IpcamIConfig *iconfig, const gchar *username)
 {
     g_return_if_fail(IPCAM_IS_ICONFIG(iconfig));
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);

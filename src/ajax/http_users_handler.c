@@ -9,25 +9,27 @@ G_DEFINE_TYPE(IpcamHttpUsersHandler, ipcam_http_users_handler, IPCAM_HTTP_REQUES
 
 static gchar* do_get_action(IpcamIConfig *iconfig, GList *item_list)
 {
-    JsonBuilder *builder;
-    JsonNode *req_node, *res_node = NULL;
+    JsonBuilder *builder = NULL;
+    JsonNode *req_node = NULL, *res_node = NULL;
     GList *item;
     JsonGenerator *generator;
 
-    builder = json_builder_new();
     generator = json_generator_new();
 
-    json_builder_begin_object(builder);
-    json_builder_set_member_name(builder, "items");
-    json_builder_begin_array (builder);
-    for (item = g_list_first(item_list); item; item = g_list_next(item))
+    if (item_list)
     {
-        json_builder_add_string_value(builder, item->data);
+        builder = json_builder_new();
+        json_builder_begin_object(builder);
+        json_builder_set_member_name(builder, "items");
+        json_builder_begin_array (builder);
+        for (item = g_list_first(item_list); item; item = g_list_next(item))
+        {
+            json_builder_add_string_value(builder, item->data);
+        }
+        json_builder_end_array(builder);
+        json_builder_end_object(builder);
+        req_node = json_builder_get_root(builder);
     }
-    json_builder_end_array(builder);
-    json_builder_end_object(builder);
-
-    req_node = json_builder_get_root(builder);
 
     IpcamMessageHandler *msg_handler = g_object_new(IPCAM_TYPE_USERS_MSG_HANDLER,
                                                       "app", iconfig, NULL);
@@ -42,7 +44,10 @@ static gchar* do_get_action(IpcamIConfig *iconfig, GList *item_list)
     json_node_free(req_node);
     json_node_free(res_node);
     g_object_unref(msg_handler);
-    g_object_unref(G_OBJECT(builder));
+    if (builder)
+    {
+        g_object_unref(G_OBJECT(builder));
+    }
     g_object_unref(G_OBJECT(generator));
 
     return result;
@@ -51,12 +56,11 @@ static gchar* do_get_action(IpcamIConfig *iconfig, GList *item_list)
 START_HANDLER(get_users, HTTP_GET, "/api/1.0/users.json", http_request, http_response)
 {
     IpcamIConfig *iconfig;
-    IpcamHttpQueryStringParser *parser;
+    IpcamHttpQueryStringParser *parser = NULL;
     gchar *query_string = NULL;
     GList *item_list = NULL;
     GHashTable *query_hash = NULL;
     gboolean success = FALSE;
-    
     g_object_get(get_users, "app", &iconfig, NULL);
     g_object_get(http_request, "query-string", &query_string, NULL);
     if (query_string) 
@@ -66,21 +70,21 @@ START_HANDLER(get_users, HTTP_GET, "/api/1.0/users.json", http_request, http_res
         if (query_hash)
         {
             item_list = g_hash_table_lookup(query_hash, "items[]");
-            if (item_list)
-            {
-                gchar *result = do_get_action(iconfig, item_list);
-                g_object_set(http_response, "body", result, NULL);
-                g_free(result);
-
-                g_object_set(http_response,
-                             "status", 200,
-                             NULL);
-                success = TRUE;
-            }
         }
-        g_free(query_string);
+    }
+    gchar *result = do_get_action(iconfig, item_list);
+    g_object_set(http_response, "body", result, NULL);
+    g_free(result);
+    g_free(query_string);
+    if (parser)
+    {
         g_clear_object(&parser);
     }
+
+    g_object_set(http_response,
+                 "status", 200,
+                 NULL);
+    success = TRUE;
     if (!success)
     {
         ipcam_http_response_success(http_response, success);
@@ -98,7 +102,7 @@ static gchar* do_put_action(IpcamIConfig *iconfig, JsonNode *request)
     generator = json_generator_new();
 
     IpcamMessageHandler *msg_handler = g_object_new(IPCAM_TYPE_USERS_MSG_HANDLER,
-                                                      "app", iconfig, NULL);
+                                                    "app", iconfig, NULL);
 
     ipcam_message_handler_do_put(msg_handler, "set_users", request, &response);
 
@@ -119,7 +123,8 @@ START_HANDLER(put_users, HTTP_PUT, "/api/1.0/users.json", http_request, http_res
     gchar *body = NULL;
     IpcamIConfig *iconfig;
     gboolean success = FALSE;
-
+    g_print("fadsfasdf\n");
+    
     g_object_get(put_users, "app", &iconfig, NULL);
     g_object_get(http_request, "body", &body, NULL);
     if (body)
@@ -142,7 +147,11 @@ START_HANDLER(put_users, HTTP_PUT, "/api/1.0/users.json", http_request, http_res
         g_object_unref(parser);
         g_free(body);
     }
-    ipcam_http_response_success(http_response, success);
+    if (!success)
+    {
+        ipcam_http_response_success(http_response, success);
+    }
+    
     ret = TRUE;
 }
 END_HANDLER
@@ -200,7 +209,11 @@ START_HANDLER(post_users, HTTP_POST, "/api/1.0/users.json", http_request, http_r
         g_object_unref(parser);
         g_free(body);
     }
-    ipcam_http_response_success(http_response, success);
+    if (!success)
+    {
+        ipcam_http_response_success(http_response, success);
+    }
+    
     ret = TRUE;
 }
 END_HANDLER
@@ -258,7 +271,11 @@ START_HANDLER(delete_users, HTTP_DELETE, "/api/1.0/users.json", http_request, ht
         g_object_unref(parser);
         g_free(body);
     }
-    ipcam_http_response_success(http_response, success);
+    if (!success)
+    {
+        ipcam_http_response_success(http_response, success);
+    }
+    
     ret = TRUE;
 }
 END_HANDLER

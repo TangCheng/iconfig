@@ -32,7 +32,9 @@ void ipcam_database_set_user_password(IpcamDatabase *database, const gchar *user
 gchar *ipcam_database_get_user_password(IpcamDatabase *database, const gchar *username);
 void ipcam_database_set_user_role(IpcamDatabase *database, const gchar *username, const gchar *role);
 gchar *ipcam_database_get_user_role(IpcamDatabase *database, const gchar *username);
-void ipcam_database_del_user(IpcamDatabase *database, const gchar *username);
+gboolean ipcam_database_add_user(IpcamDatabase *database, const gchar *username,
+                                 const gchar *password, const gchar *role);
+gboolean ipcam_database_del_user(IpcamDatabase *database, const gchar *username);
 void ipcam_database_set_osd(IpcamDatabase *database,
                             const gchar *name,
                             gboolean isshow,
