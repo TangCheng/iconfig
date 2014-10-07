@@ -111,7 +111,7 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "vtype    TEXT NOT NULL"
                      ");");
         EXEC_OR_FAIL("INSERT INTO datetime (name, value, vtype) "
-                     "VALUES ('timezone', 'Beijing', 'STRING');");
+                     "VALUES ('timezone', '(GMT+08:00) Beijing', 'STRING');");
         EXEC_OR_FAIL("INSERT INTO datetime (name, value, vtype) "
                      "VALUES ('use_ntp', '0', 'BOOLEAN');");
         EXEC_OR_FAIL("INSERT INTO datetime (name, value, vtype) "
