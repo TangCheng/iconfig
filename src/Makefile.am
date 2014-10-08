@@ -53,26 +53,16 @@ iconfig_SOURCES = \
     ajax/http_users_handler.c \
 	ajax/http_misc_handler.c \
 	msg-handler/ipcam-message-handler.c \
-	msg-handler/ipcam-message-handler.h \
 	msg-handler/ipcam-base-info-handler.c \
-	msg-handler/ipcam-base-info-handler.h \
 	msg-handler/ipcam-osd-handler.c \
-	msg-handler/ipcam-osd-handler.h \
 	msg-handler/ipcam-video-handler.c \
-	msg-handler/ipcam-video-handler.h \
 	msg-handler/ipcam-image-handler.c \
-	msg-handler/ipcam-image-handler.h \
 	action-handler/generic_action_handler.c \
-	action-handler/generic_action_handler.h \
 	msg-handler/ipcam-network-handler.c \
-	msg-handler/ipcam-network-handler.h \
 	msg-handler/ipcam-datetime-handler.c \
-	msg-handler/ipcam-datetime-handler.h \
 	msg-handler/ipcam-users-handler.c \
-	msg-handler/ipcam-users-handler.h \
 	msg-handler/ipcam-misc-handler.c \
-	sysutils.c \
-	sysutils.h
+	sysutils.c
 
 iconfig_LDFLAGS = 
 
