@@ -11,9 +11,9 @@ JSON
 
 ### HTTP请求方式
 GET  
-PUT
-POST
-DELETE
+PUT  
+POST  
+DELETE  
 
 ### 是否需要登录
 是
@@ -22,16 +22,18 @@ DELETE
  请求|参数|必选|类型及范围|说明
 ---|---|:-:|---|---|---
 GET|items|是|array: ['password', 'role]|是否需要返回用户密码和特权级
-PUT|items|是|object: [ {'username':'username', 'password':'password', 'role:'user'}]|所有需要设置的用户名，密码，特权级的数组，允许一次调用设置多个用户
-POST|items|是|object: [ {'username':'username', 'password':'password', 'role:'user'}]|目前POST和PUT功能完全一样，都是可以增加用户，修改用户信息
-DELETE|items|是|object: [ { 'username':'user1' }, { 'username':'user2' } ]|需要被删除的用户名，可以一次删除多个
+PUT|items|是|object array: [ {'username':'username', 'password':'password', 'role:'user'}]|修改用户的密码和角色信息，需要设置用户的用户名，密码，角色的数组，允许一次调用设置多个用户
+POST|items|是|object array: [ {'username':'username', 'password':'password', 'role:'user'}]|新增用户
+DELETE|items|是|object array: [ { 'username':'user1' }, { 'username':'user2' } ]|需要被删除的用户名，可以一次删除多个
 
 ### 注意事项
 无
 
 ### 调用样例
 GET http://x.x.x.x/api/1.0/users.json&items[]=password&items[]=role  
-PUT http://x.x.x.x/api/1.0/users.json json_data
+PUT http://x.x.x.x/api/1.0/users.json json_data  
+POST http://x.x.x.x/api/1.0/users.json json_data  
+DELETE http://x.x.x.x/api/1.0/users.json json_data  
 
 ### 返回结果
 JSON示例
