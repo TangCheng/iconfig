@@ -54,5 +54,7 @@ gchar *ipcam_iconfig_get_user_role(IpcamIConfig *iconfig, const gchar *username)
 gboolean ipcam_iconfig_add_user(IpcamIConfig *iconfig, const gchar *username,
                                 const gchar *password, const gchar *role);
 gboolean ipcam_iconfig_del_user(IpcamIConfig *iconfig, const gchar *username);
+void ipcam_iconfig_set_misc(IpcamIConfig *iconfig, const gchar *name, const GVariant *value);
+GVariant *ipcam_iconfig_get_misc(IpcamIConfig *iconfig, const gchar *name);
 
 #endif /* __ICONFIG_H__ */

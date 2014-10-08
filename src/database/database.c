@@ -17,6 +17,7 @@
 #include "network_static.h"
 #include "network_pppoe.h"
 #include "network_port.h"
+#include "misc.h"
 
 #define DATABASE_PATH "/data"
 #define DATABASE_NAME "configuration.sqlite3"
@@ -68,6 +69,22 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
         g_object_unref(c);                                  \
     } G_STMT_END
     if (version == 1) {
+        /************************************************
+         * misc table                                   *
+         ************************************************/
+        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS misc ("
+                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
+                     "name     TEXT UNIQUE NOT NULL,"
+                     "value    TEXT,"
+                     "vtype    TEXT NOT NULL"
+                     ");");
+        EXEC_OR_FAIL("INSERT INTO misc (name, value, vtype) "
+                     "VALUES ('language', '中文', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO misc (name, value, vtype) "
+                     "VALUES ('rtsp_auth', '0', 'BOOLEAN');");
+        /************************************************
+         * base_info table                              *
+         ************************************************/
         EXEC_OR_FAIL("CREATE   TABLE IF NOT EXISTS base_info ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
@@ -90,7 +107,9 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "VALUES ('serial', 'NCD1081A16000001', 0);");
         EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
                      "VALUES ('hardware', 'Rev1', 0);");
-
+        /************************************************
+         * users table                                  *
+         ************************************************/
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS users ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
@@ -103,7 +122,9 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "VALUES ('operator', 'operator', 'operator');");
         EXEC_OR_FAIL("INSERT INTO users (name, password, role) "
                      "VALUES ('user', 'user', 'user');");
-
+        /************************************************
+         * datetime table                               *
+         ************************************************/
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS datetime ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
@@ -116,7 +137,9 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "VALUES ('use_ntp', '0', 'BOOLEAN');");
         EXEC_OR_FAIL("INSERT INTO datetime (name, value, vtype) "
                      "VALUES ('ntp_server', 'pool.ntp.org', 'STRING');");
-
+        /************************************************
+         * video table                                  *
+         ************************************************/
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS video ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
@@ -157,7 +180,9 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "VALUES ('sub_profile:resolution', 'D1', 'STRING');");
         EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
                      "VALUES ('sub_profile:stream_path', 'sub_stream', 'STRING');");
-
+        /************************************************
+         * image table                                  *
+         ************************************************/
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS image ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
@@ -178,7 +203,9 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "VALUES ('saturation', '128', 'INTEGER');");
         EXEC_OR_FAIL("INSERT INTO image (name, value, vtype) "
                      "VALUES ('scenario', '50Hz', 'STRING');");
-
+        /************************************************
+         * privacy_block table                               *
+         ************************************************/
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS privacy_block ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
@@ -193,7 +220,9 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "VALUES ('region1', 0, 0, 0, 0, 0, 0);");
         EXEC_OR_FAIL("INSERT INTO privacy_block (name, enable, left, top, width, height, color) "
                      "VALUES ('region2', 0, 0, 0, 0, 0, 0);");
-
+        /************************************************
+         * day_night_mode table                         *
+         ************************************************/
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS day_night_mode ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
@@ -205,7 +234,9 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "VALUES ('night_mode_threshold', 50);");
         EXEC_OR_FAIL("INSERT INTO day_night_mode (name, value) "
                      "VALUES ('ir_intensity', 80);");
-        
+        /************************************************
+         * osd table                                    *
+         ************************************************/
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS osd ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
@@ -236,7 +267,9 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "VALUES ('slave:frame_rate', 1, 20, 10, 945, 0);");
         EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, left, top, color) "
                      "VALUES ('slave:bit_rate', 1, 20, 10, 970, 0);");
-
+        /************************************************
+         * szyc table                               *
+         ************************************************/
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS szyc ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
@@ -248,7 +281,9 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "VALUES ('carriage_num', '');");
         EXEC_OR_FAIL("INSERT INTO szyc (name, value) "
                      "VALUES ('position_num', '');");
-
+        /************************************************
+         * network table                                *
+         ************************************************/
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS network ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
@@ -256,6 +291,9 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      ");");
         EXEC_OR_FAIL("INSERT INTO network (name, value) "
                      "VALUES ('method', 'static');");
+        /************************************************
+         * network_static table                         *
+         ************************************************/
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS network_static ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
@@ -271,6 +309,9 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "VALUES ('dns1', '');");
         EXEC_OR_FAIL("INSERT INTO network_static (name, value) "
                      "VALUES ('dns2', '');");
+        /************************************************
+         * network_pppoe table                          *
+         ************************************************/
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS network_pppoe ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
@@ -280,7 +321,9 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "VALUES ('username', '');");
         EXEC_OR_FAIL("INSERT INTO network_pppoe (name, value) "
                      "VALUES ('password', '');");
-        
+        /************************************************
+         * network_port table                           *
+         ************************************************/
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS network_port ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
@@ -292,7 +335,9 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "VALUES ('ftp', 21);");
         EXEC_OR_FAIL("INSERT INTO network_port (name, value) "
                      "VALUES ('rtsp', 554);");
-
+        /************************************************
+         * event_input table                            *
+         ************************************************/
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS event_input ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
@@ -307,7 +352,9 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      ");");
         EXEC_OR_FAIL("INSERT INTO event_input (name, enable) "
                      "VALUES ('intput1', 0);");
-
+        /************************************************
+         * event_output table                           *
+         ************************************************/
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS event_output ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
@@ -316,7 +363,9 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      ");");
         EXEC_OR_FAIL("INSERT INTO event_output (name, normal, period) "
                      "VALUES ('output1', 'open', 0);");
-
+        /************************************************
+         * event_motion table                           *
+         ************************************************/
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS event_motion ("
                      "id            INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name          TEXT UNIQUE NOT NULL,"
@@ -338,7 +387,9 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "VALUES ('region1', 0, 50, 0, 0, 0, 0);");
         EXEC_OR_FAIL("INSERT INTO event_motion (name, enable, sensitivity, left, top, width, height) "
                      "VALUES ('region2', 0, 50, 0, 0, 0, 0);");
-
+        /************************************************
+         * event_cover table                            *
+         ************************************************/
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS event_cover ("
                      "id            INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name          TEXT UNIQUE NOT NULL,"
@@ -360,7 +411,9 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "VALUES ('region1', 0, 50, 0, 0, 0, 0);");
         EXEC_OR_FAIL("INSERT INTO event_cover (name, enable, sensitivity, left, top, width, height) "
                      "VALUES ('region2', 0, 50, 0, 0, 0, 0);");
-
+        /************************************************
+         * event_proc table                             *
+         ************************************************/
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS event_proc ("
                      "id            INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name          TEXT UNIQUE NOT NULL,"
@@ -374,7 +427,9 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "VALUES ('motion', 0, 0, 0);");
         EXEC_OR_FAIL("INSERT INTO event_proc (name, record, sound, output1) "
                      "VALUES ('cover', 0, 0, 0);");
-
+        /************************************************
+         * record_schedule table                        *
+         ************************************************/
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS record_schedule ("
                      "id            INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "mon           TEXT,"
@@ -385,7 +440,9 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "sat           TEXT,"
                      "sun           TEXT"
                      ");");
-
+        /************************************************
+         * record_strategy table                        *
+         ************************************************/
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS record_strategy ("
                      "id            INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name          TEXT UNIQUE NOT NULL,"
@@ -1088,6 +1145,78 @@ GVariant *ipcam_database_get_datetime(IpcamDatabase *database, const gchar *name
     GVariant *value = NULL;
     
     resource = ipcam_database_get_resource(database, IPCAM_DATETIME_TYPE, name);
+    if (resource)
+    {
+        g_object_get(resource, "value", &temp_value, "vtype", &vtype, NULL);
+        g_object_unref(resource);
+    }
+
+    if (vtype && g_str_equal(vtype, "STRING"))
+    {
+        value = g_variant_new_string(temp_value);
+    }
+    else if (vtype && g_str_equal(vtype, "BOOLEAN"))
+    {
+        value = g_variant_new_boolean(g_ascii_strtoull(temp_value, NULL, 10));
+    }
+    else
+    {
+        g_warn_if_reached();
+    }
+
+    g_free(temp_value);
+    g_free(vtype);
+    return value;
+}
+void ipcam_database_set_misc(IpcamDatabase *database, const gchar *name, const GVariant *value)
+{
+    g_return_if_fail(IPCAM_IS_DATABASE(database));
+    GomResource *resource = NULL;
+    GError *error = NULL;
+
+    resource = ipcam_database_get_resource(database, IPCAM_MISC_TYPE, name);
+    if (resource)
+    {
+        gchar *temp_value = NULL;
+        if (g_variant_is_of_type((GVariant *)value, G_VARIANT_TYPE_STRING))
+        {
+            temp_value = g_strdup(g_variant_get_string((GVariant *)value, NULL));
+        }
+        else if (g_variant_is_of_type((GVariant *)value, G_VARIANT_TYPE_BOOLEAN))
+        {
+            temp_value = g_malloc0(8);
+            g_snprintf(temp_value, 8, "%u", g_variant_get_boolean((GVariant *)value));
+        }
+        else
+        {
+            g_warn_if_reached();
+        }
+
+        if (temp_value)
+        {
+            g_object_set(resource, "value", temp_value, NULL);
+            gom_resource_save_sync(resource, &error);
+        }
+        
+        g_object_unref(resource);
+        g_free(temp_value);
+    }
+
+    if (error)
+    {
+        g_print("set misc record failed: %s\n", error->message);
+        g_error_free(error);
+    }
+}
+GVariant *ipcam_database_get_misc(IpcamDatabase *database, const gchar *name)
+{
+    g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
+    GomResource *resource = NULL;
+    gchar *temp_value = NULL;
+    gchar *vtype = NULL;
+    GVariant *value = NULL;
+    
+    resource = ipcam_database_get_resource(database, IPCAM_MISC_TYPE, name);
     if (resource)
     {
         g_object_get(resource, "value", &temp_value, "vtype", &vtype, NULL);

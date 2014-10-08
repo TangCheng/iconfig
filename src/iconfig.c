@@ -74,6 +74,8 @@ static void ipcam_iconfig_before_start(IpcamBaseService *base_service)
     ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "set_users", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
     ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "add_users", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
     ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "del_users", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
+    ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "get_misc", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
+    ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "set_misc", IPCAM_GENERIC_ACTION_HANDLER_TYPE);    
 }
 
 static void ipcam_iconfig_in_loop(IpcamBaseService *base_service)
@@ -305,4 +307,20 @@ gboolean ipcam_iconfig_del_user(IpcamIConfig *iconfig, const gchar *username)
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
 
     return ipcam_database_del_user (priv->database, username);
+}
+
+void ipcam_iconfig_set_misc(IpcamIConfig *iconfig, const gchar *name, const GVariant *value)
+{
+    g_return_if_fail(IPCAM_IS_ICONFIG(iconfig));
+    IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
+
+    ipcam_database_set_misc (priv->database, name, value);
+}
+
+GVariant *ipcam_iconfig_get_misc(IpcamIConfig *iconfig, const gchar *name)
+{
+    g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), NULL);
+    IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
+
+    return ipcam_database_get_misc (priv->database, name);
 }

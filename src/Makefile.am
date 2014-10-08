@@ -33,6 +33,7 @@ iconfig_SOURCES = \
 	database/network_pppoe.c \
 	database/network_port.c \
 	database/datetime.c \
+	database/misc.c \
 	ajax/http_response.c \
 	ajax/http_request.c \
 	ajax/http_query_string_parser.c \
@@ -50,6 +51,7 @@ iconfig_SOURCES = \
 	ajax/http_network_handler.c \
     ajax/http_datetime_handler.c \
     ajax/http_users_handler.c \
+	ajax/http_misc_handler.c \
 	msg-handler/ipcam-message-handler.c \
 	msg-handler/ipcam-message-handler.h \
 	msg-handler/ipcam-base-info-handler.c \
@@ -68,6 +70,7 @@ iconfig_SOURCES = \
 	msg-handler/ipcam-datetime-handler.h \
 	msg-handler/ipcam-users-handler.c \
 	msg-handler/ipcam-users-handler.h \
+	msg-handler/ipcam-misc-handler.c \
 	sysutils.c \
 	sysutils.h
 

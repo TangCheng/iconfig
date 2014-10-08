@@ -63,5 +63,7 @@ void ipcam_database_set_network_port(IpcamDatabase *database, const gchar *name,
 gint ipcam_database_get_network_port(IpcamDatabase *database, const gchar *name);
 void ipcam_database_set_datetime(IpcamDatabase *database, const gchar *name, const GVariant *value);
 GVariant *ipcam_database_get_datetime(IpcamDatabase *database, const gchar *name);
+void ipcam_database_set_misc(IpcamDatabase *database, const gchar *name, const GVariant *value);
+GVariant *ipcam_database_get_misc(IpcamDatabase *database, const gchar *name);
 
 #endif /* __DATABASE_H__ */
