@@ -41,6 +41,7 @@ IpcamHttpRequest *ipcam_http_parser_get_request(IpcamHttpParser *self, gchar *ht
     http_parser *parser = ipcam_http_parser_parser_init(HTTP_REQUEST);
     parser->data = request;
     gssize nparsed = http_parser_execute(parser, &settings, http_buffer, len);
+    nparsed = nparsed; /* clear compile warning. */
     ipcam_http_parser_parser_free(parser);
     return request;
 }

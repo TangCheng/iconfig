@@ -9,7 +9,9 @@
 #include "http_network_handler.h"
 #include "http_datetime_handler.h"
 #include "http_users_handler.h"
+#include "http_misc_handler.h"
 #include "iconfig.h"
+#include "common.h"
 
 enum
 {
@@ -47,20 +49,24 @@ static void ipcam_http_proc_init(IpcamHttpProc *self)
 {
     IpcamHttpProcPrivate *priv = ipcam_http_proc_get_instance_private(self);
     IpcamHttpRequestHandler *req_handler;
-    req_handler = g_object_new(IPCAM_HTTP_BASE_INFO_HANDLER_TYPE, "app", priv->iconfig, NULL);
-    priv->request_handler_list = g_list_append(priv->request_handler_list, req_handler);
-    req_handler = g_object_new(IPCAM_HTTP_OSD_HANDLER_TYPE, "app", priv->iconfig, NULL);
-    priv->request_handler_list = g_list_append(priv->request_handler_list, req_handler);
-    req_handler = g_object_new(IPCAM_HTTP_VIDEO_HANDLER_TYPE, "app", priv->iconfig, NULL);
-    priv->request_handler_list = g_list_append(priv->request_handler_list, req_handler);
-    req_handler = g_object_new(IPCAM_HTTP_IMAGE_HANDLER_TYPE, "app", priv->iconfig, NULL);
-    priv->request_handler_list = g_list_append(priv->request_handler_list, req_handler);
-    req_handler = g_object_new(IPCAM_HTTP_NETWORK_HANDLER_TYPE, "app", priv->iconfig, NULL);
-    priv->request_handler_list = g_list_append(priv->request_handler_list, req_handler);
-    req_handler = g_object_new(IPCAM_HTTP_DATETIME_HANDLER_TYPE, "app", priv->iconfig, NULL);
-    priv->request_handler_list = g_list_append(priv->request_handler_list, req_handler);
-    req_handler = g_object_new(IPCAM_HTTP_USERS_HANDLER_TYPE, "app", priv->iconfig, NULL);
-    priv->request_handler_list = g_list_append(priv->request_handler_list, req_handler);
+    GType http_handler_type[] =
+    {
+        IPCAM_HTTP_MISC_HANDLER_TYPE,
+        IPCAM_HTTP_BASE_INFO_HANDLER_TYPE,
+        IPCAM_HTTP_USERS_HANDLER_TYPE,
+        IPCAM_HTTP_DATETIME_HANDLER_TYPE,
+        IPCAM_HTTP_VIDEO_HANDLER_TYPE,
+        IPCAM_HTTP_IMAGE_HANDLER_TYPE,
+        IPCAM_HTTP_OSD_HANDLER_TYPE,
+        IPCAM_HTTP_NETWORK_HANDLER_TYPE,
+    };
+    gint i = 0;
+
+    for (i = 0; i < ARRAY_SIZE(http_handler_type); i++)
+    {
+        req_handler = g_object_new(http_handler_type[i], "app", priv->iconfig, NULL);
+        priv->request_handler_list = g_list_append(priv->request_handler_list, req_handler);
+    }
 }
 static void ipcam_http_proc_get_property(GObject    *object,
                                          guint       property_id,

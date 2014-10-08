@@ -3,6 +3,8 @@
 
 #include <glib.h>
 
+#define ARRAY_SIZE(x)       sizeof(x)/sizeof(x[0])
+
 typedef union _Color
 {
     struct
