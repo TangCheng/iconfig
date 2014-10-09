@@ -10,6 +10,7 @@
 #include "http_datetime_handler.h"
 #include "http_users_handler.h"
 #include "http_misc_handler.h"
+#include "http_privacy_block_handler.h"
 #include "iconfig.h"
 #include "common.h"
 
@@ -57,6 +58,7 @@ static void ipcam_http_proc_init(IpcamHttpProc *self)
         IPCAM_HTTP_DATETIME_HANDLER_TYPE,
         IPCAM_HTTP_VIDEO_HANDLER_TYPE,
         IPCAM_HTTP_IMAGE_HANDLER_TYPE,
+        IPCAM_HTTP_PRIVACY_BLOCK_HANDLER_TYPE,
         IPCAM_HTTP_OSD_HANDLER_TYPE,
         IPCAM_HTTP_NETWORK_HANDLER_TYPE,
     };

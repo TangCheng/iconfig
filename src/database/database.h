@@ -39,15 +39,15 @@ void ipcam_database_set_osd(IpcamDatabase *database,
                             const gchar *name,
                             gboolean isshow,
                             guint size,
-                            guint x,
-                            guint y,
+                            guint left,
+                            guint top,
                             guint color);
 gboolean ipcam_database_get_osd(IpcamDatabase *database,
                                 const gchar *name,
                                 gboolean *isshow,
                                 guint *size,
-                                guint *x,
-                                guint *y,
+                                guint *left,
+                                guint *top,
                                 guint *color);
 void ipcam_database_set_video(IpcamDatabase *database, const gchar *name, const GVariant *value);
 GVariant *ipcam_database_get_video(IpcamDatabase *database, const gchar *name);
@@ -65,5 +65,21 @@ void ipcam_database_set_datetime(IpcamDatabase *database, const gchar *name, con
 GVariant *ipcam_database_get_datetime(IpcamDatabase *database, const gchar *name);
 void ipcam_database_set_misc(IpcamDatabase *database, const gchar *name, const GVariant *value);
 GVariant *ipcam_database_get_misc(IpcamDatabase *database, const gchar *name);
+void ipcam_database_set_privacy_block(IpcamDatabase *database,
+                                      const gchar *name,
+                                      gboolean enabled,
+                                      guint left,
+                                      guint top,
+                                      guint width,
+                                      guint height,
+                                      guint color);
+gboolean ipcam_database_get_privacy_block(IpcamDatabase *database,
+                                          const gchar *name,
+                                          gboolean *enabled,
+                                          guint *left,
+                                          guint *top,
+                                          guint *width,
+                                          guint *height,
+                                          guint *color);
 
 #endif /* __DATABASE_H__ */

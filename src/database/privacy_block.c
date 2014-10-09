@@ -22,7 +22,7 @@ typedef struct _IpcamPrivacyBlockPrivate
     guint top;
     guint width;
     guint height;
-    guint color;
+    guint32 color;
 } IpcamPrivacyBlockPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE(IpcamPrivacyBlock, ipcam_privacy_block, GOM_TYPE_RESOURCE);
@@ -82,7 +82,7 @@ static void ipcam_privacy_block_set_property(GObject      *object,
         break;
     case PROP_COLOR:
         {
-            priv->color = g_value_get_int(value);
+            priv->color = g_value_get_uint(value);
         }
         break;
     default:
@@ -136,7 +136,7 @@ static void ipcam_privacy_block_get_property(GObject    *object,
         }
     case PROP_COLOR:
         {
-            g_value_set_int(value, priv->color);
+            g_value_set_uint(value, priv->color);
         }
         break;
     default:
@@ -210,11 +210,11 @@ static void ipcam_privacy_block_class_init(IpcamPrivacyBlockClass *klass)
                          0, // default value
                          G_PARAM_READWRITE);
     obj_properties[PROP_COLOR] =
-        g_param_spec_int("color",
+        g_param_spec_uint("color",
                          "privacy block region color",
                          "Color of the privacy block region.",
                          0,
-                         65535,
+                         G_MAXUINT,
                          0, // default value
                          G_PARAM_READWRITE);
 

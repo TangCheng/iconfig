@@ -8,6 +8,7 @@
 #include "database/database.h"
 #include "ajax/ajax.h"
 #include "action-handler/generic_action_handler.h"
+#include "common.h"
 
 typedef struct _IpcamIConfigPrivate
 {
@@ -58,24 +59,35 @@ static void ipcam_iconfig_before_start(IpcamBaseService *base_service)
     }
 
     /* Message Handler */
-    ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "get_base_info", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
-    ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "set_base_info", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
-    ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "get_osd", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
-    ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "set_osd", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
-    ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "get_video", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
-    ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "set_video", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
-    ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "get_image", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
-    ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "set_image", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
-    ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "get_network", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
-    ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "set_network", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
-    ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "get_datetime", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
-    ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "set_datetime", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
-    ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "get_users", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
-    ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "set_users", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
-    ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "add_users", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
-    ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "del_users", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
-    ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "get_misc", IPCAM_GENERIC_ACTION_HANDLER_TYPE);
-    ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), "set_misc", IPCAM_GENERIC_ACTION_HANDLER_TYPE);    
+    const gchar *name[] =
+    {
+        "get_misc",
+        "set_misc",    
+        "get_base_info",
+        "set_base_info",
+        "get_users",
+        "set_users",
+        "add_users",
+        "del_users",
+        "get_datetime",
+        "set_datetime",
+        "get_video",
+        "set_video",
+        "get_image",
+        "set_image",
+        "get_privacy_block",
+        "set_privacy_block",
+        "get_osd",
+        "set_osd",
+        "get_network",
+        "set_network"
+    };
+
+    gint i = 0;
+    for (i = 0; i < ARRAY_SIZE(name); i++)
+    {
+        ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), name[i], IPCAM_GENERIC_ACTION_HANDLER_TYPE);
+    }
 }
 
 static void ipcam_iconfig_in_loop(IpcamBaseService *base_service)
@@ -102,28 +114,28 @@ gboolean ipcam_iconfig_get_osd(IpcamIConfig *iconfig,
                                const gchar *name,
                                gboolean *isshow,
                                guint *size,
-                               guint *x,
-                               guint *y,
+                               guint *left,
+                               guint *top,
                                guint *color)
 {
     g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), FALSE);
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
 
-    return ipcam_database_get_osd(priv->database, (gchar *)name, isshow, size, x, y, color);
+    return ipcam_database_get_osd(priv->database, (gchar *)name, isshow, size, left, top, color);
 }
 
 void ipcam_iconfig_set_osd(IpcamIConfig *iconfig,
                             const gchar *name,
                             gboolean isshow,
                             guint size,
-                            guint x,
-                            guint y,
+                            guint left,
+                            guint top,
                             guint color)
 {
     g_return_if_fail(IPCAM_IS_ICONFIG(iconfig));
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
 
-    ipcam_database_set_osd(priv->database, (gchar *)name, isshow, size, x, y, color);
+    ipcam_database_set_osd(priv->database, (gchar *)name, isshow, size, left, top, color);
 }
 
 GVariant *ipcam_iconfig_get_video(IpcamIConfig *iconfig,
@@ -316,4 +328,24 @@ GVariant *ipcam_iconfig_get_misc(IpcamIConfig *iconfig, const gchar *name)
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
 
     return ipcam_database_get_misc (priv->database, name);
+}
+
+gboolean ipcam_iconfig_get_privacy_block(IpcamIConfig *iconfig, const char *name, gboolean *enabled,
+                                         guint *left, guint *top, guint *width, guint *height, guint *color)
+{
+    g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), FALSE);
+    IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
+
+    return ipcam_database_get_privacy_block(priv->database, (gchar *)name, enabled,
+                                            left, top, width, height, color);
+}
+
+void ipcam_iconfig_set_privacy_block(IpcamIConfig *iconfig, const gchar *name, gboolean enabled,
+                                     guint left, guint top, guint width, guint height, guint color)
+{
+    g_return_if_fail(IPCAM_IS_ICONFIG(iconfig));
+    IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
+
+    ipcam_database_set_privacy_block(priv->database, (gchar *)name, enabled,
+                                     left, top, width, height, color);
 }

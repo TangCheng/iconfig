@@ -49,9 +49,10 @@ iconfig_SOURCES = \
 	ajax/http_video_handler.c \
 	ajax/http_image_handler.c \
 	ajax/http_network_handler.c \
-    ajax/http_datetime_handler.c \
-    ajax/http_users_handler.c \
+	ajax/http_datetime_handler.c \
+	ajax/http_users_handler.c \
 	ajax/http_misc_handler.c \
+	ajax/http_privacy_block_handler.c \
 	msg-handler/ipcam-message-handler.c \
 	msg-handler/ipcam-base-info-handler.c \
 	msg-handler/ipcam-osd-handler.c \
@@ -62,6 +63,7 @@ iconfig_SOURCES = \
 	msg-handler/ipcam-datetime-handler.c \
 	msg-handler/ipcam-users-handler.c \
 	msg-handler/ipcam-misc-handler.c \
+	msg-handler/ipcam-privacy-block-handler.c \
 	sysutils.c
 
 iconfig_LDFLAGS = 
