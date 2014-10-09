@@ -198,7 +198,7 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
         EXEC_OR_FAIL("INSERT INTO image (name, value, vtype) "
                      "VALUES ('scenario', '50Hz', 'STRING');");
         /************************************************
-         * privacy_block table                               *
+         * privacy_block table                          *
          ************************************************/
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS privacy_block ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
