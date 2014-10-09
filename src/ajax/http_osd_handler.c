@@ -4,15 +4,17 @@
 #include "http_query_string_parser.h"
 #include "iconfig.h"
 #include "../msg-handler/ipcam-osd-handler.h"
+#include "common.h"
 
 G_DEFINE_TYPE(IpcamHttpOsdHandler, ipcam_http_osd_handler, IPCAM_HTTP_REQUEST_HANDLER_TYPE)
 
-static gchar* do_get_action(IpcamIConfig *iconfig, GList *item_list)
+static gchar* do_get_action(IpcamIConfig *iconfig, GHashTable *item_hash)
 {
     JsonBuilder *builder;
     JsonNode *req_node, *res_node = NULL;
-    GList *item;
+    GList *item_list, *item;
     JsonGenerator *generator;
+    const gchar *kv[] = {"master", "slave"};
 
     builder = json_builder_new();
     generator = json_generator_new();
@@ -20,10 +22,26 @@ static gchar* do_get_action(IpcamIConfig *iconfig, GList *item_list)
     json_builder_begin_object(builder);
     json_builder_set_member_name(builder, "items");
     json_builder_begin_array (builder);
-    for (item = g_list_first(item_list); item; item = g_list_next(item))
+
+    gchar *key = g_malloc0(32);
+    gchar *value = g_malloc0(32);
+    gint i = 0;
+    for (i = 0; i < ARRAY_SIZE(kv); i++)
     {
-        json_builder_add_string_value(builder, item->data);
+        g_snprintf(key, 32, "items[%s][]", kv[i]);
+        item_list = g_hash_table_lookup(item_hash, key);
+        if (item_list)
+        {
+            for (item = g_list_first(item_list); item; item = g_list_next(item))
+            {
+                g_snprintf(value, 32, "%s:%s", kv[i], (gchar *)item->data);
+                json_builder_add_string_value(builder, value);
+            }
+        }
     }
+    g_free(value);
+    g_free(key);
+    
     json_builder_end_array(builder);
     json_builder_end_object(builder);
 
@@ -53,7 +71,6 @@ START_HANDLER(get_osd, HTTP_GET, "/api/1.0/osd.json", http_request, http_respons
     IpcamIConfig *iconfig;
     IpcamHttpQueryStringParser *parser;
     gchar *query_string = NULL;
-    GList *item_list = NULL;
     GHashTable *query_hash = NULL;
     gboolean success = FALSE;
     
@@ -65,18 +82,14 @@ START_HANDLER(get_osd, HTTP_GET, "/api/1.0/osd.json", http_request, http_respons
         query_hash = ipcam_http_query_string_parser_get(parser, query_string);
         if (query_hash)
         {
-            item_list = g_hash_table_lookup(query_hash, "items[]");
-            if (item_list)
-            {
-                gchar *result = do_get_action(iconfig, item_list);
-                g_object_set(http_response, "body", result, NULL);
-                g_free(result);
+            gchar *result = do_get_action(iconfig, query_hash);
+            g_object_set(http_response, "body", result, NULL);
+            g_free(result);
 
-                g_object_set(http_response,
-                             "status", 200,
-                             NULL);
-                success = TRUE;
-            }
+            g_object_set(http_response,
+                         "status", 200,
+                         NULL);
+            success = TRUE;
         }
         g_free(query_string);
         g_clear_object(&parser);
