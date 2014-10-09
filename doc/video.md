@@ -19,43 +19,42 @@ PUT
 ### 请求参数
  请求|参数|必选|类型及范围|说明
 ---|---|:-:|---|---|---
-GET|items|是|array: ['main', 'sub']|需要查询的Video设置的profile
+GET|items|是|array: ['profile', 'flip', 'mirror', 'mainprofile', 'subprofile']|需要查询的Video设置的profile
 PUT|items|是|object-array: {'profile':0, 'flip':0, 'quanlity':0, 'frame_rate':25, 'bit_rate':0, 'bit_rate_value':300}|要设置的Video设置项的名称，值
 
 ### 注意事项
 无
 
 ### 调用样例
-GET http://x.x.x.x/api/1.0/video.json?items%5B%5D=main&items%5B%5D=sub 
+GET http://x.x.x.x/api/1.0/video.json?items[]=mainprofile&items[]=subprofile  
 PUT http://x.x.x.x/api/1.0/video.json json_data
 
 ### 返回结果
 JSON示例 
 GET
-    {
-        'body': {
-            'items': {
-                'main_profile': {
-                    'flip':0,
-                    'quanlity':0
-                    'frame_rate':25,
-                    'bit_rate':0,
-                    'bit_rate_value':300
-                    'resolution':1
-                    'stream_path':'main'
-                },
-                'sub_profile' {
-                    'flip':0,
-                    'quanlity':0
-                    'frame_rate':25,
-                    'bit_rate':0,
-                    'bit_rate_value':300
-                    'resolution':2
-                    'stream_path':'sub'
-                }
+	{
+		'body': {
+			'items': {
+				'profile': 'baseline',
+				'flip': false,
+				'mirror': false,
+				'main_profile': {
+					'frame_rate': 25,
+					'bit_rate': 'CBR',
+					'bit_rate_value': 4096,
+					'resolution': 'UXGA',
+					'stream_path': 'main_stream'
+				},
+				'sub_profile': {
+					'frame_rate': 25,
+					'bit_rate': 'VBR',
+					'bit_rate_value': 1024,
+					'resolution': 'D1',
+					'stream_path': 'sub_stream'
+				}
 			}
-        }
-    }
+		}
+	}
 	
 PUT
 
@@ -64,14 +63,14 @@ PUT
 ### 返回字段说明
 返回值字段|字段类型|字段说明
 ---|---|---
-profile|int|视频编码级别
-flip|int|视频垂直和左右翻转
-quanlity|int|视频质量（高、中、低）
-frame_rate|int|视频帧率（1～30fps）
-bit_rate|int|视频码率（CBR/VBR）
+profile|string|视频编码级别['baseline','main','high']
+flip|boolean|视频垂直翻转
+mirror|boolean|视频左右镜像
+frame_rate|int|视频帧率(1～30fps)
+bit_rate|string|视频码率['CBR','VBR']
 bit_rate_value|int|视频码率值
-resolution|int|视频分辨率
-stream_uri|string|视频流路径
+resolution|string|视频分辨率
+stream_path|string|视频流路径
 
 ## 2. video（message）
 
@@ -98,24 +97,23 @@ stream_uri|string|视频流路径
 		},
         'body': {
             'items': {
-                'main_profile': {
-                    'flip':0,
-                    'quanlity':0
-                    'frame_rate':25,
-                    'bit_rate':0,
-                    'bit_rate_value':300
-                    'resolution':1
-                    'stream_path':'main'
-                },
-                'sub_profile' {
-                    'flip':0,
-                    'quanlity':0
-                    'frame_rate':25,
-                    'bit_rate':0,
-                    'bit_rate_value':300
-                    'resolution':2
-                    'stream_path':'sub'
-                }
+			    'profile': 'baseline',
+				'flip': false,
+				'mirror': false,
+				'main_profile': {
+					'frame_rate': 25,
+					'bit_rate': 'CBR',
+					'bit_rate_value': 4096,
+					'resolution': 'UXGA',
+					'stream_path': 'main_stream'
+				},
+				'sub_profile': {
+					'frame_rate': 25,
+					'bit_rate': 'VBR',
+					'bit_rate_value': 1024,
+					'resolution': 'D1',
+					'stream_path': 'sub_stream'
+				}
 			}
         }
     }
@@ -129,24 +127,23 @@ stream_uri|string|视频流路径
         },
         'body': {
             'items': {
-                'main_profile': {
-                    'flip':0,
-                    'quanlity':0
-                    'frame_rate':25,
-                    'bit_rate':0,
-                    'bit_rate_value':300
-                    'resolution':1
-                    'stream_path':'main'
-                },
-                'sub_profile' {
-                    'flip':0,
-                    'quanlity':0
-                    'frame_rate':25,
-                    'bit_rate':0,
-                    'bit_rate_value':300
-                    'resolution':2
-                    'stream_path':'sub'
-                }
+			    'profile': 'baseline',
+				'flip': false,
+				'mirror': false,
+				'main_profile': {
+					'frame_rate': 25,
+					'bit_rate': 'CBR',
+					'bit_rate_value': 4096,
+					'resolution': 'UXGA',
+					'stream_path': 'main_stream'
+				},
+				'sub_profile': {
+					'frame_rate': 25,
+					'bit_rate': 'VBR',
+					'bit_rate_value': 1024,
+					'resolution': 'D1',
+					'stream_path': 'sub_stream'
+				}
 			}
 		}
     }

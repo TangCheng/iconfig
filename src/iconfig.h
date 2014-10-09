@@ -30,8 +30,8 @@ gboolean ipcam_iconfig_get_osd(IpcamIConfig *iconfig, const char *name, gboolean
                              guint *size, guint *x, guint *y, guint *color);
 void ipcam_iconfig_set_osd(IpcamIConfig *iconfig, const gchar *name, gboolean isshow,
                            guint size, guint x, guint y, guint color);
-GVariant *ipcam_iconfig_get_video(IpcamIConfig *iconfig, const gchar *profile, const gchar *name);
-void ipcam_iconfig_set_video(IpcamIConfig *iconfig, const gchar *profile, const gchar *name, GVariant *value);
+GVariant *ipcam_iconfig_get_video(IpcamIConfig *iconfig, const gchar *name);
+void ipcam_iconfig_set_video(IpcamIConfig *iconfig, const gchar *name, GVariant *value);
 
 GVariant *ipcam_iconfig_get_image(IpcamIConfig *iconfig, const gchar *name);
 void ipcam_iconfig_set_image(IpcamIConfig *iconfig, const gchar *name, GVariant *value);

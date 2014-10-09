@@ -127,30 +127,23 @@ void ipcam_iconfig_set_osd(IpcamIConfig *iconfig,
 }
 
 GVariant *ipcam_iconfig_get_video(IpcamIConfig *iconfig,
-                             const gchar *profile, const gchar *name)
+                                  const gchar *name)
 {
     g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), NULL);
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
-    gchar *key = NULL;
 
-    asprintf(&key, "%s:%s", profile, name);
-    GVariant *ret = ipcam_database_get_video(priv->database, key);
-    free(key);
-
+    GVariant *ret = ipcam_database_get_video(priv->database, name);
 	return ret;
 }
 
 void ipcam_iconfig_set_video(IpcamIConfig *iconfig,
-                             const gchar *profile, const gchar *name,
+                             const gchar *name,
                              GVariant *value)
 {
     g_return_if_fail(IPCAM_IS_ICONFIG(iconfig));
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
-    gchar *key = NULL;
-
-    asprintf(&key, "%s:%s", profile, name);
-	ipcam_database_set_video(priv->database, key, value);
-    free(key);
+    
+	ipcam_database_set_video(priv->database, name, value);
 }
 
 GVariant *ipcam_iconfig_get_image(IpcamIConfig *iconfig, const gchar *name)

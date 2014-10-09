@@ -146,40 +146,34 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "value    TEXT,"
                      "vtype    TEXT NOT NULL"
                      ");");
+        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
+                     "VALUES ('flip', '0', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
+                     "VALUES ('mirror', '0', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
+                     "VALUES ('profile', 'baseline', 'STRING');");
         /* Main profile */
         EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('main_profile:flip', '0', 'BOOLEAN');");
+                     "VALUES ('master:frame_rate', '25', 'INTEGER');");
         EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('main_profile:mirror', '0', 'BOOLEAN');");
+                     "VALUES ('master:bit_rate', 'CBR', 'STRING');");
         EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('main_profile:quanlity', 'baseline', 'STRING');");
+                     "VALUES ('master:bit_rate_value', '4096', 'INTEGER');");
         EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('main_profile:frame_rate', '25', 'INTEGER');");
+                     "VALUES ('master:resolution', 'UXGA', 'STRING');");
         EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('main_profile:bit_rate', 'CBR', 'STRING');");
-        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('main_profile:bit_rate_value', '4096', 'INTEGER');");
-        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('main_profile:resolution', 'UXGA', 'STRING');");
-        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('main_profile:stream_path', 'main_stream', 'STRING');");
+                     "VALUES ('master:stream_path', 'main_stream', 'STRING');");
         /* Sub profile */
         EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('sub_profile:flip', '0', 'BOOLEAN');");
+                     "VALUES ('slave:frame_rate', '25', 'INTEGER');");
         EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('sub_profile:mirror', '0', 'BOOLEAN');");
+                     "VALUES ('slave:bit_rate', 'CBR', 'STRING');");
         EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('sub_profile:quanlity', 'baseline', 'STRING');");
+                     "VALUES ('slave:bit_rate_value', '1024', 'INTEGER');");
         EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('sub_profile:frame_rate', '25', 'INTEGER');");
+                     "VALUES ('slave:resolution', 'D1', 'STRING');");
         EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('sub_profile:bit_rate', 'CBR', 'STRING');");
-        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('sub_profile:bit_rate_value', '1024', 'INTEGER');");
-        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('sub_profile:resolution', 'D1', 'STRING');");
-        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('sub_profile:stream_path', 'sub_stream', 'STRING');");
+                     "VALUES ('slave:stream_path', 'sub_stream', 'STRING');");
         /************************************************
          * image table                                  *
          ************************************************/
@@ -840,14 +834,41 @@ void ipcam_database_set_video(IpcamDatabase *database, const gchar *name, const 
     g_return_if_fail(IPCAM_IS_DATABASE(database));
     GomResource *resource = NULL;
     GError *error = NULL;
+    gchar *temp_value = NULL;
 
-    resource = ipcam_database_get_resource(database, IPCAM_VIDEO_TYPE, name);
-    if (resource)
+    if (g_variant_is_of_type((GVariant *)value, G_VARIANT_TYPE_STRING))
     {
-        g_object_set(resource, "value", value, NULL);
-        gom_resource_save_sync(resource, &error);
-        g_object_unref(resource);
+        temp_value = g_variant_dup_string((GVariant *)value, NULL);
     }
+    else if (g_variant_is_of_type((GVariant *)value, G_VARIANT_TYPE_BOOLEAN))
+    {
+        gboolean b = g_variant_get_boolean((GVariant *)value);
+        temp_value = g_malloc0(8);
+        g_snprintf(temp_value, 8, "%u", b);
+    }
+    else if (g_variant_is_of_type((GVariant *)value, G_VARIANT_TYPE_UINT32))
+    {
+        guint i = g_variant_get_uint32((GVariant *)value);
+        temp_value = g_malloc0(8);
+        g_snprintf(temp_value, 8, "%u", i);
+    }
+    else
+    {
+        g_warn_if_reached();
+    }
+
+    if (temp_value)
+    {    
+        resource = ipcam_database_get_resource(database, IPCAM_VIDEO_TYPE, name);
+        if (resource)
+        {
+            g_object_set(resource, "value", temp_value, NULL);
+            gom_resource_save_sync(resource, &error);
+            g_object_unref(resource);
+        }
+        g_free(temp_value);
+    }
+    
 
     if (error)
     {
@@ -860,13 +881,33 @@ GVariant *ipcam_database_get_video(IpcamDatabase *database, const gchar *name)
 {
     g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
     GomResource *resource = NULL;
+    gchar *temp_value = NULL;
+    gchar *vtype = NULL;
     GVariant *value = NULL;
-    
+
     resource = ipcam_database_get_resource(database, IPCAM_VIDEO_TYPE, name);
     if (resource)
     {
-        g_object_get(resource, "intval", &value, NULL);
+        g_object_get(resource, "value", &temp_value, "vtype", &vtype, NULL);
         g_object_unref(resource);
+        if (vtype && g_str_equal(vtype, "STRING"))
+        {
+            value = g_variant_new_string(temp_value);
+        }
+        else if (vtype && g_str_equal(vtype, "BOOLEAN"))
+        {
+            value = g_variant_new_boolean(g_ascii_strtoull(temp_value, NULL, 10));
+        }
+        else if (vtype && g_str_equal(vtype, "INTEGER"))
+        {
+            value = g_variant_new_uint32(g_ascii_strtoull(temp_value, NULL, 10));
+        }
+        else
+        {
+            g_warn_if_reached();
+        }
+        g_free(temp_value);
+        g_free(vtype);
     }
 
     return value;
