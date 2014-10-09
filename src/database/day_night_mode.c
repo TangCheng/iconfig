@@ -47,7 +47,7 @@ static void ipcam_day_night_mode_set_property(GObject      *object,
         break;
     case PROP_VALUE:
         {
-            priv->value = g_value_get_int(value);
+            priv->value = g_value_get_uint(value);
         }
         break;
     default:
@@ -76,7 +76,7 @@ static void ipcam_day_night_mode_get_property(GObject    *object,
         break;
     case PROP_VALUE:
         {
-            g_value_set_int(value, priv->value);
+            g_value_set_uint(value, priv->value);
         }
         break;
     default:
@@ -112,13 +112,13 @@ static void ipcam_day_night_mode_class_init(IpcamDayNightModeClass *klass)
                             NULL, // default value
                             G_PARAM_READWRITE);
     obj_properties[PROP_VALUE] =
-        g_param_spec_int("value",
-                         "value",
-                         "value",
-                         0,
-                         100,
-                         0, // default value
-                         G_PARAM_READWRITE);
+        g_param_spec_uint("value",
+                          "value",
+                          "value",
+                          0,
+                          100,
+                          0, // default value
+                          G_PARAM_READWRITE);
 
     g_object_class_install_properties(object_class, N_PROPERTIES, obj_properties);
     gom_resource_class_set_primary_key(resource_class, "id");

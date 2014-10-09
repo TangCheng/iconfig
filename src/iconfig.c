@@ -77,6 +77,8 @@ static void ipcam_iconfig_before_start(IpcamBaseService *base_service)
         "set_image",
         "get_privacy_block",
         "set_privacy_block",
+        "get_day_night_mode",
+        "set_day_night_mode",
         "get_osd",
         "set_osd",
         "get_network",
@@ -348,4 +350,20 @@ void ipcam_iconfig_set_privacy_block(IpcamIConfig *iconfig, const gchar *name, g
 
     ipcam_database_set_privacy_block(priv->database, (gchar *)name, enabled,
                                      left, top, width, height, color);
+}
+
+gint ipcam_iconfig_get_day_night_mode(IpcamIConfig *iconfig, const gchar *name)
+{
+    g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), -1);
+    IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
+
+    return ipcam_database_get_day_night_mode(priv->database, name);
+}
+
+void ipcam_iconfig_set_day_night_mode(IpcamIConfig *iconfig, const gchar *name, guint value)
+{
+    g_return_if_fail(IPCAM_IS_ICONFIG(iconfig));
+    IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
+
+    return ipcam_database_set_day_night_mode(priv->database, name, value);
 }

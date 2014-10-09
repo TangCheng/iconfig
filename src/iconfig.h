@@ -60,5 +60,7 @@ gboolean ipcam_iconfig_get_privacy_block(IpcamIConfig *iconfig, const char *name
                                          guint *left, guint *top, guint *width, guint *height, guint *color);
 void ipcam_iconfig_set_privacy_block(IpcamIConfig *iconfig, const gchar *name, gboolean enabled,
                                      guint left, guint top, guint width, guint height, guint color);
+gint ipcam_iconfig_get_day_night_mode(IpcamIConfig *iconfig, const gchar *name);
+void ipcam_iconfig_set_day_night_mode(IpcamIConfig *iconfig, const gchar *name, guint value);
 
 #endif /* __ICONFIG_H__ */

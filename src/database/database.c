@@ -1345,3 +1345,38 @@ gboolean ipcam_database_get_privacy_block(IpcamDatabase *database,
     
     return ret;
 }
+void ipcam_database_set_day_night_mode(IpcamDatabase *database, const gchar *name, guint value)
+{
+    g_return_if_fail(IPCAM_IS_DATABASE(database));
+    GomResource *resource = NULL;
+    GError *error = NULL;
+
+    resource = ipcam_database_get_resource(database, IPCAM_DAY_NIGHT_MODE_TYPE, name);
+    if (resource)
+    {
+        g_object_set(resource, "value", value, NULL);
+        gom_resource_save_sync(resource, &error);
+        g_object_unref(resource);
+    }
+
+    if (error)
+    {
+        g_print("set day night mode record failed: %s\n", error->message);
+        g_error_free(error);
+    }
+}
+gint ipcam_database_get_day_night_mode(IpcamDatabase *database, const gchar *name)
+{
+    g_return_val_if_fail(IPCAM_IS_DATABASE(database), -1);
+    GomResource *resource = NULL;
+    gint value = -1;
+    
+    resource = ipcam_database_get_resource(database, IPCAM_DAY_NIGHT_MODE_TYPE, name);
+    if (resource)
+    {
+        g_object_get(resource, "value", &value, NULL);
+        g_object_unref(resource);
+    }
+    
+    return value;
+}

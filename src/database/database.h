@@ -81,5 +81,7 @@ gboolean ipcam_database_get_privacy_block(IpcamDatabase *database,
                                           guint *width,
                                           guint *height,
                                           guint *color);
+void ipcam_database_set_day_night_mode(IpcamDatabase *database, const gchar *name, guint value);
+gint ipcam_database_get_day_night_mode(IpcamDatabase *database, const gchar *name);
 
 #endif /* __DATABASE_H__ */
