@@ -36,7 +36,7 @@ static void ipcam_network_port_set_property(GObject      *object,
     {
     case PROP_ID:
         {
-            priv->id = g_value_get_int(value);
+            priv->id = g_value_get_uint(value);
         }
         break;
     case PROP_NAME:
@@ -47,7 +47,7 @@ static void ipcam_network_port_set_property(GObject      *object,
         break;
     case PROP_VALUE:
         {
-            priv->value = g_value_get_int(value);
+            priv->value = g_value_get_uint(value);
         }
         break;
     default:
@@ -66,7 +66,7 @@ static void ipcam_network_port_get_property(GObject    *object,
     {
     case PROP_ID:
         {
-            g_value_set_int(value, priv->id);
+            g_value_set_uint(value, priv->id);
         }
         break;
     case PROP_NAME:
@@ -76,7 +76,7 @@ static void ipcam_network_port_get_property(GObject    *object,
         break;
     case PROP_VALUE:
         {
-            g_value_set_int(value, priv->value);
+            g_value_set_uint(value, priv->value);
         }
         break;
     default:
@@ -98,13 +98,13 @@ static void ipcam_network_port_class_init(IpcamNetworkPortClass *klass)
     gom_resource_class_set_table(resource_class, "network_port");
   
     obj_properties[PROP_ID] =
-        g_param_spec_int("id",
-                         "ID",
-                         "The ID for the network port parameter.",
-                         0,
-                         65535,
-                         0, // default value
-                         G_PARAM_READWRITE);
+        g_param_spec_uint("id",
+                          "ID",
+                          "The ID for the network port parameter.",
+                          0,
+                          G_MAXUINT,
+                          0, // default value
+                          G_PARAM_READWRITE);
     obj_properties[PROP_NAME] =
         g_param_spec_string("name",
                             "Parameter Name",
@@ -112,13 +112,13 @@ static void ipcam_network_port_class_init(IpcamNetworkPortClass *klass)
                             NULL, // default value
                             G_PARAM_READWRITE);
     obj_properties[PROP_VALUE] =
-        g_param_spec_int("value",
-                         "Parameter value",
-                         "Network port parameter value.",
-                         0,
-                         65535,
-                         0, // default value
-                         G_PARAM_READWRITE);
+        g_param_spec_uint("value",
+                          "Parameter value",
+                          "Network port parameter value.",
+                          0,
+                          65535,
+                          0, // default value
+                          G_PARAM_READWRITE);
 
     g_object_class_install_properties(object_class, N_PROPERTIES, obj_properties);
     gom_resource_class_set_primary_key(resource_class, "id");

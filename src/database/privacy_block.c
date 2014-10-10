@@ -22,7 +22,7 @@ typedef struct _IpcamPrivacyBlockPrivate
     guint top;
     guint width;
     guint height;
-    guint32 color;
+    guint color;
 } IpcamPrivacyBlockPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE(IpcamPrivacyBlock, ipcam_privacy_block, GOM_TYPE_RESOURCE);
@@ -46,7 +46,7 @@ static void ipcam_privacy_block_set_property(GObject      *object,
     {
     case PROP_ID:
         {
-            priv->id = g_value_get_int(value);
+            priv->id = g_value_get_uint(value);
         }
         break;
     case PROP_NAME:
@@ -62,22 +62,22 @@ static void ipcam_privacy_block_set_property(GObject      *object,
         break;
     case PROP_LEFT:
         {
-            priv->left = g_value_get_int(value);
+            priv->left = g_value_get_uint(value);
         }
         break;
     case PROP_TOP:
         {
-            priv->top = g_value_get_int(value);
+            priv->top = g_value_get_uint(value);
         }
         break;
     case PROP_WIDTH:
         {
-            priv->width = g_value_get_int(value);
+            priv->width = g_value_get_uint(value);
         }
         break;
     case PROP_HEIGHT:
         {
-            priv->height = g_value_get_int(value);
+            priv->height = g_value_get_uint(value);
         }
         break;
     case PROP_COLOR:
@@ -101,7 +101,7 @@ static void ipcam_privacy_block_get_property(GObject    *object,
     {
     case PROP_ID:
         {
-            g_value_set_int(value, priv->id);
+            g_value_set_uint(value, priv->id);
         }
         break;
     case PROP_NAME:
@@ -116,22 +116,22 @@ static void ipcam_privacy_block_get_property(GObject    *object,
         break;
     case PROP_LEFT:
         {
-            g_value_set_int(value, priv->left);
+            g_value_set_uint(value, priv->left);
         }
         break;
     case PROP_TOP:
         {
-            g_value_set_int(value, priv->top);
+            g_value_set_uint(value, priv->top);
         }
         break;
     case PROP_WIDTH:
         {
-            g_value_set_int(value, priv->width);
+            g_value_set_uint(value, priv->width);
         }
         break;
     case PROP_HEIGHT:
         {
-            g_value_set_int(value, priv->height);
+            g_value_set_uint(value, priv->height);
             break;
         }
     case PROP_COLOR:
@@ -158,13 +158,13 @@ static void ipcam_privacy_block_class_init(IpcamPrivacyBlockClass *klass)
     gom_resource_class_set_table(resource_class, "privacy_block");
   
     obj_properties[PROP_ID] =
-        g_param_spec_int("id",
-                         "ID",
-                         "The ID for the user.",
-                         0,
-                         65535,
-                         0, // default value
-                         G_PARAM_READWRITE);
+        g_param_spec_uint("id",
+                          "ID",
+                          "The ID for the user.",
+                          0,
+                          G_MAXUINT,
+                          0, // default value
+                          G_PARAM_READWRITE);
     obj_properties[PROP_NAME] =
         g_param_spec_string("name",
                             "Name",

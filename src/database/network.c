@@ -12,7 +12,7 @@ typedef struct _IpcamNetworkPrivate
 {
     guint id;
     gchar *name;
-    guint value;
+    gchar * value;
 } IpcamNetworkPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE(IpcamNetwork, ipcam_network, GOM_TYPE_RESOURCE);
@@ -23,6 +23,7 @@ static void ipcam_network_finalize(GObject *object)
 {
     IpcamNetworkPrivate *priv = ipcam_network_get_instance_private(IPCAM_NETWORK(object));
     g_free(priv->name);
+    g_free(priv->value);
     G_OBJECT_CLASS(ipcam_network_parent_class)->finalize(object);
 }
 static void ipcam_network_set_property(GObject      *object,
@@ -36,7 +37,7 @@ static void ipcam_network_set_property(GObject      *object,
     {
     case PROP_ID:
         {
-            priv->id = g_value_get_int(value);
+            priv->id = g_value_get_uint(value);
         }
         break;
     case PROP_NAME:
@@ -47,7 +48,7 @@ static void ipcam_network_set_property(GObject      *object,
         break;
     case PROP_VALUE:
         {
-            priv->value = g_value_get_int(value);
+            priv->value = g_value_dup_string(value);
         }
         break;
     default:
@@ -66,7 +67,7 @@ static void ipcam_network_get_property(GObject    *object,
     {
     case PROP_ID:
         {
-            g_value_set_int(value, priv->id);
+            g_value_set_uint(value, priv->id);
         }
         break;
     case PROP_NAME:
@@ -76,7 +77,7 @@ static void ipcam_network_get_property(GObject    *object,
         break;
     case PROP_VALUE:
         {
-            g_value_set_int(value, priv->value);
+            g_value_set_string(value, priv->value);
         }
         break;
     default:
@@ -98,13 +99,13 @@ static void ipcam_network_class_init(IpcamNetworkClass *klass)
     gom_resource_class_set_table(resource_class, "network");
   
     obj_properties[PROP_ID] =
-        g_param_spec_int("id",
-                         "ID",
-                         "The ID for the user.",
-                         0,
-                         65535,
-                         0, // default value
-                         G_PARAM_READWRITE);
+        g_param_spec_uint("id",
+                          "ID",
+                          "The ID for the user.",
+                          0,
+                          G_MAXUINT,
+                          0, // default value
+                          G_PARAM_READWRITE);
     obj_properties[PROP_NAME] =
         g_param_spec_string("name",
                             "Parameter Name",
@@ -112,13 +113,11 @@ static void ipcam_network_class_init(IpcamNetworkClass *klass)
                             NULL, // default value
                             G_PARAM_READWRITE);
     obj_properties[PROP_VALUE] =
-        g_param_spec_int("value",
-                         "Parameter value",
-                         "Network parameter value.",
-                         0,
-                         65535,
-                         0, // default value
-                         G_PARAM_READWRITE);
+        g_param_spec_string("value",
+                            "Parameter value",
+                            "Network parameter value.",
+                            NULL, // default value
+                            G_PARAM_READWRITE);
 
     g_object_class_install_properties(object_class, N_PROPERTIES, obj_properties);
     gom_resource_class_set_primary_key(resource_class, "id");

@@ -32,24 +32,22 @@ static void ipcam_network_static_set_property(GObject      *object,
                                               GParamSpec   *pspec)
 {
     IpcamNetworkStatic *self = IPCAM_NETWORK_STATIC(object);
+    IpcamNetworkStaticPrivate *priv = ipcam_network_static_get_instance_private(self);
     switch(property_id)
     {
     case PROP_ID:
         {
-            IpcamNetworkStaticPrivate *priv = ipcam_network_static_get_instance_private(self);
-            priv->id = g_value_get_int(value);
+            priv->id = g_value_get_uint(value);
         }
         break;
     case PROP_NAME:
         {
-            IpcamNetworkStaticPrivate *priv = ipcam_network_static_get_instance_private(self);
             g_free(priv->name);
             priv->name = g_value_dup_string(value);
         }
         break;
     case PROP_VALUE:
         {
-            IpcamNetworkStaticPrivate *priv = ipcam_network_static_get_instance_private(self);
             g_free(priv->value);
             priv->value = g_value_dup_string(value);
         }
@@ -65,23 +63,21 @@ static void ipcam_network_static_get_property(GObject    *object,
                                               GParamSpec *pspec)
 {
     IpcamNetworkStatic *self = IPCAM_NETWORK_STATIC(object);
+    IpcamNetworkStaticPrivate *priv = ipcam_network_static_get_instance_private(self);
     switch(property_id)
     {
     case PROP_ID:
         {
-            IpcamNetworkStaticPrivate *priv = ipcam_network_static_get_instance_private(self);
-            g_value_set_int(value, priv->id);
+            g_value_set_uint(value, priv->id);
         }
         break;
     case PROP_NAME:
         {
-            IpcamNetworkStaticPrivate *priv = ipcam_network_static_get_instance_private(self);
             g_value_set_string(value, priv->name);
         }
         break;
     case PROP_VALUE:
         {
-            IpcamNetworkStaticPrivate *priv = ipcam_network_static_get_instance_private(self);
             g_value_set_string(value, priv->value);
         }
         break;
@@ -104,13 +100,13 @@ static void ipcam_network_static_class_init(IpcamNetworkStaticClass *klass)
     gom_resource_class_set_table(resource_class, "network_static");
   
     obj_properties[PROP_ID] =
-        g_param_spec_int("id",
-                         "ID",
-                         "The ID for the static network parameter.",
-                         0,
-                         65535,
-                         0, // default value
-                         G_PARAM_READWRITE);
+        g_param_spec_uint("id",
+                          "ID",
+                          "The ID for the static network parameter.",
+                          0,
+                          G_MAXUINT,
+                          0, // default value
+                          G_PARAM_READWRITE);
     obj_properties[PROP_NAME] =
         g_param_spec_string("name",
                             "Name",
