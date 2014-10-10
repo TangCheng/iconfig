@@ -54,6 +54,7 @@ iconfig_SOURCES = \
 	ajax/http_misc_handler.c \
 	ajax/http_privacy_block_handler.c \
 	ajax/http_day_night_mode_handler.c \
+	ajax/http_szyc_handler.c \
 	msg-handler/ipcam-message-handler.c \
 	msg-handler/ipcam-base-info-handler.c \
 	msg-handler/ipcam-osd-handler.c \
@@ -66,6 +67,7 @@ iconfig_SOURCES = \
 	msg-handler/ipcam-misc-handler.c \
 	msg-handler/ipcam-privacy-block-handler.c \
 	msg-handler/ipcam-day-night-mode-handler.c \
+	msg-handler/ipcam-szyc-handler.c \
 	sysutils.c
 
 iconfig_LDFLAGS = 

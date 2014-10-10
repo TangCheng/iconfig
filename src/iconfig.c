@@ -81,6 +81,8 @@ static void ipcam_iconfig_before_start(IpcamBaseService *base_service)
         "set_day_night_mode",
         "get_osd",
         "set_osd",
+        "get_szyc",
+        "set_szyc",
         "get_network",
         "set_network"
     };
@@ -366,4 +368,20 @@ void ipcam_iconfig_set_day_night_mode(IpcamIConfig *iconfig, const gchar *name, 
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
 
     return ipcam_database_set_day_night_mode(priv->database, name, value);
+}
+
+gchar *ipcam_iconfig_get_szyc(IpcamIConfig *iconfig, const gchar *name)
+{
+    g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), -1);
+    IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
+
+    return ipcam_database_get_szyc(priv->database, name);
+}
+
+void ipcam_iconfig_set_szyc(IpcamIConfig *iconfig, const gchar *name, const gchar *value)
+{
+    g_return_if_fail(IPCAM_IS_ICONFIG(iconfig));
+    IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
+
+    ipcam_database_set_szyc(priv->database, name, value);
 }

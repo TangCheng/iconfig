@@ -1380,3 +1380,38 @@ gint ipcam_database_get_day_night_mode(IpcamDatabase *database, const gchar *nam
     
     return value;
 }
+void ipcam_database_set_szyc(IpcamDatabase *database, const gchar *name, const gchar *value)
+{
+    g_return_if_fail(IPCAM_IS_DATABASE(database));
+    GomResource *resource = NULL;
+    GError *error = NULL;
+
+    resource = ipcam_database_get_resource(database, IPCAM_SZYC_TYPE, name);
+    if (resource)
+    {
+        g_object_set(resource, "value", value, NULL);
+        gom_resource_save_sync(resource, &error);
+        g_object_unref(resource);
+    }
+
+    if (error)
+    {
+        g_print("set szyc record failed: %s\n", error->message);
+        g_error_free(error);
+    }
+}
+gchar *ipcam_database_get_szyc(IpcamDatabase *database, const gchar *name)
+{
+    g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
+    GomResource *resource = NULL;
+    gchar *value = NULL;
+    
+    resource = ipcam_database_get_resource(database, IPCAM_SZYC_TYPE, name);
+    if (resource)
+    {
+        g_object_get(resource, "value", &value, NULL);
+        g_object_unref(resource);
+    }
+    
+    return value;
+}

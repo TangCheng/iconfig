@@ -62,5 +62,7 @@ void ipcam_iconfig_set_privacy_block(IpcamIConfig *iconfig, const gchar *name, g
                                      guint left, guint top, guint width, guint height, guint color);
 gint ipcam_iconfig_get_day_night_mode(IpcamIConfig *iconfig, const gchar *name);
 void ipcam_iconfig_set_day_night_mode(IpcamIConfig *iconfig, const gchar *name, guint value);
+gchar *ipcam_iconfig_get_szyc(IpcamIConfig *iconfig, const gchar *name);
+void ipcam_iconfig_set_szyc(IpcamIConfig *iconfig, const gchar *name, const gchar *value);
 
 #endif /* __ICONFIG_H__ */
