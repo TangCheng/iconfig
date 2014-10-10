@@ -44,7 +44,7 @@ static void ipcam_osd_set_property(GObject      *object,
     {
     case PROP_ID:
         {
-            priv->id = g_value_get_int(value);
+            priv->id = g_value_get_uint(value);
         }
         break;
     case PROP_NAME:
@@ -60,22 +60,22 @@ static void ipcam_osd_set_property(GObject      *object,
         break;
     case PROP_SIZE:
         {
-            priv->size = g_value_get_int(value);
+            priv->size = g_value_get_uint(value);
         }
         break;
     case PROP_LEFT:
         {
-            priv->left = g_value_get_int(value);
+            priv->left = g_value_get_uint(value);
         }
         break;
     case PROP_TOP:
         {
-            priv->top = g_value_get_int(value);
+            priv->top = g_value_get_uint(value);
         }
         break;
     case PROP_COLOR:
         {
-            priv->color = g_value_get_int(value);
+            priv->color = g_value_get_uint(value);
         }
         break;
     default:
@@ -94,7 +94,7 @@ static void ipcam_osd_get_property(GObject    *object,
     {
     case PROP_ID:
         {
-            g_value_set_int(value, priv->id);
+            g_value_set_uint(value, priv->id);
         }
         break;
     case PROP_NAME:
@@ -109,22 +109,22 @@ static void ipcam_osd_get_property(GObject    *object,
         break;
     case PROP_SIZE:
         {
-            g_value_set_int(value, priv->size);
+            g_value_set_uint(value, priv->size);
         }
         break;
     case PROP_LEFT:
         {
-            g_value_set_int(value, priv->left);
+            g_value_set_uint(value, priv->left);
         }
         break;
     case PROP_TOP:
         {
-            g_value_set_int(value, priv->top);
+            g_value_set_uint(value, priv->top);
         }
         break;
     case PROP_COLOR:
         {
-            g_value_set_int(value, priv->color);
+            g_value_set_uint(value, priv->color);
         }
         break;
     default:
@@ -146,13 +146,13 @@ static void ipcam_osd_class_init(IpcamOsdClass *klass)
     gom_resource_class_set_table(resource_class, "osd");
   
     obj_properties[PROP_ID] =
-        g_param_spec_int("id",
-                         "ID",
-                         "The ID for the user.",
-                         0,
-                         65535,
-                         0, // default value
-                         G_PARAM_READWRITE);
+        g_param_spec_uint("id",
+                          "ID",
+                          "The ID for the user.",
+                          0,
+                          G_MAXUINT,
+                          0, // default value
+                          G_PARAM_READWRITE);
     obj_properties[PROP_NAME] =
         g_param_spec_string("name",
                             "Name",
@@ -166,37 +166,37 @@ static void ipcam_osd_class_init(IpcamOsdClass *klass)
                              TRUE,
                              G_PARAM_READWRITE);
     obj_properties[PROP_SIZE] =
-        g_param_spec_int("size",
-                         "Size",
-                         "Font size of the content.",
-                         1,
-                         100,
-                         20, // default value
-                         G_PARAM_READWRITE);
+        g_param_spec_uint("size",
+                          "Size",
+                          "Font size of the content.",
+                          1,
+                          100,
+                          20, // default value
+                          G_PARAM_READWRITE);
     obj_properties[PROP_LEFT] =
-        g_param_spec_int("left",
-                         "left position",
-                         "X axsis position, percent of image resolution.",
-                         0,
-                         1000,
-                         0, // default value
-                         G_PARAM_READWRITE);
+        g_param_spec_uint("left",
+                          "left position",
+                          "X axsis position, percent of image resolution.",
+                          0,
+                          1000,
+                          0, // default value
+                          G_PARAM_READWRITE);
     obj_properties[PROP_TOP] =
-        g_param_spec_int("top",
-                         "top position",
-                         "Y Axsis position, percent of image resolution.",
-                         0,
-                         1000,
-                         0, // default value
-                         G_PARAM_READWRITE);
+        g_param_spec_uint("top",
+                          "top position",
+                          "Y Axsis position, percent of image resolution.",
+                          0,
+                          1000,
+                          0, // default value
+                          G_PARAM_READWRITE);
     obj_properties[PROP_COLOR] =
-        g_param_spec_int("color",
-                         "OSD color",
-                         "Color of the content.",
-                         0,
-                         65535,
-                         0, // default value
-                         G_PARAM_READWRITE);
+        g_param_spec_uint("color",
+                          "OSD color",
+                          "Color of the content.",
+                          0,
+                          G_MAXUINT,
+                          0, // default value
+                          G_PARAM_READWRITE);
 
     g_object_class_install_properties(object_class, N_PROPERTIES, obj_properties);
     gom_resource_class_set_primary_key(resource_class, "id");

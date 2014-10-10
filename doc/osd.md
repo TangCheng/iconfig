@@ -20,7 +20,7 @@ PUT
 请求|参数|必选|类型及范围|说明
 ---|---|:-:|---|---|---
 GET|items|是|object: { master: ['datetime', 'device_name', 'comment', 'frame_rate', 'bit_rate'], slave: []}|需要查询的OSD显示项的名称
-PUT|items|是|object: {'osd_name':'datetime','isshow':true,'size':5,'x':10,'y':20,'color':0}|要设置的OSD显示项的名称，是否显示，大小，X/Y坐标，和颜色值
+PUT|items|是|object: |要设置的OSD显示项的名称，是否显示，大小，X/Y坐标，和颜色值
 
 ### 注意事项
 无
@@ -35,66 +35,58 @@ GET
 
 	{
 		"items" : {
-			"master" : [
-				{
-					"comment" : {
-						"isshow" : true,
-          				"size" : 20,
-          				"left" : 800,
-          				"top" : 10,
-          				"color" : {
-            				"red" : 0,
-            				"green" : 0,
-            				"blue" : 0,
-            				"alpha" : 0
-          				}
-        			}
-      			},
-      			{
-					"bit_rate" : {
-          				"isshow" : true,
-          				"size" : 20,
-          				"left" : 10,
-          				"top" : 970,
-          				"color" : {
-            				"red" : 0,
-            				"green" : 0,
-            				"blue" : 0,
-            				"alpha" : 0
-          				}
-        			}
-      			}
-    		],
-    		"slave" : [
-      			{
-					"device_name" : {
-          				"isshow" : true,
-          				"size" : 20,
-          				"left" : 10,
-          				"top" : 10,
-          				"color" : {
-            				"red" : 0,
-            				"green" : 0,
-            				"blue" : 0,
-            				"alpha" : 0
-          				}
-        			}
-      			},
-      			{
-					"frame_rate" : {
-          				"isshow" : true,
-          				"size" : 20,
-          				"left" : 10,
-          				"top" : 945,
-          				"color" : {
-            				"red" : 0,
-            				"green" : 0,
-            				"blue" : 0,
-            				"alpha" : 0
-          				}
-        			}
-      			}
-    		]
+			"master" : {
+				"comment" : {
+					"isshow" : true,
+          			"size" : 20,
+          			"left" : 800,
+          			"top" : 10,
+          			"color" : {
+            			"red" : 0,
+            			"green" : 0,
+            			"blue" : 0,
+            			"alpha" : 0
+          			}
+        		},
+				"bit_rate" : {
+          			"isshow" : true,
+          			"size" : 20,
+          			"left" : 10,
+          			"top" : 970,
+          			"color" : {
+            			"red" : 0,
+            			"green" : 0,
+            			"blue" : 0,
+            			"alpha" : 0
+          			}
+        		}
+      		},
+    		"slave" : {
+				"device_name" : {
+          			"isshow" : true,
+          			"size" : 20,
+          			"left" : 10,
+          			"top" : 10,
+          			"color" : {
+            			"red" : 0,
+            			"green" : 0,
+            			"blue" : 0,
+            			"alpha" : 0
+          			}
+        		},
+				"frame_rate" : {
+          			"isshow" : true,
+          			"size" : 20,
+          			"left" : 10,
+          			"top" : 945,
+          			"color" : {
+            			"red" : 0,
+            			"green" : 0,
+            			"blue" : 0,
+            			"alpha" : 0
+          			}
+        		}
+      		}
   		}
 	}
 	
@@ -107,8 +99,8 @@ PUT
 ---|---|---
 isshow|boolean|是否在屏幕显示
 size|int|字体大小
-left|int|左边距
-top|int|上边距
+left|int|左边距 千分比
+top|int|上边距 千分比
 red|int|红色分量 (0-255)
 green|int|绿色分量 (0-255)
 blue|int|蓝色分量 (0-255)
@@ -145,66 +137,58 @@ alpha|int|透明度 (0-255)
 		},
         'body': {
             "items" : {
-				"master" : [
-					{
-						"comment" : {
-							"isshow" : true,
-          					"size" : 20,
-          					"left" : 800,
-          					"top" : 10,
-          					"color" : {
-            					"red" : 0,
-            					"green" : 0,
-            					"blue" : 0,
-            					"alpha" : 0
-          						}
-        					}
-      					},
-      				{
-						"bit_rate" : {
-          					"isshow" : true,
-          					"size" : 20,
-          					"left" : 10,
-          					"top" : 970,
-          					"color" : {
-            					"red" : 0,
-            					"green" : 0,
-            					"blue" : 0,
-            					"alpha" : 0
-          					}
-        				}
-      				}
-    			],
-    			"slave" : [
-      				{
-						"device_name" : {
-          					"isshow" : true,
-          					"size" : 20,
-          					"left" : 10,
-          					"top" : 10,
-          					"color" : {
-            					"red" : 0,
-            					"green" : 0,
-            					"blue" : 0,
-            					"alpha" : 0
-          					}
-        				}
+				"master" : {
+					"comment" : {
+						"isshow" : true,
+          				"size" : 20,
+          				"left" : 800,
+          				"top" : 10,
+          				"color" : {
+            				"red" : 0,
+            				"green" : 0,
+            				"blue" : 0,
+            				"alpha" : 0
+          				}
+        			},
+					"bit_rate" : {
+          				"isshow" : true,
+          				"size" : 20,
+          				"left" : 10,
+          				"top" : 970,
+          				"color" : {
+            				"red" : 0,
+            				"green" : 0,
+            				"blue" : 0,
+            				"alpha" : 0
+          				}
+        			}
+      			},
+    			"slave" : {
+					"device_name" : {
+          				"isshow" : true,
+          				"size" : 20,
+          				"left" : 10,
+          				"top" : 10,
+          				"color" : {
+            				"red" : 0,
+            				"green" : 0,
+            				"blue" : 0,
+            				"alpha" : 0
+          				}
       				},
-      				{
-						"frame_rate" : {
-          					"isshow" : true,
-          					"size" : 20,
-          					"left" : 10,
-          					"top" : 945,
-          					"color" : {
-            					"red" : 0,
-            					"green" : 0,
-            					"blue" : 0,
-            					"alpha" : 0
-          					}
-        				}
-      				}
-    			]
+					"frame_rate" : {
+          				"isshow" : true,
+          				"size" : 20,
+          				"left" : 10,
+          				"top" : 945,
+          				"color" : {
+            				"red" : 0,
+            				"green" : 0,
+            				"blue" : 0,
+            				"alpha" : 0
+          				}
+        			}
+      			}
   			}
 		}
     }
@@ -217,24 +201,60 @@ alpha|int|透明度 (0-255)
             'version': '1.0'
         },
         'body': {
-			'items': [
-                {
-                    "name":"datetime",
-                    "isshow":true,
-                    "size":5,
-                    "x":10,
-                    "y":20,
-                    "color":0
-                },
-				{
-                    "name":"device_name",
-                    "isshow":true,
-                    "size":5,
-                    "x":10,
-                    "y":10,
-                    "color":0
-                }
-            ]
+			"items" : {
+				"master" : {
+					"comment" : {
+						"isshow" : true,
+          				"size" : 20,
+          				"left" : 800,
+          				"top" : 10,
+          				"color" : {
+            				"red" : 0,
+            				"green" : 0,
+            				"blue" : 0,
+            				"alpha" : 0
+          				}
+        			},
+					"bit_rate" : {
+          				"isshow" : true,
+          				"size" : 20,
+          				"left" : 10,
+          				"top" : 970,
+          				"color" : {
+            				"red" : 0,
+            				"green" : 0,
+            				"blue" : 0,
+            				"alpha" : 0
+          				}
+        			}
+      			},
+    			"slave" : {
+					"device_name" : {
+          				"isshow" : true,
+          				"size" : 20,
+          				"left" : 10,
+          				"top" : 10,
+          				"color" : {
+            				"red" : 0,
+            				"green" : 0,
+            				"blue" : 0,
+            				"alpha" : 0
+          				}
+      				},
+					"frame_rate" : {
+          				"isshow" : true,
+          				"size" : 20,
+          				"left" : 10,
+          				"top" : 945,
+          				"color" : {
+            				"red" : 0,
+            				"green" : 0,
+            				"blue" : 0,
+            				"alpha" : 0
+          				}
+        			}
+      			}
+  			}
         }
     }
 #### response
