@@ -236,7 +236,7 @@ static char *__prefixlen2_mask(unsigned int prefix_len)
 
 	for (i = 31; i >= 32 - (int)prefix_len; i--)
 		addr.s_addr |= (1 << i);
-
+    addr.s_addr = htonl(addr.s_addr);
 	return inet_ntoa(addr);
 }
 

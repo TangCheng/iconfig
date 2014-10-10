@@ -23,6 +23,7 @@
 #include "ipcam-network-handler.h"
 #include "iconfig.h"
 #include "sysutils.h"
+#include "common.h"
 
 G_DEFINE_TYPE (IpcamNetworkMsgHandler, ipcam_network_msg_handler, IPCAM_TYPE_MESSAGE_HANDLER);
 
@@ -37,14 +38,138 @@ ipcam_network_msg_handler_finalize (GObject *object)
     G_OBJECT_CLASS (ipcam_network_msg_handler_parent_class)->finalize (object);
 }
 
-#define ARRAY_SIZE(x)       sizeof(x)/sizeof(x[0])
+static void
+ipcam_network_msg_handler_read_method(IpcamNetworkMsgHandler *handler, JsonBuilder *builder)
+{
+    IpcamIConfig *iconfig;
+    g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
+    gchar *value;
+
+    value = ipcam_iconfig_get_network(iconfig, "method");
+    if (value)
+    {                
+        json_builder_set_member_name(builder, "method");
+        json_builder_add_string_value(builder, value);
+    }
+}
+
+static void
+ipcam_network_msg_handler_read_address(IpcamNetworkMsgHandler *handler, JsonBuilder *builder)
+{
+    IpcamIConfig *iconfig;
+    g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
+    gchar *ipaddr = NULL, *netmask = NULL, *gateway = NULL;
+    char *dns[2] = { [0 ... (ARRAY_SIZE(dns) - 1)] = NULL };
+    int nr_dns = 2;
+    struct __key_val {
+        gchar *key;
+        gchar **pval;
+    } kv[] = {
+        { "ipaddr",  &ipaddr },
+        { "netmask", &netmask },
+        { "gateway", &gateway },
+        { "dns1",    &dns[0] },
+        { "dns2",    &dns[1] }
+    };
+    const gchar *netif = ipcam_base_app_get_config(IPCAM_BASE_APP(iconfig), "netif");
+
+    if (sysutils_network_get_address(netif, &ipaddr, &netmask, NULL) != 0)
+    {
+        perror("error get network address: ");
+    }
+    if (sysutils_network_get_gateway(netif, &gateway) != 0)
+    {
+        perror("error get gateway: ");
+    }
+    if (sysutils_network_get_dns(netif, dns, &nr_dns) != 0)
+    {
+        perror("error get dns: ");
+    }
+
+    int i;
+    for (i = 0; i < ARRAY_SIZE(kv); i++)
+    {
+        if (*kv[i].pval)
+        {
+            json_builder_set_member_name(builder, kv[i].key);
+            json_builder_add_string_value(builder, *kv[i].pval);
+
+            g_free(*kv[i].pval);
+        }
+    }
+}
+
+static void
+ipcam_network_msg_handler_read_pppoe(IpcamNetworkMsgHandler *handler, JsonBuilder *builder)
+{
+    IpcamIConfig *iconfig;
+    g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
+    static gchar *subitems[] = { "username", "password" };
+    gint i;
+
+    for (i = 0; i < ARRAY_SIZE(subitems); i++)
+    {
+        gchar *value = ipcam_iconfig_get_network_pppoe(iconfig, subitems[i]);
+
+        json_builder_set_member_name(builder, subitems[i]);
+        json_builder_add_string_value(builder, value);
+
+        g_free(value);
+    }
+}
+
+static void
+ipcam_network_msg_handler_read_port(IpcamNetworkMsgHandler *handler, JsonBuilder *builder)
+{
+    IpcamIConfig *iconfig;
+    g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
+    static gchar *subitems[] = { "http", "ftp", "rtsp" };
+    gint i;
+
+    for (i = 0; i < ARRAY_SIZE(subitems); i++)
+    {
+        gint value = ipcam_iconfig_get_network_port(iconfig, subitems[i]);
+
+        json_builder_set_member_name(builder, subitems[i]);
+        json_builder_add_int_value(builder, value);
+    }
+}
+
+static gboolean
+ipcam_network_msg_handler_read_param(IpcamNetworkMsgHandler *handler, JsonBuilder *builder, const gchar *name)
+{
+    if (g_str_equal(name, "method"))
+    {
+        ipcam_network_msg_handler_read_method(handler, builder);
+    }
+    else if (g_str_equal(name, "address"))
+    {
+        json_builder_set_member_name(builder, "address");
+        json_builder_begin_object(builder);
+        ipcam_network_msg_handler_read_address(handler, builder);
+        json_builder_end_object(builder);
+    }
+    else if (g_str_equal(name, "pppoe"))
+    {
+        json_builder_set_member_name(builder, name);
+        json_builder_begin_object(builder);
+        ipcam_network_msg_handler_read_pppoe(handler, builder);
+        json_builder_end_object(builder);
+    }
+    else if (g_strcmp0(name, "port") == 0)
+    {
+        json_builder_set_member_name(builder, name);
+        json_builder_begin_object(builder);
+        ipcam_network_msg_handler_read_port(handler, builder);
+        json_builder_end_object(builder);
+    }
+
+    return TRUE;
+}
 
 static gboolean
 ipcam_network_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode *request, JsonNode **response)
 {
-    IpcamIConfig *iconfig;
-    g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
-
     JsonBuilder *builder = json_builder_new();
     JsonArray *req_array;
     int idx;
@@ -55,121 +180,10 @@ ipcam_network_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode
     json_builder_set_member_name(builder, "items");
     json_builder_begin_object(builder);
 
-    gchar *method = ipcam_iconfig_get_network(iconfig, "method");
-
     for (idx = 0; idx < json_array_get_length(req_array); idx++)
     {
         const gchar *name = json_array_get_string_element(req_array, idx);
-
-        if (g_str_equal(name, "autoconf")) {
-            json_builder_set_member_name(builder, name);
-            json_builder_add_string_value(builder, method);
-        }
-        else if (!g_strcmp0(name, "address") || !g_strcmp0(name, "dyn-address"))
-        {
-            gchar *hwaddr = NULL, *ipaddr = NULL, *netmask = NULL, *gateway = NULL;
-            char *dns[2] = { [0 ... (ARRAY_SIZE(dns) - 1)] = NULL };
-            int nr_dns = 2;
-
-            json_builder_set_member_name(builder, "address");
-            json_builder_begin_object(builder);
-            struct __key_val {
-                gchar *key;
-                gchar **pval;
-            } kv[] = {
-                { "hwaddr",  &hwaddr },
-                { "ipaddr",  &ipaddr },
-                { "netmask", &netmask },
-                { "gateway", &gateway },
-                { "dns1",    &dns[0] },
-                { "dns2",    &dns[1] }
-            };
-            const gchar *netif = ipcam_base_app_get_config(IPCAM_BASE_APP(iconfig), "netif");
-
-            hwaddr = ipcam_iconfig_get_network_static(iconfig, "hwaddr");
-            if (sysutils_network_get_address(netif, &ipaddr, &netmask, NULL) != 0)
-                perror("error get network address: ");
-            if (sysutils_network_get_gateway(netif, &gateway) != 0)
-                perror("error get gateway: ");
-            if (sysutils_network_get_dns(netif, dns, &nr_dns) != 0)
-                perror("error get dns: ");
-
-            int i;
-            for (i = 0; i < ARRAY_SIZE(kv); i++)
-            {
-                if (*kv[i].pval)
-                {
-                    json_builder_set_member_name(builder, kv[i].key);
-                    json_builder_add_string_value(builder, *kv[i].pval);
-
-                    g_free(*kv[i].pval);
-                }
-            }
-            json_builder_end_object(builder);
-        }
-        else if ((g_strcmp0(name, "address") == 0))
-        {
-            static gchar *keys[] = { "hwaddr", "ipaddr", "netmask", "gateway", "dns1", "dns2" };
-            int i;
-
-            json_builder_set_member_name(builder, name);
-            json_builder_begin_object(builder);
-            for (i = 0; i < ARRAY_SIZE(keys); i++)
-            {
-                gchar *value = ipcam_iconfig_get_network_static(iconfig, keys[i]);
-
-                json_builder_set_member_name(builder, keys[i]);
-                json_builder_add_string_value(builder, value);
-
-                g_free(value);
-            }
-            json_builder_end_object(builder);
-        }
-        else if (g_strcmp0(name, "hostname") == 0)
-        {
-            const gchar *hostname = NULL;
-            if (sysutils_network_get_hostname(&hostname) == 0)
-            {
-                json_builder_set_member_name(builder, "hostname");
-                json_builder_add_string_value(builder, hostname);
-
-                g_free((gpointer)hostname);
-            }
-        }
-        else if (g_strcmp0(name, "pppoe") == 0)
-        {
-            static gchar *subitems[] = { "username", "password" };
-            int i;
-
-            json_builder_set_member_name(builder, name);
-            json_builder_begin_object(builder);
-            for (i = 0; i < ARRAY_SIZE(subitems); i++)
-            {
-                gchar *value = ipcam_iconfig_get_network_pppoe(iconfig, subitems[i]);
-
-                json_builder_set_member_name(builder, subitems[i]);
-                json_builder_add_string_value(builder, value);
-
-                g_free(value);
-            }
-            json_builder_end_object(builder);
-        }
-        else if (g_strcmp0(name, "server_port") == 0)
-        {
-            static gchar *subitems[] = { "http", "ftp", "rtsp" };
-            int i;
-
-            json_builder_set_member_name(builder, name);
-            json_builder_begin_object(builder);
-            for (i = 0; i < ARRAY_SIZE(subitems); i++)
-            {
-                gint value = ipcam_iconfig_get_network_port(iconfig, subitems[i]);
-
-                json_builder_set_member_name(builder, subitems[i]);
-                json_builder_add_int_value(builder, value);
-            }
-            json_builder_end_object(builder);
-        }
+        ipcam_network_msg_handler_read_param(IPCAM_NETWORK_MSG_HANDLER(handler), builder, name);
     }
     json_builder_end_object(builder);
     json_builder_end_object(builder);
@@ -190,7 +204,7 @@ ipcam_network_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode
     JsonBuilder *builder = json_builder_new();
     JsonObject *req_obj;
 
-    gchar *method = ipcam_iconfig_get_network(iconfig, "method");
+    const gchar *method = ipcam_iconfig_get_network(iconfig, "method");
 
     req_obj = json_object_get_object_member(json_node_get_object(request), "items");
 
