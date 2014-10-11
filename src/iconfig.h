@@ -64,5 +64,7 @@ gint ipcam_iconfig_get_day_night_mode(IpcamIConfig *iconfig, const gchar *name);
 void ipcam_iconfig_set_day_night_mode(IpcamIConfig *iconfig, const gchar *name, guint value);
 gchar *ipcam_iconfig_get_szyc(IpcamIConfig *iconfig, const gchar *name);
 void ipcam_iconfig_set_szyc(IpcamIConfig *iconfig, const gchar *name, const gchar *value);
+GVariant *ipcam_iconfig_read(IpcamIConfig *iconfig, GType table, const gchar *name, const gchar *sub_name);
+gboolean ipcam_iconfig_update(IpcamIConfig *iconfig, GType table, const gchar *name, const gchar *sub_name, GVariant *value);
 
 #endif /* __ICONFIG_H__ */

@@ -4,6 +4,7 @@
 #include <gom/gom.h>
 #include <sysutils.h>
 #include "database.h"
+#include "common.h"
 #include "base_info.h"
 #include "users.h"
 #include "datetime.h"
@@ -18,6 +19,7 @@
 #include "network_pppoe.h"
 #include "network_port.h"
 #include "misc.h"
+#include "event_input.h"
 
 #define DATABASE_PATH "/data"
 #define DATABASE_NAME "configuration.sqlite3"
@@ -27,6 +29,7 @@ typedef struct _IpcamDatabasePrivate
 {
     GomRepository *repository;
     GomAdapter *adapter;
+    GomResource *resource;
 } IpcamDatabasePrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE(IpcamDatabase, ipcam_database, G_TYPE_OBJECT);
@@ -38,6 +41,10 @@ static void ipcam_database_finalize (GObject *object)
     IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(IPCAM_DATABASE(object));
     g_object_unref(priv->repository);
     g_object_unref(priv->adapter);
+    if (priv->resource)
+    {
+        g_object_unref(priv->resource);
+    }
     G_OBJECT_CLASS(ipcam_database_parent_class)->finalize(object);
 }
 static void ipcam_database_init(IpcamDatabase *self)
@@ -106,7 +113,7 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
         EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
                      "VALUES ('serial', 'NCD1081A16000001', 0);");
         EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
-                     "VALUES ('hardware', 'Rev1', 0);");
+                     "VALUES ('hardware', 'Rev.1', 0);");
         /************************************************
          * users table                                  *
          ************************************************/
@@ -336,16 +343,16 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
                      "enable   INTEGER NOT NULL,"
-                     "mon      TEXT,"
-                     "tue      TEXT,"
-                     "wed      TEXT,"
-                     "thu      TEXT,"
-                     "fri      TEXT,"
-                     "sat      TEXT,"
-                     "sun      TEXT"
+                     "mon      TEXT NOT NULL,"
+                     "tue      TEXT NOT NULL,"
+                     "wed      TEXT NOT NULL,"
+                     "thu      TEXT NOT NULL,"
+                     "fri      TEXT NOT NULL,"
+                     "sat      TEXT NOT NULL,"
+                     "sun      TEXT NOT NULL"
                      ");");
-        EXEC_OR_FAIL("INSERT INTO event_input (name, enable) "
-                     "VALUES ('intput1', 0);");
+        EXEC_OR_FAIL("INSERT INTO event_input (name, enable, mon, tue, wed, thu, fri, sat, sun) "
+                     "VALUES ('input1', 0, '', '', '', '', '', '', '');");
         /************************************************
          * event_output table                           *
          ************************************************/
@@ -416,7 +423,7 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "output1       INTEGER NOT NULL"
                      ");");
         EXEC_OR_FAIL("INSERT INTO event_proc (name, record, sound, output1) "
-                     "VALUES ('intput1', 0, 0, 0);");
+                     "VALUES ('input1', 0, 0, 0);");
         EXEC_OR_FAIL("INSERT INTO event_proc (name, record, sound, output1) "
                      "VALUES ('motion', 0, 0, 0);");
         EXEC_OR_FAIL("INSERT INTO event_proc (name, record, sound, output1) "
@@ -1415,3 +1422,197 @@ gchar *ipcam_database_get_szyc(IpcamDatabase *database, const gchar *name)
     
     return value;
 }
+void ipcam_database_set_event_input(IpcamDatabase *database, const gchar *name, GVariant *value)
+{
+    g_return_if_fail(IPCAM_IS_DATABASE(database));
+    GomResource *resource = NULL;
+    GError *error = NULL;
+
+    resource = ipcam_database_get_resource(database, IPCAM_SZYC_TYPE, name);
+    if (resource)
+    {
+        gom_resource_save_sync(resource, &error);
+        g_object_unref(resource);
+    }
+
+    if (error)
+    {
+        g_print("set szyc record failed: %s\n", error->message);
+        g_error_free(error);
+    }
+}
+GVariant *ipcam_database_get_event_input(IpcamDatabase *database, const gchar *name)
+{
+    g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
+    GomResource *resource = NULL;
+    GVariant *value;
+
+    resource = ipcam_database_get_resource(database, IPCAM_SZYC_TYPE, name);
+    if (resource)
+    {
+        g_object_unref(resource);
+    }
+    
+    return value;
+}
+static void ipcam_database_set_schedules(IpcamDatabase *database, GVariant *value)
+{
+    IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);
+    Schedules *sche = NULL;
+    if (IS_64BIT_MACHINE)
+    {
+        sche = GSIZE_TO_POINTER(g_variant_get_uint64(value));
+    }
+    else
+    {
+        sche = GSIZE_TO_POINTER(g_variant_get_uint32(value));
+    }
+    g_object_set(priv->resource,
+                 "mon", sche->schedule[ENUM_MON],
+                 "tue", sche->schedule[ENUM_TUE],
+                 "wed", sche->schedule[ENUM_WED],
+                 "thu", sche->schedule[ENUM_THU],
+                 "fri", sche->schedule[ENUM_FRI],
+                 "sat", sche->schedule[ENUM_SAT],
+                 "sun", sche->schedule[ENUM_SUN],
+                 NULL);
+}
+static gboolean ipcam_database_update_value(IpcamDatabase *database, const gchar *sub_name, GVariant *value)
+{
+    IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);
+    GError *error = NULL;
+    gboolean ret = TRUE;
+
+    if (g_str_equal(sub_name, "schedules"))
+    {
+        ipcam_database_set_schedules(database, value);
+    }
+    else
+    {
+        if (g_variant_is_of_type(value, G_VARIANT_TYPE_STRING))
+        {
+            g_object_set(priv->resource, sub_name, g_variant_get_string(value, NULL), NULL);
+        }
+        else if (g_variant_is_of_type(value, G_VARIANT_TYPE_BOOLEAN))
+        {
+            g_object_set(priv->resource, sub_name, g_variant_get_boolean(value), NULL);
+        }
+        else if (g_variant_is_of_type(value, G_VARIANT_TYPE_UINT32))
+        {
+            g_object_set(priv->resource, sub_name, g_variant_get_uint32(value), NULL);
+        }
+        else
+        {
+            g_warn_if_reached();
+            ret = FALSE;
+        }
+    }
+    
+    gom_resource_save_sync(priv->resource, &error);
+
+    if (error)
+    {
+        g_print("set record failed: %s\n", error->message);
+        g_error_free(error);
+        ret = FALSE;
+    }
+
+    return ret;
+}
+gboolean ipcam_database_update(IpcamDatabase *database, GType table, const gchar *name, const gchar *sub_name, GVariant *value)
+{
+    g_return_val_if_fail(IPCAM_IS_DATABASE(database), FALSE);
+    IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);
+    gboolean ret = FALSE;
+
+    priv->resource = ipcam_database_get_resource(database, table, name);
+    if (priv->resource)
+    {
+        ret = ipcam_database_update_value(database, sub_name, value);
+        
+        g_object_unref(priv->resource);
+        priv->resource = NULL;
+    }
+    return ret;
+}
+GVariant *ipcam_database_get_schedules(IpcamDatabase *database)
+{
+    IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);
+    GVariant *value;
+
+    Schedules *sche = g_new0(Schedules, 1);
+    g_object_get(priv->resource,
+                 "mon", &sche->schedule[ENUM_MON],
+                 "tue", &sche->schedule[ENUM_TUE],
+                 "wed", &sche->schedule[ENUM_WED],
+                 "thu", &sche->schedule[ENUM_THU],
+                 "fri", &sche->schedule[ENUM_FRI],
+                 "sat", &sche->schedule[ENUM_SAT],
+                 "sun", &sche->schedule[ENUM_SUN],
+                 NULL);
+    if (IS_64BIT_MACHINE)
+    {
+        value = g_variant_new_uint64(GPOINTER_TO_SIZE(sche));
+    }
+    else
+    {
+        value = g_variant_new_uint32(GPOINTER_TO_SIZE(sche));
+    }
+    return value;
+}
+GVariant *ipcam_database_read_value(IpcamDatabase *database, const gchar *sub_name)
+{
+    IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);
+    GParamSpec *param_spec = NULL;
+    GVariant *value = NULL;
+    guint ival;
+    gchar *sval;
+    gboolean bval;
+
+    if (g_str_equal(sub_name, "schedules"))
+    {
+        value = ipcam_database_get_schedules(database);
+    }
+    else
+    {
+        param_spec = g_object_class_find_property(G_OBJECT_GET_CLASS(priv->resource), sub_name);
+        switch (G_PARAM_SPEC_VALUE_TYPE(param_spec))
+        {
+        case G_TYPE_UINT:
+            g_object_get(priv->resource, sub_name, &ival, NULL);
+            value = g_variant_new_uint32(ival);
+            break;
+        case G_TYPE_STRING:
+            g_object_get(priv->resource, sub_name, &sval, NULL);
+            value = g_variant_new_string(sval);
+            g_free(sval);
+            break;
+        case G_TYPE_BOOLEAN:
+            g_object_get(priv->resource, sub_name, &bval, NULL);
+            value = g_variant_new_boolean(bval);
+            break;
+        default:
+            g_warn_if_reached();
+            break;
+        }
+    }    
+
+    return value;
+}
+GVariant *ipcam_database_read(IpcamDatabase *database, GType table, const gchar *name, const gchar *sub_name)
+{
+    g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
+    IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);
+    GVariant *value = NULL;
+
+    priv->resource = ipcam_database_get_resource(database, table, name);
+    if (priv->resource)
+    {
+        value = ipcam_database_read_value(database, sub_name);
+        g_object_unref(priv->resource);
+        priv->resource = NULL;
+    }
+
+    return value;
+}
+

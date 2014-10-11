@@ -84,7 +84,9 @@ static void ipcam_iconfig_before_start(IpcamBaseService *base_service)
         "get_szyc",
         "set_szyc",
         "get_network",
-        "set_network"
+        "set_network",
+        "get_event_input",
+        "set_event_input"
     };
 
     gint i = 0;
@@ -385,3 +387,19 @@ void ipcam_iconfig_set_szyc(IpcamIConfig *iconfig, const gchar *name, const gcha
 
     ipcam_database_set_szyc(priv->database, name, value);
 }
+GVariant *ipcam_iconfig_read(IpcamIConfig *iconfig, GType table, const gchar *name, const gchar *sub_name)
+{
+    g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), NULL);
+    IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
+
+    return ipcam_database_read(priv->database, table, name, sub_name);
+}
+
+gboolean ipcam_iconfig_update(IpcamIConfig *iconfig, GType table, const gchar *name, const gchar *sub_name,  GVariant *value)
+{
+    g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), FALSE);
+    IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
+
+    return ipcam_database_update(priv->database, table, name, sub_name, value);
+}
+

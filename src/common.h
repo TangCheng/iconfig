@@ -4,6 +4,7 @@
 #include <glib.h>
 
 #define ARRAY_SIZE(x)       sizeof(x)/sizeof(x[0])
+#define IS_64BIT_MACHINE    (8 == sizeof(gpointer))
 
 typedef union _Color
 {
@@ -16,5 +17,24 @@ typedef union _Color
     };
     guint32 value;
 } Color;
+
+enum _Weekday
+{
+    ENUM_MON = 0,
+    ENUM_TUE = 1,
+    ENUM_WED = 2,
+    ENUM_THU = 3,
+    ENUM_FRI = 4,
+    ENUM_SAT = 5,
+    ENUM_SUN = 6,
+    ENUM_WEEKDAY_LAST
+} Weekday;
+
+extern const gchar *weekday_name[];
+
+typedef struct _Schedules
+{
+    gchar *schedule[ENUM_WEEKDAY_LAST];
+} Schedules;
 
 #endif /* __COMMON_H__ */

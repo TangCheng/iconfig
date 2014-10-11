@@ -85,5 +85,9 @@ void ipcam_database_set_day_night_mode(IpcamDatabase *database, const gchar *nam
 gint ipcam_database_get_day_night_mode(IpcamDatabase *database, const gchar *name);
 void ipcam_database_set_szyc(IpcamDatabase *database, const gchar *name, const gchar *value);
 gchar *ipcam_database_get_szyc(IpcamDatabase *database, const gchar *name);
+void ipcam_database_set_event_input(IpcamDatabase *database, const gchar *name, GVariant *value);
+GVariant *ipcam_database_get_event_input(IpcamDatabase *database, const gchar *name);
+gboolean ipcam_database_update(IpcamDatabase *database, GType table, const gchar *name, const gchar *sub_name, GVariant *value);
+GVariant *ipcam_database_read(IpcamDatabase *database, GType table, const gchar *name, const gchar *sub_name);
 
 #endif /* __DATABASE_H__ */
