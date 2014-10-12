@@ -376,18 +376,18 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "top           INTEGER NOT NULL,"
                      "width         INTEGER NOT NULL,"
                      "height        INTEGER NOT NULL,"
-                     "mon           TEXT,"
-                     "tue           TEXT,"
-                     "wed           TEXT,"
-                     "thu           TEXT,"
-                     "fri           TEXT,"
-                     "sat           TEXT,"
-                     "sun           TEXT"
+                     "mon           TEXT NOT NULL,"
+                     "tue           TEXT NOT NULL,"
+                     "wed           TEXT NOT NULL,"
+                     "thu           TEXT NOT NULL,"
+                     "fri           TEXT NOT NULL,"
+                     "sat           TEXT NOT NULL,"
+                     "sun           TEXT NOT NULL"
                      ");");
-        EXEC_OR_FAIL("INSERT INTO event_motion (name, enable, sensitivity, left, top, width, height) "
-                     "VALUES ('region1', 0, 50, 0, 0, 0, 0);");
-        EXEC_OR_FAIL("INSERT INTO event_motion (name, enable, sensitivity, left, top, width, height) "
-                     "VALUES ('region2', 0, 50, 0, 0, 0, 0);");
+        EXEC_OR_FAIL("INSERT INTO event_motion (name, enable, sensitivity, left, top, width, height, mon, tue, wed, thu, fri, sat, sun) "
+                     "VALUES ('region1', 0, 50, 0, 0, 0, 0, '', '', '', '', '', '', '');");
+        EXEC_OR_FAIL("INSERT INTO event_motion (name, enable, sensitivity, left, top, width, height, mon, tue, wed, thu, fri, sat, sun) "
+                     "VALUES ('region2', 0, 50, 0, 0, 0, 0, '', '', '', '', '', '', '');");
         /************************************************
          * event_cover table                            *
          ************************************************/
@@ -400,18 +400,18 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "top           INTEGER NOT NULL,"
                      "width         INTEGER NOT NULL,"
                      "height        INTEGER NOT NULL,"
-                     "mon           TEXT,"
-                     "tue           TEXT,"
-                     "wed           TEXT,"
-                     "thu           TEXT,"
-                     "fri           TEXT,"
-                     "sat           TEXT,"
-                     "sun           TEXT"
+                     "mon           TEXT NOT NULL,"
+                     "tue           TEXT NOT NULL,"
+                     "wed           TEXT NOT NULL,"
+                     "thu           TEXT NOT NULL,"
+                     "fri           TEXT NOT NULL,"
+                     "sat           TEXT NOT NULL,"
+                     "sun           TEXT NOT NULL"
                      ");");
-        EXEC_OR_FAIL("INSERT INTO event_cover (name, enable, sensitivity, left, top, width, height) "
-                     "VALUES ('region1', 0, 50, 0, 0, 0, 0);");
-        EXEC_OR_FAIL("INSERT INTO event_cover (name, enable, sensitivity, left, top, width, height) "
-                     "VALUES ('region2', 0, 50, 0, 0, 0, 0);");
+        EXEC_OR_FAIL("INSERT INTO event_cover (name, enable, sensitivity, left, top, width, height, mon, tue, wed, thu, fri, sat, sun) "
+                     "VALUES ('region1', 0, 50, 0, 0, 0, 0, '', '', '', '', '', '', '');");
+        EXEC_OR_FAIL("INSERT INTO event_cover (name, enable, sensitivity, left, top, width, height, mon, tue, wed, thu, fri, sat, sun) "
+                     "VALUES ('region2', 0, 50, 0, 0, 0, 0, '', '', '', '', '', '', '');");
         /************************************************
          * event_proc table                             *
          ************************************************/
@@ -433,14 +433,16 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
          ************************************************/
         EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS record_schedule ("
                      "id            INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "mon           TEXT,"
-                     "tue           TEXT,"
-                     "wed           TEXT,"
-                     "thu           TEXT,"
-                     "fri           TEXT,"
-                     "sat           TEXT,"
-                     "sun           TEXT"
+                     "mon           TEXT NOT NULL,"
+                     "tue           TEXT NOT NULL,"
+                     "wed           TEXT NOT NULL,"
+                     "thu           TEXT NOT NULL,"
+                     "fri           TEXT NOT NULL,"
+                     "sat           TEXT NOT NULL,"
+                     "sun           TEXT NOT NULL"
                      ");");
+        EXEC_OR_FAIL("INSERT INTO record_schedule (mon, tue, wed, thu, fri, sat, sun) "
+                     "VALUES ('', '', '', '', '', '', '');");
         /************************************************
          * record_strategy table                        *
          ************************************************/
@@ -1477,6 +1479,25 @@ static void ipcam_database_set_schedules(IpcamDatabase *database, GVariant *valu
                  "sun", sche->schedule[ENUM_SUN],
                  NULL);
 }
+static void ipcam_database_set_rect(IpcamDatabase *database, GVariant *value)
+{
+    IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);
+    Rect *rect = NULL;
+    if (IS_64BIT_MACHINE)
+    {
+        rect = GSIZE_TO_POINTER(g_variant_get_uint64(value));
+    }
+    else
+    {
+        rect = GSIZE_TO_POINTER(g_variant_get_uint32(value));
+    }
+    g_object_set(priv->resource,
+                 "left", rect->x,
+                 "top", rect->y,
+                 "width", rect->width,
+                 "height", rect->height,
+                 NULL);
+}
 static gboolean ipcam_database_update_value(IpcamDatabase *database, const gchar *sub_name, GVariant *value)
 {
     IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);
@@ -1486,6 +1507,10 @@ static gboolean ipcam_database_update_value(IpcamDatabase *database, const gchar
     if (g_str_equal(sub_name, "schedules"))
     {
         ipcam_database_set_schedules(database, value);
+    }
+    else if (g_str_equal(sub_name, "rect"))
+    {
+        ipcam_database_set_rect(database, value);
     }
     else
     {
@@ -1560,6 +1585,28 @@ GVariant *ipcam_database_get_schedules(IpcamDatabase *database)
     }
     return value;
 }
+GVariant *ipcam_database_get_rect(IpcamDatabase *database)
+{
+    IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);
+    GVariant *value;
+
+    Rect *rect = g_new0(Rect, 1);
+    g_object_get(priv->resource,
+                 "left", &rect->x,
+                 "top", &rect->y,
+                 "width", &rect->width,
+                 "height", &rect->height,
+                 NULL);
+    if (IS_64BIT_MACHINE)
+    {
+        value = g_variant_new_uint64(GPOINTER_TO_SIZE(rect));
+    }
+    else
+    {
+        value = g_variant_new_uint32(GPOINTER_TO_SIZE(rect));
+    }
+    return value;
+}
 GVariant *ipcam_database_read_value(IpcamDatabase *database, const gchar *sub_name)
 {
     IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);
@@ -1572,6 +1619,10 @@ GVariant *ipcam_database_read_value(IpcamDatabase *database, const gchar *sub_na
     if (g_str_equal(sub_name, "schedules"))
     {
         value = ipcam_database_get_schedules(database);
+    }
+    else if (g_str_equal(sub_name, "rect"))
+    {
+        value = ipcam_database_get_rect(database);
     }
     else
     {

@@ -18,6 +18,20 @@ typedef union _Color
     guint32 value;
 } Color;
 
+typedef struct _Point
+{
+    guint x;
+    guint y;
+} Point;
+
+typedef struct _Rect
+{
+    guint x;
+    guint y;
+    guint width;
+    guint height;
+} Rect;
+
 enum _Weekday
 {
     ENUM_MON = 0,
