@@ -564,50 +564,6 @@ static GomResource *ipcam_database_add_resource(IpcamDatabase *database, GType r
 
     return resource;
 }
-void ipcam_database_set_baseinfo(IpcamDatabase *database, const gchar *name, gchar *value)
-{
-    g_return_if_fail(IPCAM_IS_DATABASE(database));
-    GomResource *resource = NULL;
-    GError *error = NULL;
-
-    resource = ipcam_database_get_resource(database, IPCAM_BASE_INFO_TYPE, name);
-    if (resource)
-    {
-        guint rw;
-        g_object_get(resource, "rw", &rw, NULL);
-        if (rw)
-        {
-            g_object_set(resource, "value", value, NULL);
-            gom_resource_save_sync(resource, &error);
-        }
-        else
-        {
-            g_warning("Attempt to set read-only property '%s'\n", name);
-        }
-        g_object_unref(resource);
-    }
-
-    if (error)
-    {
-        g_print("save base info error: %s\n", error->message);
-        g_error_free(error);
-    }
-}
-gchar *ipcam_database_get_baseinfo(IpcamDatabase *database, const gchar *name)
-{
-    g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
-    GomResource *resource = NULL;
-    gchar *value = NULL;
-
-    resource = ipcam_database_get_resource(database, IPCAM_BASE_INFO_TYPE, name);
-    if (resource)
-    {
-        g_object_get(resource, "value", &value, NULL);
-        g_object_unref(resource);
-    }
-    
-    return value;
-}
 GList *ipcam_database_get_users(IpcamDatabase *database)
 {
     g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
@@ -1488,6 +1444,17 @@ gboolean ipcam_database_update(IpcamDatabase *database, GType table, const gchar
     priv->resource = ipcam_database_get_resource(database, table, name);
     if (priv->resource)
     {
+        if (table == IPCAM_BASE_INFO_TYPE)
+        {
+            guint rw;
+            g_object_get(priv->resource, "rw", &rw, NULL);
+            if (0 == rw)
+            {
+                g_warning("Attempt to set read-only property '%s'\n", name);
+                g_object_unref(priv->resource);
+                return ret;
+            }
+        }
         ret = ipcam_database_update_value(database, sub_name, value);
         
         g_object_unref(priv->resource);

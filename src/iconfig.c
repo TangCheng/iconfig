@@ -108,22 +108,6 @@ static void ipcam_iconfig_in_loop(IpcamBaseService *base_service)
 {
 }
 
-gchar *ipcam_iconfig_get_base_info(IpcamIConfig *iconfig, const gchar *name)
-{
-    g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), NULL);
-    IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
-
-    return ipcam_database_get_baseinfo(priv->database, (gchar *)name);
-}
-
-void ipcam_iconfig_set_base_info(IpcamIConfig *iconfig, const char *name, const char *value)
-{
-    g_return_if_fail(IPCAM_IS_ICONFIG(iconfig));
-    IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
-
-    ipcam_database_set_baseinfo(priv->database, (gchar *)name, (gchar *)value);
-}
-
 gboolean ipcam_iconfig_get_osd(IpcamIConfig *iconfig,
                                const gchar *name,
                                gboolean *isshow,
