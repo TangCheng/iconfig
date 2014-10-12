@@ -37,6 +37,7 @@ iconfig_SOURCES = \
 	database/event_input.c \
 	database/event_output.c \
 	database/event_motion.c \
+	database/event_cover.c \
 	ajax/http_response.c \
 	ajax/http_request.c \
 	ajax/http_query_string_parser.c \
@@ -62,6 +63,7 @@ iconfig_SOURCES = \
 	ajax/http_event_input_handler.c \
 	ajax/http_event_output_handler.c \
 	ajax/http_event_motion_handler.c \
+	ajax/http_event_cover_handler.c \
 	msg-handler/ipcam-message-handler.c \
 	msg-handler/ipcam-base-info-handler.c \
 	msg-handler/ipcam-osd-handler.c \
@@ -78,6 +80,7 @@ iconfig_SOURCES = \
 	msg-handler/ipcam-event-input-handler.c \
 	msg-handler/ipcam-event-output-handler.c \
 	msg-handler/ipcam-event-motion-handler.c \
+	msg-handler/ipcam-event-cover-handler.c \
 	sysutils.c
 
 iconfig_LDFLAGS = 

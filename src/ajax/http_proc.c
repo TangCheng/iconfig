@@ -16,6 +16,7 @@
 #include "http_event_input_handler.h"
 #include "http_event_output_handler.h"
 #include "http_event_motion_handler.h"
+#include "http_event_cover_handler.h"
 #include "iconfig.h"
 #include "common.h"
 
@@ -70,7 +71,8 @@ static void ipcam_http_proc_init(IpcamHttpProc *self)
         IPCAM_HTTP_NETWORK_HANDLER_TYPE,
         IPCAM_HTTP_EVENT_INPUT_HANDLER_TYPE,
         IPCAM_HTTP_EVENT_OUTPUT_HANDLER_TYPE,
-        IPCAM_HTTP_EVENT_MOTION_HANDLER_TYPE
+        IPCAM_HTTP_EVENT_MOTION_HANDLER_TYPE,
+        IPCAM_HTTP_EVENT_COVER_HANDLER_TYPE
     };
     gint i = 0;
 
