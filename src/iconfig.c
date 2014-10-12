@@ -92,7 +92,9 @@ static void ipcam_iconfig_before_start(IpcamBaseService *base_service)
         "get_event_motion",
         "set_event_motion",
         "get_event_cover",
-        "set_event_cover"
+        "set_event_cover",
+        "get_event_proc",
+        "set_event_proc"
     };
 
     gint i = 0;
