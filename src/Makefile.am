@@ -35,6 +35,7 @@ iconfig_SOURCES = \
 	database/datetime.c \
 	database/misc.c \
 	database/event_input.c \
+	database/event_output.c \
 	ajax/http_response.c \
 	ajax/http_request.c \
 	ajax/http_query_string_parser.c \
@@ -58,6 +59,7 @@ iconfig_SOURCES = \
 	ajax/http_day_night_mode_handler.c \
 	ajax/http_szyc_handler.c \
 	ajax/http_event_input_handler.c \
+	ajax/http_event_output_handler.c \
 	msg-handler/ipcam-message-handler.c \
 	msg-handler/ipcam-base-info-handler.c \
 	msg-handler/ipcam-osd-handler.c \
@@ -72,6 +74,7 @@ iconfig_SOURCES = \
 	msg-handler/ipcam-day-night-mode-handler.c \
 	msg-handler/ipcam-szyc-handler.c \
 	msg-handler/ipcam-event-input-handler.c \
+	msg-handler/ipcam-event-output-handler.c \
 	sysutils.c
 
 iconfig_LDFLAGS = 

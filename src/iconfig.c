@@ -86,7 +86,9 @@ static void ipcam_iconfig_before_start(IpcamBaseService *base_service)
         "get_network",
         "set_network",
         "get_event_input",
-        "set_event_input"
+        "set_event_input",
+        "get_event_output",
+        "set_event_output"
     };
 
     gint i = 0;

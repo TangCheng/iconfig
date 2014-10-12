@@ -14,6 +14,7 @@
 #include "http_day_night_mode_handler.h"
 #include "http_szyc_handler.h"
 #include "http_event_input_handler.h"
+#include "http_event_output_handler.h"
 #include "iconfig.h"
 #include "common.h"
 
@@ -66,7 +67,8 @@ static void ipcam_http_proc_init(IpcamHttpProc *self)
         IPCAM_HTTP_OSD_HANDLER_TYPE,
         IPCAM_HTTP_SZYC_HANDLER_TYPE,
         IPCAM_HTTP_NETWORK_HANDLER_TYPE,
-        IPCAM_HTTP_EVENT_INPUT_HANDLER_TYPE
+        IPCAM_HTTP_EVENT_INPUT_HANDLER_TYPE,
+        IPCAM_HTTP_EVENT_OUTPUT_HANDLER_TYPE
     };
     gint i = 0;
 
