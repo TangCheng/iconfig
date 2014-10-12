@@ -217,9 +217,9 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "color    INTEGER NOT NULL"
                      ");");
         EXEC_OR_FAIL("INSERT INTO privacy_block (name, enable, left, top, width, height, color) "
-                     "VALUES ('region1', 0, 0, 67, 89, 0, 0);");
+                     "VALUES ('region1', 0, 0, 0, 67, 90, 0);");
         EXEC_OR_FAIL("INSERT INTO privacy_block (name, enable, left, top, width, height, color) "
-                     "VALUES ('region2', 0, 0, 67, 89, 0, 0);");
+                     "VALUES ('region2', 0, 0, 0, 67, 90, 0);");
         /************************************************
          * day_night_mode table                         *
          ************************************************/
@@ -384,9 +384,9 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "sun           TEXT NOT NULL"
                      ");");
         EXEC_OR_FAIL("INSERT INTO event_motion (name, enable, sensitivity, left, top, width, height, mon, tue, wed, thu, fri, sat, sun) "
-                     "VALUES ('region1', 0, 50, 0, 0, 67, 89, '', '', '', '', '', '', '');");
+                     "VALUES ('region1', 0, 50, 0, 0, 67, 90, '', '', '', '', '', '', '');");
         EXEC_OR_FAIL("INSERT INTO event_motion (name, enable, sensitivity, left, top, width, height, mon, tue, wed, thu, fri, sat, sun) "
-                     "VALUES ('region2', 0, 50, 0, 0, 67, 89, '', '', '', '', '', '', '');");
+                     "VALUES ('region2', 0, 50, 0, 0, 67, 90, '', '', '', '', '', '', '');");
         /************************************************
          * event_cover table                            *
          ************************************************/
@@ -408,9 +408,9 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "sun           TEXT NOT NULL"
                      ");");
         EXEC_OR_FAIL("INSERT INTO event_cover (name, enable, sensitivity, left, top, width, height, mon, tue, wed, thu, fri, sat, sun) "
-                     "VALUES ('region1', 0, 50, 0, 0, 67, 89, '', '', '', '', '', '', '');");
+                     "VALUES ('region1', 0, 50, 0, 0, 67, 90, '', '', '', '', '', '', '');");
         EXEC_OR_FAIL("INSERT INTO event_cover (name, enable, sensitivity, left, top, width, height, mon, tue, wed, thu, fri, sat, sun) "
-                     "VALUES ('region2', 0, 50, 0, 0, 67, 89, '', '', '', '', '', '', '');");
+                     "VALUES ('region2', 0, 50, 0, 0, 67, 90, '', '', '', '', '', '', '');");
         /************************************************
          * event_proc table                             *
          ************************************************/
