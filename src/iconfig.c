@@ -342,26 +342,6 @@ GVariant *ipcam_iconfig_get_misc(IpcamIConfig *iconfig, const gchar *name)
     return ipcam_database_get_misc (priv->database, name);
 }
 
-gboolean ipcam_iconfig_get_privacy_block(IpcamIConfig *iconfig, const char *name, gboolean *enabled,
-                                         guint *left, guint *top, guint *width, guint *height, guint *color)
-{
-    g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), FALSE);
-    IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
-
-    return ipcam_database_get_privacy_block(priv->database, (gchar *)name, enabled,
-                                            left, top, width, height, color);
-}
-
-void ipcam_iconfig_set_privacy_block(IpcamIConfig *iconfig, const gchar *name, gboolean enabled,
-                                     guint left, guint top, guint width, guint height, guint color)
-{
-    g_return_if_fail(IPCAM_IS_ICONFIG(iconfig));
-    IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
-
-    ipcam_database_set_privacy_block(priv->database, (gchar *)name, enabled,
-                                     left, top, width, height, color);
-}
-
 gint ipcam_iconfig_get_day_night_mode(IpcamIConfig *iconfig, const gchar *name)
 {
     g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), -1);

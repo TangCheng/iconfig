@@ -22,6 +22,7 @@
 #include "ipcam-privacy-block-handler.h"
 #include "iconfig.h"
 #include "common.h"
+#include "database/privacy_block.h"
 
 G_DEFINE_TYPE (IpcamPrivacyBlockMsgHandler, ipcam_privacy_block_msg_handler, IPCAM_TYPE_MESSAGE_HANDLER);
 
@@ -41,25 +42,48 @@ ipcam_privacy_block_msg_handler_read_param(IpcamPrivacyBlockMsgHandler *handler,
 {
     IpcamIConfig *iconfig;
     g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
-    gboolean enabled;
-    guint left, top;
-    guint width, height;
-    Color color;
+    GVariant *value;
 
-    if (ipcam_iconfig_get_privacy_block(iconfig, name, &enabled, &left, &top, &width, &height, &color.value))
+    value = ipcam_iconfig_read(iconfig, IPCAM_PRIVACY_BLOCK_TYPE, name, "enable");
+    if (value)
     {
-        json_builder_set_member_name(builder, name);
+        json_builder_set_member_name(builder, "enable");
+        json_builder_add_boolean_value(builder, g_variant_get_boolean(value));
+        g_variant_unref(value);
+    }
+
+    value = ipcam_iconfig_read(iconfig, IPCAM_PRIVACY_BLOCK_TYPE, name, "rect");
+    if (value)
+    {
+        Rect *rect;
+        if (IS_64BIT_MACHINE)
+        {
+            rect = GSIZE_TO_POINTER(g_variant_get_uint64(value));
+        }
+        else
+        {
+            rect = GSIZE_TO_POINTER(g_variant_get_uint32(value));
+        }
+        json_builder_set_member_name(builder, "rect");
         json_builder_begin_object(builder);
-        json_builder_set_member_name(builder, "enabled");
-        json_builder_add_boolean_value(builder, enabled);
         json_builder_set_member_name(builder, "left");
-        json_builder_add_int_value(builder, left);
+        json_builder_add_int_value(builder, rect->x);
         json_builder_set_member_name(builder, "top");
-        json_builder_add_int_value(builder, top);
+        json_builder_add_int_value(builder, rect->y);
         json_builder_set_member_name(builder, "width");
-        json_builder_add_int_value(builder, width);
+        json_builder_add_int_value(builder, rect->width);
         json_builder_set_member_name(builder, "height");
-        json_builder_add_int_value(builder, height);
+        json_builder_add_int_value(builder, rect->height);
+        json_builder_end_object(builder);
+        g_variant_unref(value);
+        g_free(rect);
+    }
+
+    value = ipcam_iconfig_read(iconfig, IPCAM_PRIVACY_BLOCK_TYPE, name, "color");
+    if (value)
+    {
+        Color color;
+        color.value = g_variant_get_uint32(value);
         json_builder_set_member_name(builder, "color");
         json_builder_begin_object(builder);
         json_builder_set_member_name(builder, "red");
@@ -71,8 +95,9 @@ ipcam_privacy_block_msg_handler_read_param(IpcamPrivacyBlockMsgHandler *handler,
         json_builder_set_member_name(builder, "alpha");
         json_builder_add_int_value(builder, color.alpha);
         json_builder_end_object(builder);
-        json_builder_end_object(builder);
+        g_variant_unref(value);
     }
+    
     return TRUE;
 }
 
@@ -81,29 +106,60 @@ ipcam_privacy_block_msg_handler_update_param(IpcamPrivacyBlockMsgHandler *handle
 {
     IpcamIConfig *iconfig;
     g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
-    JsonObject *color_obj = NULL;
-    gboolean enabled;
-    guint left, top;
-    guint width, height;
-    Color color;
+    GVariant *value = NULL;
+    GList *members, *item;
+    Rect *rect = g_new0(Rect, 1);
+    gboolean ret = FALSE;
 
-    enabled = json_object_get_boolean_member(value_obj, "enabled");
-    left = json_object_get_int_member(value_obj, "left");
-    top = json_object_get_int_member(value_obj, "top");
-    width = json_object_get_int_member(value_obj, "width");
-    height = json_object_get_int_member(value_obj, "height");
-    color_obj = json_object_get_object_member(value_obj, "color");
-    if (color_obj)
-    {   
-        color.red = json_object_get_int_member(color_obj, "red");
-        color.green = json_object_get_int_member(color_obj, "green");
-        color.blue = json_object_get_int_member(color_obj, "blue");
-        color.alpha = json_object_get_int_member(color_obj, "alpha");
+    members = json_object_get_members(value_obj);
+    for (item = g_list_first(members); item; item = g_list_next(item))
+    {
+        const gchar *sub_name = item->data;
+        if (g_str_equal(sub_name, "enable"))
+        {
+            value = g_variant_new_boolean(json_object_get_boolean_member(value_obj, sub_name));
+        }
+        else if (g_str_equal(sub_name, "rect"))
+        {
+            JsonObject *rect_obj = json_object_get_object_member(value_obj, sub_name);
+            rect->x = json_object_get_int_member(rect_obj, "left");
+            rect->y = json_object_get_int_member(rect_obj, "top");
+            rect->width = json_object_get_int_member(rect_obj, "width");
+            rect->height = json_object_get_int_member(rect_obj, "height");
+            if (IS_64BIT_MACHINE)
+            {
+                value = g_variant_new_uint64(GPOINTER_TO_SIZE(rect));
+            }
+            else
+            {
+                value = g_variant_new_uint32(GPOINTER_TO_SIZE(rect));
+            }
+        }
+        else if (g_str_equal(sub_name, "color"))
+        {
+            JsonObject *color_obj = json_object_get_object_member(value_obj, sub_name);
+            Color color;
+            color.red = json_object_get_int_member(color_obj, "red");
+            color.green = json_object_get_int_member(color_obj, "green");
+            color.blue = json_object_get_int_member(color_obj, "blue");
+            color.alpha = json_object_get_int_member(color_obj, "alpha");
+            value = g_variant_new_uint32(color.value);
+        }
+        else
+        {
+            g_warn_if_reached();
+        }
+
+        if (value)
+        {
+            ret = ipcam_iconfig_update(iconfig, IPCAM_PRIVACY_BLOCK_TYPE, name, sub_name, value);
+            g_variant_unref(value);
+            value = NULL;
+        }
     }
-
-    ipcam_iconfig_set_privacy_block(iconfig, name, enabled, left, top, width, height, color.value);
-
-    return TRUE;
+    g_list_free(members);
+    
+    return ret;
 }
 
 static gboolean
@@ -121,7 +177,14 @@ ipcam_privacy_block_msg_handler_get_action_impl(IpcamMessageHandler *handler, Js
     for (i = 0; i < json_array_get_length(req_array); i++)
     {
         const gchar *name = json_array_get_string_element(req_array, i);
-        ipcam_privacy_block_msg_handler_read_param(IPCAM_PRIVACY_BLOCK_MSG_HANDLER(handler), builder, name);
+        if (g_str_equal(name, "region1") ||
+            g_str_equal(name, "region2"))
+        {
+            json_builder_set_member_name(builder, name);
+            json_builder_begin_object(builder);
+            ipcam_privacy_block_msg_handler_read_param(IPCAM_PRIVACY_BLOCK_MSG_HANDLER(handler), builder, name);
+            json_builder_end_object(builder);
+        }
     }
     json_builder_end_object(builder);
     json_builder_end_object(builder);
@@ -148,9 +211,16 @@ ipcam_privacy_block_msg_handler_put_action_impl(IpcamMessageHandler *handler, Js
     for(item = g_list_first(members); item; item = g_list_next(item))
     {
         const gchar *name = item->data;
-        JsonObject *value_obj = json_object_get_object_member(req_obj, name);
-        ipcam_privacy_block_msg_handler_update_param(IPCAM_PRIVACY_BLOCK_MSG_HANDLER(handler), name, value_obj);
-        ipcam_privacy_block_msg_handler_read_param(IPCAM_PRIVACY_BLOCK_MSG_HANDLER(handler), builder, name);
+        if (g_str_equal(name, "region1") ||
+            g_str_equal(name, "region2"))
+        {
+            JsonObject *value_obj = json_object_get_object_member(req_obj, name);
+            ipcam_privacy_block_msg_handler_update_param(IPCAM_PRIVACY_BLOCK_MSG_HANDLER(handler), name, value_obj);
+            json_builder_set_member_name(builder, name);
+            json_builder_begin_object(builder);
+            ipcam_privacy_block_msg_handler_read_param(IPCAM_PRIVACY_BLOCK_MSG_HANDLER(handler), builder, name);
+            json_builder_end_object(builder);
+        }
     }
     g_list_free(members);
     json_builder_end_object(builder);

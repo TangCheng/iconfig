@@ -37,10 +37,12 @@ GET
 		'items': {
 			region1: {
 				"enabled": false,
-				"left":10,
-				"top":20,
-				"width":10,
-				"height":20,
+				"rect": {
+					"left":10,
+					"top":20,
+					"width":10,
+					"height":20,
+				}
 				"color": {
 					"red": 0,
 					"green": 0,
@@ -50,10 +52,12 @@ GET
 			},
 			region2: {
 				"enabled": false,
-				"left":10,
-				"top":20,
-				"width":10,
-				"height":20,
+				"rect": {
+					"left":10,
+					"top":20,
+					"width":10,
+					"height":20
+				}
 				"color": {
 					"red": 0,
 					"green": 0,
@@ -72,14 +76,14 @@ PUT
 返回值字段|字段类型|字段说明
 ---|---|---
 enabled|boolean|OSD设置项名称
-left|int|区域的左边距，千分比
-top|int|区域的上边距，千分比
-width|int|区域的宽度，千分比
-height|int|区域的高度，千分比
-red|int|区域颜色的红色分量，0-255
-green|int|区域颜色的绿色分量，0-255
-blue|int|区域颜色的蓝色分量，0-255
-alpha|int|区域颜色的透明度分量，0-255
+rect.left|int|区域的左边距，千分比
+rect.top|int|区域的上边距，千分比
+rect.width|int|区域的宽度，千分比
+rect.height|int|区域的高度，千分比
+color.red|int|区域颜色的红色分量，0-255
+color.green|int|区域颜色的绿色分量，0-255
+color.blue|int|区域颜色的蓝色分量，0-255
+color.alpha|int|区域颜色的透明度分量，0-255
 
 ## 2. osd (message)
 
@@ -108,10 +112,12 @@ alpha|int|区域颜色的透明度分量，0-255
             'items': {
 				region1: {
 					"enabled": false,
-					"left":10,
-					"top":20,
-					"width":10,
-					"height":20,
+					"rect": {
+						"left":10,
+						"top":20,
+						"width":10,
+						"height":20
+					}
 					"color": {
 						"red": 0,
 						"green": 0,
@@ -121,10 +127,12 @@ alpha|int|区域颜色的透明度分量，0-255
 				},
 				region2: {
 					"enabled": false,
-					"left":10,
-					"top":20,
-					"width":10,
-					"height":20,
+					"rect": {
+						"left":10,
+						"top":20,
+						"width":10,
+						"height":20
+					}
 					"color": {
 						"red": 0,
 						"green": 0,

@@ -10,7 +10,6 @@
 #include "datetime.h"
 #include "video.h"
 #include "image.h"
-#include "privacy_block.h"
 #include "day_night_mode.h"
 #include "osd.h"
 #include "szyc.h"
@@ -218,9 +217,9 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "color    INTEGER NOT NULL"
                      ");");
         EXEC_OR_FAIL("INSERT INTO privacy_block (name, enable, left, top, width, height, color) "
-                     "VALUES ('region1', 0, 0, 0, 0, 0, 0);");
+                     "VALUES ('region1', 0, 0, 67, 89, 0, 0);");
         EXEC_OR_FAIL("INSERT INTO privacy_block (name, enable, left, top, width, height, color) "
-                     "VALUES ('region2', 0, 0, 0, 0, 0, 0);");
+                     "VALUES ('region2', 0, 0, 67, 89, 0, 0);");
         /************************************************
          * day_night_mode table                         *
          ************************************************/
@@ -385,9 +384,9 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "sun           TEXT NOT NULL"
                      ");");
         EXEC_OR_FAIL("INSERT INTO event_motion (name, enable, sensitivity, left, top, width, height, mon, tue, wed, thu, fri, sat, sun) "
-                     "VALUES ('region1', 0, 50, 0, 0, 0, 0, '', '', '', '', '', '', '');");
+                     "VALUES ('region1', 0, 50, 0, 0, 67, 89, '', '', '', '', '', '', '');");
         EXEC_OR_FAIL("INSERT INTO event_motion (name, enable, sensitivity, left, top, width, height, mon, tue, wed, thu, fri, sat, sun) "
-                     "VALUES ('region2', 0, 50, 0, 0, 0, 0, '', '', '', '', '', '', '');");
+                     "VALUES ('region2', 0, 50, 0, 0, 67, 89, '', '', '', '', '', '', '');");
         /************************************************
          * event_cover table                            *
          ************************************************/
@@ -409,9 +408,9 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "sun           TEXT NOT NULL"
                      ");");
         EXEC_OR_FAIL("INSERT INTO event_cover (name, enable, sensitivity, left, top, width, height, mon, tue, wed, thu, fri, sat, sun) "
-                     "VALUES ('region1', 0, 50, 0, 0, 0, 0, '', '', '', '', '', '', '');");
+                     "VALUES ('region1', 0, 50, 0, 0, 67, 89, '', '', '', '', '', '', '');");
         EXEC_OR_FAIL("INSERT INTO event_cover (name, enable, sensitivity, left, top, width, height, mon, tue, wed, thu, fri, sat, sun) "
-                     "VALUES ('region2', 0, 50, 0, 0, 0, 0, '', '', '', '', '', '', '');");
+                     "VALUES ('region2', 0, 50, 0, 0, 67, 89, '', '', '', '', '', '', '');");
         /************************************************
          * event_proc table                             *
          ************************************************/
@@ -1289,70 +1288,6 @@ GVariant *ipcam_database_get_misc(IpcamDatabase *database, const gchar *name)
     g_free(temp_value);
     g_free(vtype);
     return value;
-}
-void ipcam_database_set_privacy_block(IpcamDatabase *database,
-                                      const gchar *name,
-                                      gboolean enabled,
-                                      guint left,
-                                      guint top,
-                                      guint width,
-                                      guint height,
-                                      guint color)
-{
-    g_return_if_fail(IPCAM_IS_DATABASE(database));
-    GomResource *resource = NULL;
-    GError *error = NULL;
-
-    resource = ipcam_database_get_resource(database, IPCAM_PRIVACY_BLOCK_TYPE, name);
-    if (resource)
-    {
-        g_object_set(resource,
-                     "enable", enabled,
-                     "left", left,
-                     "top", top,
-                     "width", width,
-                     "height", height,
-                     "color", color,
-                     NULL);
-        gom_resource_save_sync(resource, &error);
-        g_object_unref(resource);
-    }
-
-    if (error)
-    {
-        g_print("set osd record failed: %s\n", error->message);
-        g_error_free(error);
-    }
-}
-gboolean ipcam_database_get_privacy_block(IpcamDatabase *database,
-                                          const gchar *name,
-                                          gboolean *enabled,
-                                          guint *left,
-                                          guint *top,
-                                          guint *width,
-                                          guint *height,
-                                          guint *color)
-{
-    g_return_val_if_fail(IPCAM_IS_DATABASE(database), FALSE);
-    GomResource *resource = NULL;
-    gboolean ret = FALSE;
-    
-    resource = ipcam_database_get_resource(database, IPCAM_PRIVACY_BLOCK_TYPE, name);
-    if (resource)
-    {
-        g_object_get(resource,
-                     "enable", enabled,
-                     "left", left,
-                     "top", top,
-                     "width", width,
-                     "height", height,
-                     "color", color,
-                     NULL);
-        g_object_unref(resource);
-        ret = TRUE;
-    }
-    
-    return ret;
 }
 void ipcam_database_set_day_night_mode(IpcamDatabase *database, const gchar *name, guint value)
 {

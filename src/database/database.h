@@ -65,22 +65,6 @@ void ipcam_database_set_datetime(IpcamDatabase *database, const gchar *name, con
 GVariant *ipcam_database_get_datetime(IpcamDatabase *database, const gchar *name);
 void ipcam_database_set_misc(IpcamDatabase *database, const gchar *name, const GVariant *value);
 GVariant *ipcam_database_get_misc(IpcamDatabase *database, const gchar *name);
-void ipcam_database_set_privacy_block(IpcamDatabase *database,
-                                      const gchar *name,
-                                      gboolean enabled,
-                                      guint left,
-                                      guint top,
-                                      guint width,
-                                      guint height,
-                                      guint color);
-gboolean ipcam_database_get_privacy_block(IpcamDatabase *database,
-                                          const gchar *name,
-                                          gboolean *enabled,
-                                          guint *left,
-                                          guint *top,
-                                          guint *width,
-                                          guint *height,
-                                          guint *color);
 void ipcam_database_set_day_night_mode(IpcamDatabase *database, const gchar *name, guint value);
 gint ipcam_database_get_day_night_mode(IpcamDatabase *database, const gchar *name);
 void ipcam_database_set_szyc(IpcamDatabase *database, const gchar *name, const gchar *value);

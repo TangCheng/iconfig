@@ -178,37 +178,37 @@ static void ipcam_privacy_block_class_init(IpcamPrivacyBlockClass *klass)
                              FALSE,
                              G_PARAM_READWRITE);
     obj_properties[PROP_LEFT] =
-        g_param_spec_int("left",
-                         "Left",
-                         "region left position",
-                         0,
-                         1000,
-                         0, // default value
-                         G_PARAM_READWRITE);
+        g_param_spec_uint("left",
+                          "Left",
+                          "region left position",
+                          0,
+                          1000,
+                          0, // default value
+                          G_PARAM_READWRITE);
     obj_properties[PROP_TOP] =
-        g_param_spec_int("top",
-                         "Top",
-                         "region top position",
-                         0,
-                         1000,
-                         0, // default value
-                         G_PARAM_READWRITE);
+        g_param_spec_uint("top",
+                          "Top",
+                          "region top position",
+                          0,
+                          1000,
+                          0, // default value
+                          G_PARAM_READWRITE);
     obj_properties[PROP_WIDTH] =
-        g_param_spec_int("width",
-                         "Width",
-                         "region width",
-                         0,
-                         1000,
-                         0, // default value
-                         G_PARAM_READWRITE);
+        g_param_spec_uint("width",
+                          "Width",
+                          "region width",
+                          0,
+                          1000,
+                          0, // default value
+                          G_PARAM_READWRITE);
     obj_properties[PROP_HEIGHT] =
-        g_param_spec_int("height",
-                         "Height",
-                         "region height",
-                         0,
-                         1000,
-                         0, // default value
-                         G_PARAM_READWRITE);
+        g_param_spec_uint("height",
+                          "Height",
+                          "region height",
+                          0,
+                          1000,
+                          0, // default value
+                          G_PARAM_READWRITE);
     obj_properties[PROP_COLOR] =
         g_param_spec_uint("color",
                          "privacy block region color",

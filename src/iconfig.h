@@ -56,10 +56,6 @@ gboolean ipcam_iconfig_add_user(IpcamIConfig *iconfig, const gchar *username,
 gboolean ipcam_iconfig_del_user(IpcamIConfig *iconfig, const gchar *username);
 void ipcam_iconfig_set_misc(IpcamIConfig *iconfig, const gchar *name, const GVariant *value);
 GVariant *ipcam_iconfig_get_misc(IpcamIConfig *iconfig, const gchar *name);
-gboolean ipcam_iconfig_get_privacy_block(IpcamIConfig *iconfig, const char *name, gboolean *enabled,
-                                         guint *left, guint *top, guint *width, guint *height, guint *color);
-void ipcam_iconfig_set_privacy_block(IpcamIConfig *iconfig, const gchar *name, gboolean enabled,
-                                     guint left, guint top, guint width, guint height, guint color);
 gint ipcam_iconfig_get_day_night_mode(IpcamIConfig *iconfig, const gchar *name);
 void ipcam_iconfig_set_day_night_mode(IpcamIConfig *iconfig, const gchar *name, guint value);
 gchar *ipcam_iconfig_get_szyc(IpcamIConfig *iconfig, const gchar *name);
