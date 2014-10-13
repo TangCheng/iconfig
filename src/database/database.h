@@ -33,42 +33,6 @@ gchar *ipcam_database_get_user_role(IpcamDatabase *database, const gchar *userna
 gboolean ipcam_database_add_user(IpcamDatabase *database, const gchar *username,
                                  const gchar *password, const gchar *role);
 gboolean ipcam_database_del_user(IpcamDatabase *database, const gchar *username);
-void ipcam_database_set_osd(IpcamDatabase *database,
-                            const gchar *name,
-                            gboolean isshow,
-                            guint size,
-                            guint left,
-                            guint top,
-                            guint color);
-gboolean ipcam_database_get_osd(IpcamDatabase *database,
-                                const gchar *name,
-                                gboolean *isshow,
-                                guint *size,
-                                guint *left,
-                                guint *top,
-                                guint *color);
-void ipcam_database_set_video(IpcamDatabase *database, const gchar *name, const GVariant *value);
-GVariant *ipcam_database_get_video(IpcamDatabase *database, const gchar *name);
-void ipcam_database_set_image(IpcamDatabase *database, const gchar *name, const GVariant *value);
-GVariant *ipcam_database_get_image(IpcamDatabase *database, const gchar *name);
-void ipcam_database_set_network(IpcamDatabase *database, const gchar *name, const gchar *value);
-gchar *ipcam_database_get_network(IpcamDatabase *database, const gchar *name);
-void ipcam_database_set_network_static(IpcamDatabase *database, const gchar *name, gchar *value);
-gchar *ipcam_database_get_network_static(IpcamDatabase *database, const gchar *name);
-void ipcam_database_set_network_pppoe(IpcamDatabase *database, const gchar *name, gchar *value);
-gchar *ipcam_database_get_network_pppoe(IpcamDatabase *database, const gchar *name);
-void ipcam_database_set_network_port(IpcamDatabase *database, const gchar *name, guint value);
-gint ipcam_database_get_network_port(IpcamDatabase *database, const gchar *name);
-void ipcam_database_set_datetime(IpcamDatabase *database, const gchar *name, const GVariant *value);
-GVariant *ipcam_database_get_datetime(IpcamDatabase *database, const gchar *name);
-void ipcam_database_set_misc(IpcamDatabase *database, const gchar *name, const GVariant *value);
-GVariant *ipcam_database_get_misc(IpcamDatabase *database, const gchar *name);
-void ipcam_database_set_day_night_mode(IpcamDatabase *database, const gchar *name, guint value);
-gint ipcam_database_get_day_night_mode(IpcamDatabase *database, const gchar *name);
-void ipcam_database_set_szyc(IpcamDatabase *database, const gchar *name, const gchar *value);
-gchar *ipcam_database_get_szyc(IpcamDatabase *database, const gchar *name);
-void ipcam_database_set_event_input(IpcamDatabase *database, const gchar *name, GVariant *value);
-GVariant *ipcam_database_get_event_input(IpcamDatabase *database, const gchar *name);
 gboolean ipcam_database_update(IpcamDatabase *database, GType table, const gchar *name, const gchar *sub_name, GVariant *value);
 GVariant *ipcam_database_read(IpcamDatabase *database, GType table, const gchar *name, const gchar *sub_name);
 

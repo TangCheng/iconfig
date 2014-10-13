@@ -22,6 +22,7 @@
 #include "ipcam-day-night-mode-handler.h"
 #include "iconfig.h"
 #include "sysutils.h"
+#include "database/day_night_mode.h"
 
 G_DEFINE_TYPE (IpcamDayNightModeMsgHandler, ipcam_day_night_mode_msg_handler, IPCAM_TYPE_MESSAGE_HANDLER);
 
@@ -41,24 +42,27 @@ ipcam_day_night_mode_msg_handler_read_param(IpcamDayNightModeMsgHandler *handler
 {
     IpcamIConfig *iconfig;
     g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
-    gint value = -1;
+    GVariant *value = NULL;
+    gboolean ret = FALSE;
     
-    value = ipcam_iconfig_get_day_night_mode(iconfig, name);
+    value = ipcam_iconfig_read(iconfig, IPCAM_DAY_NIGHT_MODE_TYPE, name, "value");
 
-    if (value >= 0)
+    if (value)
     {    
         json_builder_set_member_name(builder, name);
         if (g_str_equal(name, "force_night_mode"))
         {
-            json_builder_add_boolean_value(builder, value);
+            json_builder_add_boolean_value(builder, g_variant_get_uint32(value));
         }
         else
         {
-            json_builder_add_int_value(builder, value);
+            json_builder_add_int_value(builder, g_variant_get_uint32(value));
         }
+        g_variant_unref(value);
+        ret = TRUE;
     }
     
-    return TRUE;
+    return ret;
 }
 
 static gboolean
@@ -66,10 +70,16 @@ ipcam_day_night_mode_msg_handler_write_param(IpcamDayNightModeMsgHandler *handle
 {
     IpcamIConfig *iconfig;
     g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
+    GVariant *val = g_variant_new_uint32(value);
+    gboolean ret = FALSE;
 
-    ipcam_iconfig_set_day_night_mode(iconfig, name, value);
+    if (value)
+    {
+        ret = ipcam_iconfig_update(iconfig, IPCAM_DAY_NIGHT_MODE_TYPE, name, "value", val);
+        g_variant_unref(val);
+    }
 
-    return TRUE;
+    return ret;
 }
 
 static gboolean
@@ -116,7 +126,7 @@ ipcam_day_night_mode_msg_handler_put_action_impl(IpcamMessageHandler *handler, J
     {
         const gchar *name = item->data;
         guint value;
-        if (g_str_equal(name, ""))
+        if (g_str_equal(name, "force_night_mode"))
         {
             value = json_object_get_boolean_member(req_obj, name);
         }

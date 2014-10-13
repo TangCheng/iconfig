@@ -22,6 +22,7 @@
 #include "ipcam-osd-handler.h"
 #include "iconfig.h"
 #include "common.h"
+#include "database/osd.h"
 
 G_DEFINE_TYPE (IpcamOsdMsgHandler, ipcam_osd_msg_handler, IPCAM_TYPE_MESSAGE_HANDLER);
 
@@ -41,38 +42,64 @@ ipcam_osd_msg_handler_read_param(IpcamOsdMsgHandler *handler, JsonBuilder *build
 {
     IpcamIConfig *iconfig;
     g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
-    gboolean isshow;
-    guint size;
-    guint left, top;
     Color color;
-    
-    if (ipcam_iconfig_get_osd(iconfig, name, &isshow, &size, &left, &top, &color.value))
+    GVariant *value = NULL;
+    const gchar *key[] = 
     {
-        gchar **osd_name = g_strsplit(name, ":", -1);
-        json_builder_set_member_name(builder, osd_name[1]);
-        g_strfreev(osd_name);
-        json_builder_begin_object(builder);
-        json_builder_set_member_name(builder, "isshow");
-        json_builder_add_boolean_value(builder, isshow);
-        json_builder_set_member_name(builder, "size");
-        json_builder_add_int_value(builder, size);
-        json_builder_set_member_name(builder, "left");
-        json_builder_add_int_value(builder, left);
-        json_builder_set_member_name(builder, "top");
-        json_builder_add_int_value(builder, top);
-        json_builder_set_member_name(builder, "color");
-        json_builder_begin_object(builder);
-        json_builder_set_member_name(builder, "red");
-        json_builder_add_int_value(builder, color.red);
-        json_builder_set_member_name(builder, "green");
-        json_builder_add_int_value(builder, color.green);
-        json_builder_set_member_name(builder, "blue");
-        json_builder_add_int_value(builder, color.blue);
-        json_builder_set_member_name(builder, "alpha");
-        json_builder_add_int_value(builder, color.alpha);
-        json_builder_end_object(builder);
-        json_builder_end_object(builder);
+        "isshow",
+        "size",
+        "left",
+        "top",
+        "color"
+    };
+    gint i = 0;
+
+    gchar **osd_name = g_strsplit(name, ":", -1);
+    json_builder_set_member_name(builder, osd_name[1]);
+    g_strfreev(osd_name);
+    json_builder_begin_object(builder);
+
+    for (i = 0; i < ARRAY_SIZE(key); i++)
+    {
+        value = ipcam_iconfig_read(iconfig, IPCAM_OSD_TYPE, name, key[i]);
+        if (value)
+        {
+            if (g_variant_is_of_type(value, G_VARIANT_TYPE_BOOLEAN))
+            {
+                json_builder_set_member_name(builder, key[i]);
+                json_builder_add_boolean_value(builder, g_variant_get_boolean(value));
+            }
+            else if (g_variant_is_of_type(value, G_VARIANT_TYPE_UINT32))
+            {
+                if (g_str_equal(key[i], "color"))
+                {
+                    color.value = g_variant_get_uint32(value);
+                    json_builder_set_member_name(builder, key[i]);
+                    json_builder_begin_object(builder);
+                    json_builder_set_member_name(builder, "red");
+                    json_builder_add_int_value(builder, color.red);
+                    json_builder_set_member_name(builder, "green");
+                    json_builder_add_int_value(builder, color.green);
+                    json_builder_set_member_name(builder, "blue");
+                    json_builder_add_int_value(builder, color.blue);
+                    json_builder_set_member_name(builder, "alpha");
+                    json_builder_add_int_value(builder, color.alpha);
+                    json_builder_end_object(builder);
+                }
+                else
+                {
+                    json_builder_set_member_name(builder, key[i]);
+                    json_builder_add_int_value(builder, g_variant_get_uint32(value));
+                }
+            }
+            else
+            {
+                g_warn_if_reached();
+            }
+            g_variant_unref(value);
+        }
     }
+    json_builder_end_object(builder);
 
     return TRUE;
 }
@@ -82,23 +109,40 @@ ipcam_osd_msg_handler_update_param(IpcamOsdMsgHandler *handler, const gchar *nam
 {
     IpcamIConfig *iconfig;
     g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
-    gboolean isshow;
-    guint size;
-    guint left, top;
     Color color;
     JsonObject *color_obj;
-
-    isshow = json_object_get_boolean_member(value_obj, "isshow");
-    size = json_object_get_int_member(value_obj, "size");
-    left = json_object_get_int_member(value_obj, "left");
-    top = json_object_get_int_member(value_obj, "top");
-    color_obj = json_object_get_object_member(value_obj, "color");
-    color.red = json_object_get_int_member(color_obj, "red");
-    color.green = json_object_get_int_member(color_obj, "green");
-    color.blue = json_object_get_int_member(color_obj, "blue");
-    color.alpha = json_object_get_int_member(color_obj, "alpha");
-
-    ipcam_iconfig_set_osd(iconfig, name, isshow, size, left, top, color.value);
+    GVariant *value = NULL;
+    GList *members, *item;
+    
+    members = json_object_get_members(value_obj);
+    for (item = g_list_first(members); item; item = g_list_next(item))
+    {
+        const gchar *sub_name = item->data;
+        if (g_str_equal(sub_name, "isshow"))
+        {
+            value = g_variant_new_boolean(json_object_get_boolean_member(value_obj, sub_name));
+        }
+        else if (g_str_equal(sub_name, "color"))
+        {
+            color_obj = json_object_get_object_member(value_obj, sub_name);
+            color.red = json_object_get_int_member(color_obj, "red");
+            color.green = json_object_get_int_member(color_obj, "green");
+            color.blue = json_object_get_int_member(color_obj, "blue");
+            color.alpha = json_object_get_int_member(color_obj, "alpha");
+            value = g_variant_new_uint32(color.value);
+        }
+        else
+        {
+            value = g_variant_new_uint32(json_object_get_int_member(value_obj, sub_name));
+        }
+        if (value)
+        {
+            ipcam_iconfig_update(iconfig, IPCAM_OSD_TYPE, name, sub_name, value);
+            g_variant_unref(value);
+        }
+    }
+    g_list_free(members);
+        
     return TRUE;
 }
 

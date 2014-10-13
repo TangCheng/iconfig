@@ -21,6 +21,7 @@
 #include <glib/gprintf.h>
 #include "ipcam-image-handler.h"
 #include "iconfig.h"
+#include "database/image.h"
 
 G_DEFINE_TYPE (IpcamImageMsgHandler, ipcam_image_msg_handler, IPCAM_TYPE_MESSAGE_HANDLER);
 
@@ -40,8 +41,8 @@ ipcam_image_msg_handler_read_param(IpcamImageMsgHandler *handler, JsonBuilder *b
 {
     IpcamIConfig *iconfig;
     g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
-    GVariant *value = ipcam_iconfig_get_image(iconfig, name);
     gboolean ret = FALSE;
+    GVariant *value = ipcam_iconfig_read(iconfig, IPCAM_IMAGE_TYPE, name, "value");
 
     if (value)
     {
@@ -79,6 +80,7 @@ ipcam_image_msg_handler_update_param(IpcamImageMsgHandler *handler, const gchar 
     g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
     GVariant *value = NULL;
     GType type = json_node_get_value_type(value_node);
+    gboolean ret = FALSE;
     
     if (g_type_is_a(type, G_TYPE_STRING))
     {
@@ -99,11 +101,11 @@ ipcam_image_msg_handler_update_param(IpcamImageMsgHandler *handler, const gchar 
         
     if (value)
     {
-        ipcam_iconfig_set_image(iconfig, name, value);
+        ret = ipcam_iconfig_update(iconfig, IPCAM_IMAGE_TYPE, name, "value", value);
         g_variant_unref(value);
     }
     
-    return TRUE;
+    return ret;
 }
 
 static gboolean
