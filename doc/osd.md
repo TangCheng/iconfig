@@ -116,16 +116,12 @@ alpha|int|透明度 (0-255)
             'version': '1.0'
 		},
         'body': {
-            'items': {
-				master: [
-                	'comment',
-					'bit_rate',
-				],
-				slave: [
-                	'device_name',
-                	'frame_rate'
-				]
-            }
+            'items': [
+				'master:comment',
+				'master:bit_rate',
+               	'slave:device_name',
+               	'slave:frame_rate'
+            ]
         }
     }
 #### response
