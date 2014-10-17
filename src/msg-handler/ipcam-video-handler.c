@@ -22,6 +22,7 @@
 #include "ipcam-video-handler.h"
 #include "iconfig.h"
 #include "common.h"
+#include "database/video.h"
 
 G_DEFINE_TYPE (IpcamVideoMsgHandler, ipcam_video_msg_handler, IPCAM_TYPE_MESSAGE_HANDLER);
 
@@ -83,7 +84,7 @@ ipcam_video_msg_handler_read_param(IpcamVideoMsgHandler *handler, JsonBuilder *b
         for (i = 0; i < ARRAY_SIZE(kv); i++)
         {
             g_snprintf(key, 32, "%s:%s", name[0] == 'm' ? "master" : "slave", kv[i]);
-            value = ipcam_iconfig_get_video(iconfig, key);
+            value = ipcam_iconfig_read(iconfig, IPCAM_VIDEO_TYPE, key, "value");
             if (value)
             {
                 json_builder_set_member_name(builder, kv[i]);
@@ -96,7 +97,7 @@ ipcam_video_msg_handler_read_param(IpcamVideoMsgHandler *handler, JsonBuilder *b
     }
     else
     {
-        value = ipcam_iconfig_get_video(iconfig, name);
+        value = ipcam_iconfig_read(iconfig, IPCAM_VIDEO_TYPE, name, "value");
         if (value)
         {
             json_builder_set_member_name(builder, name);
@@ -140,7 +141,7 @@ ipcam_video_msg_handler_update_param(IpcamVideoMsgHandler *handler, const gchar 
 
     if (value)
     {
-        ipcam_iconfig_set_video(iconfig, name, value);
+        ipcam_iconfig_update(iconfig, IPCAM_VIDEO_TYPE, name, "value", value);
         g_variant_unref(value);
     }
 
@@ -158,14 +159,14 @@ ipcam_video_msg_handler_update_param(IpcamVideoMsgHandler *handler, const gchar 
             {
                 const gchar *strval = json_node_get_string(node);
                 value = g_variant_new_string(strval);
-                ipcam_iconfig_set_video(iconfig, key, value);
+                ipcam_iconfig_update(iconfig, IPCAM_VIDEO_TYPE, key, "value", value);
                 g_variant_unref(value);
             }
             else if (g_type_is_a(json_node_get_value_type(node), G_TYPE_UINT))
             {
                 gint intval = json_node_get_int(node);
                 value = g_variant_new_uint32(intval);
-                ipcam_iconfig_set_video(iconfig, key, value);
+                ipcam_iconfig_update(iconfig, IPCAM_VIDEO_TYPE, key, "value", value);
                 g_variant_unref(value);
             }
         }

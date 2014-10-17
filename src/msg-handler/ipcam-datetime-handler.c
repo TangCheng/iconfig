@@ -22,6 +22,7 @@
 #include "ipcam-datetime-handler.h"
 #include "iconfig.h"
 #include "sysutils.h"
+#include "database/datetime.h"
 
 G_DEFINE_TYPE (IpcamDatetimeMsgHandler, ipcam_datetime_msg_handler, IPCAM_TYPE_MESSAGE_HANDLER);
 
@@ -50,7 +51,7 @@ ipcam_datetime_msg_handler_read_param(IpcamDatetimeMsgHandler *handler, JsonBuil
     }
     else
     {
-        value = ipcam_iconfig_get_datetime(iconfig, name);
+        value = ipcam_iconfig_read(iconfig, IPCAM_DATETIME_TYPE, name, "value");
     }
 
     if (datetime)
@@ -112,7 +113,7 @@ ipcam_datetime_msg_handler_update_param(IpcamDatetimeMsgHandler *handler, const 
         }
         if (value)
         {
-            ipcam_iconfig_set_datetime(iconfig, name, value);
+            ipcam_iconfig_update(iconfig, IPCAM_DATETIME_TYPE, name, "value", value);
             g_variant_unref(value);
         }
     }

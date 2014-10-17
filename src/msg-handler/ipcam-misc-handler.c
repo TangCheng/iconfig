@@ -21,7 +21,7 @@
 #include <glib/gprintf.h>
 #include "ipcam-misc-handler.h"
 #include "iconfig.h"
-#include "sysutils.h"
+#include "database/misc.h"
 
 G_DEFINE_TYPE (IpcamMiscMsgHandler, ipcam_misc_msg_handler, IPCAM_TYPE_MESSAGE_HANDLER);
 
@@ -42,8 +42,9 @@ ipcam_misc_msg_handler_read_param(IpcamMiscMsgHandler *handler, JsonBuilder *bui
     IpcamIConfig *iconfig;
     g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
     GVariant *value = NULL;
+    gboolean ret = FALSE;
 
-    value = ipcam_iconfig_get_misc(iconfig, name);
+    value = ipcam_iconfig_read(iconfig, IPCAM_MISC_TYPE, name, "value");
 
     if (value)
     {
@@ -51,11 +52,13 @@ ipcam_misc_msg_handler_read_param(IpcamMiscMsgHandler *handler, JsonBuilder *bui
         {
             json_builder_set_member_name(builder, name);
             json_builder_add_string_value(builder, g_variant_get_string(value, NULL));
+            ret = TRUE;
         }
         else if (g_variant_is_of_type(value, G_VARIANT_TYPE_BOOLEAN))
         {
             json_builder_set_member_name(builder, name);
             json_builder_add_boolean_value(builder, g_variant_get_boolean(value));
+            ret = TRUE;
         }
         else
         {
@@ -64,7 +67,7 @@ ipcam_misc_msg_handler_read_param(IpcamMiscMsgHandler *handler, JsonBuilder *bui
         g_variant_unref(value);
     }
 
-    return TRUE;
+    return ret;
 }
 
 static gboolean
@@ -88,7 +91,7 @@ ipcam_misc_msg_handler_update_param(IpcamMiscMsgHandler *handler, const gchar *n
     }
     if (value)
     {
-        ipcam_iconfig_set_misc(iconfig, name, value);
+        ipcam_iconfig_update(iconfig, IPCAM_MISC_TYPE, name, "value", value);
         g_variant_unref(value);
     }
 

@@ -24,28 +24,7 @@ struct _IpcamIConfigClass
 };
 
 GType ipcam_iconfig_get_type(void);
-gchar *ipcam_iconfig_get_base_info(IpcamIConfig *iconfig, const gchar *name);
-void ipcam_iconfig_set_base_info(IpcamIConfig *iconfig, const char *name, const char *value);
-gboolean ipcam_iconfig_get_osd(IpcamIConfig *iconfig, const char *name, gboolean *isshow,
-                             guint *size, guint *x, guint *y, guint *color);
-void ipcam_iconfig_set_osd(IpcamIConfig *iconfig, const gchar *name, gboolean isshow,
-                           guint size, guint x, guint y, guint color);
-GVariant *ipcam_iconfig_get_video(IpcamIConfig *iconfig, const gchar *name);
-void ipcam_iconfig_set_video(IpcamIConfig *iconfig, const gchar *name, GVariant *value);
 
-GVariant *ipcam_iconfig_get_image(IpcamIConfig *iconfig, const gchar *name);
-void ipcam_iconfig_set_image(IpcamIConfig *iconfig, const gchar *name, GVariant *value);
-
-gchar *ipcam_iconfig_get_network(IpcamIConfig *iconfig, const gchar *name);
-void ipcam_iconfig_set_network(IpcamIConfig *iconfig, const gchar *name, const gchar *value);
-gchar *ipcam_iconfig_get_network_static(IpcamIConfig *iconfig, const gchar *name);
-void ipcam_iconfig_set_network_static(IpcamIConfig *iconfig, const gchar *name, gchar *value);
-gchar *ipcam_iconfig_get_network_pppoe(IpcamIConfig *iconfig, const gchar *name);
-void ipcam_iconfig_set_network_pppoe(IpcamIConfig *iconfig, const gchar *name, gchar *value);
-gint ipcam_iconfig_get_network_port(IpcamIConfig *iconfig, const gchar *name);
-void ipcam_iconfig_set_network_port(IpcamIConfig *iconfig, const gchar *name, guint value);
-void ipcam_iconfig_set_datetime(IpcamIConfig *iconfig, const gchar *name, const GVariant *value);
-GVariant *ipcam_iconfig_get_datetime(IpcamIConfig *iconfig, const gchar *name);
 GList *ipcam_iconfig_get_users(IpcamIConfig *iconfig);
 void ipcam_iconfig_set_user_password(IpcamIConfig *iconfig, const gchar *username, gchar *password);
 gchar *ipcam_iconfig_get_user_password(IpcamIConfig *iconfig, const gchar *username);
@@ -54,12 +33,6 @@ gchar *ipcam_iconfig_get_user_role(IpcamIConfig *iconfig, const gchar *username)
 gboolean ipcam_iconfig_add_user(IpcamIConfig *iconfig, const gchar *username,
                                 const gchar *password, const gchar *role);
 gboolean ipcam_iconfig_del_user(IpcamIConfig *iconfig, const gchar *username);
-void ipcam_iconfig_set_misc(IpcamIConfig *iconfig, const gchar *name, const GVariant *value);
-GVariant *ipcam_iconfig_get_misc(IpcamIConfig *iconfig, const gchar *name);
-gint ipcam_iconfig_get_day_night_mode(IpcamIConfig *iconfig, const gchar *name);
-void ipcam_iconfig_set_day_night_mode(IpcamIConfig *iconfig, const gchar *name, guint value);
-gchar *ipcam_iconfig_get_szyc(IpcamIConfig *iconfig, const gchar *name);
-void ipcam_iconfig_set_szyc(IpcamIConfig *iconfig, const gchar *name, const gchar *value);
 GVariant *ipcam_iconfig_read(IpcamIConfig *iconfig, GType table, const gchar *name, const gchar *sub_name);
 gboolean ipcam_iconfig_update(IpcamIConfig *iconfig, GType table, const gchar *name, const gchar *sub_name, GVariant *value);
 

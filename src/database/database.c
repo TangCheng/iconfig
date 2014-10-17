@@ -10,15 +10,7 @@
 #include "datetime.h"
 #include "video.h"
 #include "image.h"
-#include "day_night_mode.h"
-#include "osd.h"
-#include "szyc.h"
-#include "network.h"
-#include "network_static.h"
-#include "network_pppoe.h"
-#include "network_port.h"
 #include "misc.h"
-#include "event_input.h"
 
 #define DATABASE_PATH "/data"
 #define DATABASE_NAME "configuration.sqlite3"
@@ -564,50 +556,6 @@ static GomResource *ipcam_database_add_resource(IpcamDatabase *database, GType r
 
     return resource;
 }
-void ipcam_database_set_baseinfo(IpcamDatabase *database, const gchar *name, gchar *value)
-{
-    g_return_if_fail(IPCAM_IS_DATABASE(database));
-    GomResource *resource = NULL;
-    GError *error = NULL;
-
-    resource = ipcam_database_get_resource(database, IPCAM_BASE_INFO_TYPE, name);
-    if (resource)
-    {
-        guint rw;
-        g_object_get(resource, "rw", &rw, NULL);
-        if (rw)
-        {
-            g_object_set(resource, "value", value, NULL);
-            gom_resource_save_sync(resource, &error);
-        }
-        else
-        {
-            g_warning("Attempt to set read-only property '%s'\n", name);
-        }
-        g_object_unref(resource);
-    }
-
-    if (error)
-    {
-        g_print("save base info error: %s\n", error->message);
-        g_error_free(error);
-    }
-}
-gchar *ipcam_database_get_baseinfo(IpcamDatabase *database, const gchar *name)
-{
-    g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
-    GomResource *resource = NULL;
-    gchar *value = NULL;
-
-    resource = ipcam_database_get_resource(database, IPCAM_BASE_INFO_TYPE, name);
-    if (resource)
-    {
-        g_object_get(resource, "value", &value, NULL);
-        g_object_unref(resource);
-    }
-    
-    return value;
-}
 GList *ipcam_database_get_users(IpcamDatabase *database)
 {
     g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
@@ -776,622 +724,7 @@ gboolean ipcam_database_del_user(IpcamDatabase *database, const gchar *username)
     }
     return TRUE;
 }
-void ipcam_database_set_osd(IpcamDatabase *database,
-                            const gchar *name,
-                            gboolean isshow,
-                            guint size,
-                            guint left,
-                            guint top,
-                            guint color)
-{
-    g_return_if_fail(IPCAM_IS_DATABASE(database));
-    GomResource *resource = NULL;
-    GError *error = NULL;
 
-    resource = ipcam_database_get_resource(database, IPCAM_OSD_TYPE, name);
-    if (resource)
-    {
-        g_object_set(resource,
-                     "isshow", isshow,
-                     "size", size,
-                     "left", left,
-                     "top", top,
-                     "color", color,
-                     NULL);
-        gom_resource_save_sync(resource, &error);
-        g_object_unref(resource);
-    }
-
-    if (error)
-    {
-        g_print("set osd record failed: %s\n", error->message);
-        g_error_free(error);
-    }
-}
-gboolean ipcam_database_get_osd(IpcamDatabase *database,
-                                const gchar *name,
-                                gboolean *isshow,
-                                guint *size,
-                                guint *left,
-                                guint *top,
-                                guint *color)
-{
-    g_return_val_if_fail(IPCAM_IS_DATABASE(database), FALSE);
-    GomResource *resource = NULL;
-    gboolean ret = FALSE;
-    
-    resource = ipcam_database_get_resource(database, IPCAM_OSD_TYPE, name);
-    if (resource)
-    {
-        g_object_get(resource,
-                     "isshow", isshow,
-                     "size", size,
-                     "left", left,
-                     "top", top,
-                     "color", color,
-                     NULL);
-        g_object_unref(resource);
-        ret = TRUE;
-    }
-    
-    return ret;
-}
-
-void ipcam_database_set_video(IpcamDatabase *database, const gchar *name, const GVariant *value)
-{
-    g_return_if_fail(IPCAM_IS_DATABASE(database));
-    GomResource *resource = NULL;
-    GError *error = NULL;
-    gchar *temp_value = NULL;
-
-    if (g_variant_is_of_type((GVariant *)value, G_VARIANT_TYPE_STRING))
-    {
-        temp_value = g_variant_dup_string((GVariant *)value, NULL);
-    }
-    else if (g_variant_is_of_type((GVariant *)value, G_VARIANT_TYPE_BOOLEAN))
-    {
-        gboolean b = g_variant_get_boolean((GVariant *)value);
-        temp_value = g_malloc0(8);
-        g_snprintf(temp_value, 8, "%u", b);
-    }
-    else if (g_variant_is_of_type((GVariant *)value, G_VARIANT_TYPE_UINT32))
-    {
-        guint i = g_variant_get_uint32((GVariant *)value);
-        temp_value = g_malloc0(8);
-        g_snprintf(temp_value, 8, "%u", i);
-    }
-    else
-    {
-        g_warn_if_reached();
-    }
-
-    if (temp_value)
-    {    
-        resource = ipcam_database_get_resource(database, IPCAM_VIDEO_TYPE, name);
-        if (resource)
-        {
-            g_object_set(resource, "value", temp_value, NULL);
-            gom_resource_save_sync(resource, &error);
-            g_object_unref(resource);
-        }
-        g_free(temp_value);
-    }
-    
-
-    if (error)
-    {
-        g_print("set video record failed: %s\n", error->message);
-        g_error_free(error);
-    }
-}
-
-GVariant *ipcam_database_get_video(IpcamDatabase *database, const gchar *name)
-{
-    g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
-    GomResource *resource = NULL;
-    gchar *temp_value = NULL;
-    gchar *vtype = NULL;
-    GVariant *value = NULL;
-
-    resource = ipcam_database_get_resource(database, IPCAM_VIDEO_TYPE, name);
-    if (resource)
-    {
-        g_object_get(resource, "value", &temp_value, "vtype", &vtype, NULL);
-        g_object_unref(resource);
-        if (vtype && g_str_equal(vtype, "STRING"))
-        {
-            value = g_variant_new_string(temp_value);
-        }
-        else if (vtype && g_str_equal(vtype, "BOOLEAN"))
-        {
-            value = g_variant_new_boolean(g_ascii_strtoull(temp_value, NULL, 10));
-        }
-        else if (vtype && g_str_equal(vtype, "INTEGER"))
-        {
-            value = g_variant_new_uint32(g_ascii_strtoull(temp_value, NULL, 10));
-        }
-        else
-        {
-            g_warn_if_reached();
-        }
-        g_free(temp_value);
-        g_free(vtype);
-    }
-
-    return value;
-}
-
-void ipcam_database_set_image(IpcamDatabase *database, const gchar *name, const GVariant *value)
-{
-    g_return_if_fail(IPCAM_IS_DATABASE(database));
-    GomResource *resource = NULL;
-    GError *error = NULL;
-    gchar *vtype = NULL;
-
-    resource = ipcam_database_get_resource(database, IPCAM_IMAGE_TYPE, name);
-    if (resource)
-    {
-        g_object_get(resource, "vtype", &vtype, NULL);
-        if (vtype && g_str_equal(vtype, "INTEGER"))
-        {
-            gchar *temp_value = g_malloc0(16);
-            g_snprintf(temp_value, 16, "%u", g_variant_get_uint32((GVariant *)value));
-            g_object_set(resource, "value", temp_value, NULL);
-            g_free(temp_value);
-        }
-        else if (vtype && g_str_equal(vtype, "BOOLEAN"))
-        {
-            gchar *temp_value = g_malloc0(8);
-            g_snprintf(temp_value, 16, "%u", g_variant_get_boolean((GVariant *)value));
-            g_object_set(resource, "value", temp_value, NULL);
-            g_free(temp_value);
-        }
-        else if (vtype && g_str_equal(vtype, "STRING"))
-        {
-            g_object_set(resource, "value", g_variant_get_string((GVariant *)value, NULL), NULL);
-        }
-        else
-        {
-            g_warn_if_reached();
-        }
-        g_free(vtype);
-        gom_resource_save_sync(resource, &error);
-        g_object_unref(resource);
-    }
-
-    if (error)
-    {
-        g_print("set image record failed: %s\n", error->message);
-        g_error_free(error);
-    }
-}
-GVariant *ipcam_database_get_image(IpcamDatabase *database, const gchar *name)
-{
-    g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
-    GomResource *resource = NULL;
-    GVariant *value = NULL;
-    gchar *vtype = NULL;
-    gchar *temp_value = NULL;
-    
-    resource = ipcam_database_get_resource(database, IPCAM_IMAGE_TYPE, name);
-    if (resource)
-    {
-        g_object_get(resource, "value", &temp_value, "vtype", &vtype, NULL);
-        g_object_unref(resource);
-    }
-
-    if (temp_value)
-    {
-        if (vtype && g_str_equal(vtype, "INTEGER"))
-        {
-            value = g_variant_new_uint32(g_ascii_strtoull(temp_value, NULL, 10));
-        }
-        else if (vtype && g_str_equal(vtype, "BOOLEAN"))
-        {
-            value = g_variant_new_boolean(g_ascii_strtoull(temp_value, NULL, 10));
-        }
-        else if (vtype && g_str_equal(vtype, "STRING"))
-        {
-            value = g_variant_new_string(temp_value);
-        }
-        else
-        {
-            g_warn_if_reached();
-        }
-        
-        g_free(temp_value);
-        g_free(vtype);
-    }
-    
-    return value;
-}
-void ipcam_database_set_network(IpcamDatabase *database, const gchar *name, const gchar *value)
-{
-    g_return_if_fail(IPCAM_IS_DATABASE(database));
-    GomResource *resource = NULL;
-    GError *error = NULL;
-
-    resource = ipcam_database_get_resource(database, IPCAM_NETWORK_TYPE, name);
-    if (resource)
-    {
-        g_object_set(resource, "value", value, NULL);
-        gom_resource_save_sync(resource, &error);
-        g_object_unref(resource);
-    }
-
-    if (error)
-    {
-        g_print("set network record failed: %s\n", error->message);
-        g_error_free(error);
-    }
-}
-gchar *ipcam_database_get_network(IpcamDatabase *database, const gchar *name)
-{
-    g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
-    GomResource *resource = NULL;
-    gchar *value = NULL;
-    
-    resource = ipcam_database_get_resource(database, IPCAM_NETWORK_TYPE, name);
-    if (resource)
-    {
-        g_object_get(resource, "value", &value, NULL);
-        g_object_unref(resource);
-    }
-    
-    return value;
-}
-void ipcam_database_set_network_static(IpcamDatabase *database, const gchar *name, gchar *value)
-{
-    g_return_if_fail(IPCAM_IS_DATABASE(database));
-    GomResource *resource = NULL;
-    GError *error = NULL;
-
-    resource = ipcam_database_get_resource(database, IPCAM_NETWORK_STATIC_TYPE, name);
-    if (resource)
-    {
-        g_object_set(resource, "value", value, NULL);
-        gom_resource_save_sync(resource, &error);
-        g_object_unref(resource);
-    }
-
-    if (error)
-    {
-        g_print("set network static record failed: %s\n", error->message);
-        g_error_free(error);
-    }
-}
-gchar *ipcam_database_get_network_static(IpcamDatabase *database, const gchar *name)
-{
-    g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
-    GomResource *resource = NULL;
-    gchar *value = NULL;
-    
-    resource = ipcam_database_get_resource(database, IPCAM_NETWORK_STATIC_TYPE, name);
-    if (resource)
-    {
-        g_object_get(resource, "value", &value, NULL);
-        g_object_unref(resource);
-    }
-    
-    return value;
-}
-void ipcam_database_set_network_pppoe(IpcamDatabase *database, const gchar *name, gchar *value)
-{
-    g_return_if_fail(IPCAM_IS_DATABASE(database));
-    GomResource *resource = NULL;
-    GError *error = NULL;
-
-    resource = ipcam_database_get_resource(database, IPCAM_NETWORK_PPPOE_TYPE, name);
-    if (resource)
-    {
-        g_object_set(resource, "value", value, NULL);
-        gom_resource_save_sync(resource, &error);
-        g_object_unref(resource);
-    }
-
-    if (error)
-    {
-        g_print("set network pppoe record failed: %s\n", error->message);
-        g_error_free(error);
-    }
-}
-gchar *ipcam_database_get_network_pppoe(IpcamDatabase *database, const gchar *name)
-{
-    g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
-    GomResource *resource = NULL;
-    gchar *value = NULL;
-    
-    resource = ipcam_database_get_resource(database, IPCAM_NETWORK_PPPOE_TYPE, name);
-    if (resource)
-    {
-        g_object_get(resource, "value", &value, NULL);
-        g_object_unref(resource);
-    }
-    
-    return value;
-}
-void ipcam_database_set_network_port(IpcamDatabase *database, const gchar *name, guint value)
-{
-    g_return_if_fail(IPCAM_IS_DATABASE(database));
-    GomResource *resource = NULL;
-    GError *error = NULL;
-
-    resource = ipcam_database_get_resource(database, IPCAM_NETWORK_PORT_TYPE, name);
-    if (resource)
-    {
-        g_object_set(resource, "value", value, NULL);
-        gom_resource_save_sync(resource, &error);
-        g_object_unref(resource);
-    }
-
-    if (error)
-    {
-        g_print("set network port record failed: %s\n", error->message);
-        g_error_free(error);
-    }
-}
-gint ipcam_database_get_network_port(IpcamDatabase *database, const gchar *name)
-{
-    g_return_val_if_fail(IPCAM_IS_DATABASE(database), -1);
-    GomResource *resource = NULL;
-    gint value = -1;
-    
-    resource = ipcam_database_get_resource(database, IPCAM_NETWORK_PORT_TYPE, name);
-    if (resource)
-    {
-        g_object_get(resource, "value", &value, NULL);
-        g_object_unref(resource);
-    }
-    
-    return value;
-}
-void ipcam_database_set_datetime(IpcamDatabase *database, const gchar *name, const GVariant *value)
-{
-    g_return_if_fail(IPCAM_IS_DATABASE(database));
-    GomResource *resource = NULL;
-    GError *error = NULL;
-
-    resource = ipcam_database_get_resource(database, IPCAM_DATETIME_TYPE, name);
-    if (resource)
-    {
-        gchar *temp_value = NULL;
-        if (g_variant_is_of_type((GVariant *)value, G_VARIANT_TYPE_STRING))
-        {
-            temp_value = g_strdup(g_variant_get_string((GVariant *)value, NULL));
-        }
-        else if (g_variant_is_of_type((GVariant *)value, G_VARIANT_TYPE_BOOLEAN))
-        {
-            temp_value = g_malloc0(8);
-            g_snprintf(temp_value, 8, "%u", g_variant_get_boolean((GVariant *)value));
-        }
-        else
-        {
-            g_warn_if_reached();
-        }
-
-        if (temp_value)
-        {
-            g_object_set(resource, "value", temp_value, NULL);
-            gom_resource_save_sync(resource, &error);
-        }
-        
-        g_object_unref(resource);
-        g_free(temp_value);
-    }
-
-    if (error)
-    {
-        g_print("set datetime record failed: %s\n", error->message);
-        g_error_free(error);
-    }
-}
-GVariant *ipcam_database_get_datetime(IpcamDatabase *database, const gchar *name)
-{
-    g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
-    GomResource *resource = NULL;
-    gchar *temp_value = NULL;
-    gchar *vtype = NULL;
-    GVariant *value = NULL;
-    
-    resource = ipcam_database_get_resource(database, IPCAM_DATETIME_TYPE, name);
-    if (resource)
-    {
-        g_object_get(resource, "value", &temp_value, "vtype", &vtype, NULL);
-        g_object_unref(resource);
-    }
-
-    if (vtype && g_str_equal(vtype, "STRING"))
-    {
-        value = g_variant_new_string(temp_value);
-    }
-    else if (vtype && g_str_equal(vtype, "BOOLEAN"))
-    {
-        value = g_variant_new_boolean(g_ascii_strtoull(temp_value, NULL, 10));
-    }
-    else
-    {
-        g_warn_if_reached();
-    }
-
-    g_free(temp_value);
-    g_free(vtype);
-    return value;
-}
-void ipcam_database_set_misc(IpcamDatabase *database, const gchar *name, const GVariant *value)
-{
-    g_return_if_fail(IPCAM_IS_DATABASE(database));
-    GomResource *resource = NULL;
-    GError *error = NULL;
-
-    resource = ipcam_database_get_resource(database, IPCAM_MISC_TYPE, name);
-    if (resource)
-    {
-        gchar *temp_value = NULL;
-        if (g_variant_is_of_type((GVariant *)value, G_VARIANT_TYPE_STRING))
-        {
-            temp_value = g_strdup(g_variant_get_string((GVariant *)value, NULL));
-        }
-        else if (g_variant_is_of_type((GVariant *)value, G_VARIANT_TYPE_BOOLEAN))
-        {
-            temp_value = g_malloc0(8);
-            g_snprintf(temp_value, 8, "%u", g_variant_get_boolean((GVariant *)value));
-        }
-        else
-        {
-            g_warn_if_reached();
-        }
-
-        if (temp_value)
-        {
-            g_object_set(resource, "value", temp_value, NULL);
-            gom_resource_save_sync(resource, &error);
-        }
-        
-        g_object_unref(resource);
-        g_free(temp_value);
-    }
-
-    if (error)
-    {
-        g_print("set misc record failed: %s\n", error->message);
-        g_error_free(error);
-    }
-}
-GVariant *ipcam_database_get_misc(IpcamDatabase *database, const gchar *name)
-{
-    g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
-    GomResource *resource = NULL;
-    gchar *temp_value = NULL;
-    gchar *vtype = NULL;
-    GVariant *value = NULL;
-    
-    resource = ipcam_database_get_resource(database, IPCAM_MISC_TYPE, name);
-    if (resource)
-    {
-        g_object_get(resource, "value", &temp_value, "vtype", &vtype, NULL);
-        g_object_unref(resource);
-    }
-
-    if (vtype && g_str_equal(vtype, "STRING"))
-    {
-        value = g_variant_new_string(temp_value);
-    }
-    else if (vtype && g_str_equal(vtype, "BOOLEAN"))
-    {
-        value = g_variant_new_boolean(g_ascii_strtoull(temp_value, NULL, 10));
-    }
-    else
-    {
-        g_warn_if_reached();
-    }
-
-    g_free(temp_value);
-    g_free(vtype);
-    return value;
-}
-void ipcam_database_set_day_night_mode(IpcamDatabase *database, const gchar *name, guint value)
-{
-    g_return_if_fail(IPCAM_IS_DATABASE(database));
-    GomResource *resource = NULL;
-    GError *error = NULL;
-
-    resource = ipcam_database_get_resource(database, IPCAM_DAY_NIGHT_MODE_TYPE, name);
-    if (resource)
-    {
-        g_object_set(resource, "value", value, NULL);
-        gom_resource_save_sync(resource, &error);
-        g_object_unref(resource);
-    }
-
-    if (error)
-    {
-        g_print("set day night mode record failed: %s\n", error->message);
-        g_error_free(error);
-    }
-}
-gint ipcam_database_get_day_night_mode(IpcamDatabase *database, const gchar *name)
-{
-    g_return_val_if_fail(IPCAM_IS_DATABASE(database), -1);
-    GomResource *resource = NULL;
-    gint value = -1;
-    
-    resource = ipcam_database_get_resource(database, IPCAM_DAY_NIGHT_MODE_TYPE, name);
-    if (resource)
-    {
-        g_object_get(resource, "value", &value, NULL);
-        g_object_unref(resource);
-    }
-    
-    return value;
-}
-void ipcam_database_set_szyc(IpcamDatabase *database, const gchar *name, const gchar *value)
-{
-    g_return_if_fail(IPCAM_IS_DATABASE(database));
-    GomResource *resource = NULL;
-    GError *error = NULL;
-
-    resource = ipcam_database_get_resource(database, IPCAM_SZYC_TYPE, name);
-    if (resource)
-    {
-        g_object_set(resource, "value", value, NULL);
-        gom_resource_save_sync(resource, &error);
-        g_object_unref(resource);
-    }
-
-    if (error)
-    {
-        g_print("set szyc record failed: %s\n", error->message);
-        g_error_free(error);
-    }
-}
-gchar *ipcam_database_get_szyc(IpcamDatabase *database, const gchar *name)
-{
-    g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
-    GomResource *resource = NULL;
-    gchar *value = NULL;
-    
-    resource = ipcam_database_get_resource(database, IPCAM_SZYC_TYPE, name);
-    if (resource)
-    {
-        g_object_get(resource, "value", &value, NULL);
-        g_object_unref(resource);
-    }
-    
-    return value;
-}
-void ipcam_database_set_event_input(IpcamDatabase *database, const gchar *name, GVariant *value)
-{
-    g_return_if_fail(IPCAM_IS_DATABASE(database));
-    GomResource *resource = NULL;
-    GError *error = NULL;
-
-    resource = ipcam_database_get_resource(database, IPCAM_SZYC_TYPE, name);
-    if (resource)
-    {
-        gom_resource_save_sync(resource, &error);
-        g_object_unref(resource);
-    }
-
-    if (error)
-    {
-        g_print("set szyc record failed: %s\n", error->message);
-        g_error_free(error);
-    }
-}
-GVariant *ipcam_database_get_event_input(IpcamDatabase *database, const gchar *name)
-{
-    g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
-    GomResource *resource = NULL;
-    GVariant *value;
-
-    resource = ipcam_database_get_resource(database, IPCAM_SZYC_TYPE, name);
-    if (resource)
-    {
-        g_object_unref(resource);
-    }
-    
-    return value;
-}
 static void ipcam_database_set_schedules(IpcamDatabase *database, GVariant *value)
 {
     IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);
@@ -1432,6 +765,49 @@ static void ipcam_database_set_rect(IpcamDatabase *database, GVariant *value)
                  "width", rect->width,
                  "height", rect->height,
                  NULL);
+}
+static gboolean ipcam_database_update_fuzzy_value(IpcamDatabase *database, const gchar *sub_name, GVariant *value)
+{
+    IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);
+    GError *error = NULL;
+    gchar *temp_value = NULL;
+    gboolean ret = TRUE;
+
+    if (g_variant_is_of_type((GVariant *)value, G_VARIANT_TYPE_STRING))
+    {
+        temp_value = g_strdup(g_variant_get_string((GVariant *)value, NULL));
+    }
+    else if (g_variant_is_of_type((GVariant *)value, G_VARIANT_TYPE_BOOLEAN))
+    {
+        temp_value = g_malloc0(8);
+        g_snprintf(temp_value, 8, "%u", g_variant_get_boolean((GVariant *)value));
+    }
+    else if (g_variant_is_of_type((GVariant *)value, G_VARIANT_TYPE_UINT32))
+    {
+        temp_value = g_malloc0(16);
+        g_snprintf(temp_value, 16, "%u", g_variant_get_uint32((GVariant *)value));
+    }
+    else
+    {
+        g_warn_if_reached();
+        ret = FALSE;
+    }
+
+    if (temp_value)
+    {
+        g_object_set(priv->resource, "value", temp_value, NULL);
+        gom_resource_save_sync(priv->resource, &error);
+        g_free(temp_value);
+    }
+
+    if (error)
+    {
+        g_print("set datetime record failed: %s\n", error->message);
+        g_error_free(error);
+        ret = FALSE;
+    }
+
+    return ret;
 }
 static gboolean ipcam_database_update_value(IpcamDatabase *database, const gchar *sub_name, GVariant *value)
 {
@@ -1488,7 +864,26 @@ gboolean ipcam_database_update(IpcamDatabase *database, GType table, const gchar
     priv->resource = ipcam_database_get_resource(database, table, name);
     if (priv->resource)
     {
-        ret = ipcam_database_update_value(database, sub_name, value);
+        if (table == IPCAM_BASE_INFO_TYPE)
+        {
+            guint rw;
+            g_object_get(priv->resource, "rw", &rw, NULL);
+            if (0 == rw)
+            {
+                g_warning("Attempt to set read-only property '%s'\n", name);
+                g_object_unref(priv->resource);
+                return ret;
+            }
+        }
+        if (table == IPCAM_DATETIME_TYPE || table == IPCAM_IMAGE_TYPE ||
+            table == IPCAM_MISC_TYPE || table == IPCAM_VIDEO_TYPE)
+        {
+            ret = ipcam_database_update_fuzzy_value(database, sub_name, value);
+        }
+        else
+        {
+            ret = ipcam_database_update_value(database, sub_name, value);
+        }
         
         g_object_unref(priv->resource);
         priv->resource = NULL;
@@ -1540,6 +935,34 @@ GVariant *ipcam_database_get_rect(IpcamDatabase *database)
     {
         value = g_variant_new_uint32(GPOINTER_TO_SIZE(rect));
     }
+    return value;
+}
+GVariant *ipcam_database_read_fuzzy_value(IpcamDatabase *database, const gchar *sub_name)
+{
+    IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);
+    GVariant *value = NULL;
+    gchar *temp_value = NULL;
+    gchar *vtype = NULL;
+
+    g_object_get(priv->resource, sub_name, &temp_value, "vtype", &vtype, NULL);
+    
+    if (vtype && g_str_equal(vtype, "STRING"))
+    {
+        value = g_variant_new_string(temp_value);
+    }
+    else if (vtype && g_str_equal(vtype, "BOOLEAN"))
+    {
+        value = g_variant_new_boolean(g_ascii_strtoull(temp_value, NULL, 10));
+    }
+    else if (vtype && g_str_equal(vtype, "INTEGER"))
+    {
+        value = g_variant_new_uint32(g_ascii_strtoull(temp_value, NULL, 10));
+    }
+    else
+    {
+        g_warn_if_reached();
+    }
+
     return value;
 }
 GVariant *ipcam_database_read_value(IpcamDatabase *database, const gchar *sub_name)
@@ -1594,11 +1017,18 @@ GVariant *ipcam_database_read(IpcamDatabase *database, GType table, const gchar 
     priv->resource = ipcam_database_get_resource(database, table, name);
     if (priv->resource)
     {
-        value = ipcam_database_read_value(database, sub_name);
+        if (table == IPCAM_DATETIME_TYPE || table == IPCAM_IMAGE_TYPE ||
+            table == IPCAM_MISC_TYPE || table == IPCAM_VIDEO_TYPE)
+        {
+            value = ipcam_database_read_fuzzy_value(database, sub_name);
+        }
+        else
+        {
+            value = ipcam_database_read_value(database, sub_name);
+        }
         g_object_unref(priv->resource);
         priv->resource = NULL;
     }
 
     return value;
 }
-

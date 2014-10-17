@@ -22,8 +22,7 @@
 #include <base_app.h>
 #include "ipcam-szyc-handler.h"
 #include "iconfig.h"
-#include "sysutils.h"
-#include "common.h"
+#include "database/szyc.h"
 
 G_DEFINE_TYPE (IpcamSzycMsgHandler, ipcam_szyc_msg_handler, IPCAM_TYPE_MESSAGE_HANDLER);
 
@@ -43,14 +42,15 @@ ipcam_szyc_msg_handler_read_param(IpcamSzycMsgHandler *handler, JsonBuilder *bui
 {
     IpcamIConfig *iconfig;
     g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
-    gchar *value = NULL;
+    GVariant *value = NULL;
     gboolean ret = FALSE;
 
-    value = ipcam_iconfig_get_szyc(iconfig, name);
+    value = ipcam_iconfig_read(iconfig, IPCAM_SZYC_TYPE, name, "value");
     if (value)
     {
         json_builder_set_member_name(builder, name);
-        json_builder_add_string_value(builder, value);
+        json_builder_add_string_value(builder, g_variant_get_string(value, NULL));
+        g_variant_unref(value);
         ret = TRUE;
     }
 
@@ -62,8 +62,14 @@ ipcam_szyc_msg_handler_update_param(IpcamSzycMsgHandler *handler, const gchar *n
 {
     IpcamIConfig *iconfig;
     g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
+    GVariant *val = g_variant_new_string(value);
 
-    ipcam_iconfig_set_szyc(iconfig, name, value);
+    if (val)
+    {
+        ipcam_iconfig_update(iconfig, IPCAM_SZYC_TYPE, name, "value", val);
+        g_variant_unref(val);
+    }
+    
     return TRUE;
 }
 

@@ -24,6 +24,10 @@
 #include "iconfig.h"
 #include "sysutils.h"
 #include "common.h"
+#include "database/network.h"
+#include "database/network_static.h"
+#include "database/network_pppoe.h"
+#include "database/network_port.h"
 
 G_DEFINE_TYPE (IpcamNetworkMsgHandler, ipcam_network_msg_handler, IPCAM_TYPE_MESSAGE_HANDLER);
 
@@ -43,13 +47,14 @@ ipcam_network_msg_handler_read_method(IpcamNetworkMsgHandler *handler, JsonBuild
 {
     IpcamIConfig *iconfig;
     g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
-    gchar *value;
+    GVariant *value;
 
-    value = ipcam_iconfig_get_network(iconfig, "method");
+    value = ipcam_iconfig_read(iconfig, IPCAM_NETWORK_TYPE, "method", "value");
     if (value)
     {                
         json_builder_set_member_name(builder, "method");
-        json_builder_add_string_value(builder, value);
+        json_builder_add_string_value(builder, g_variant_get_string(value, NULL));
+        g_variant_unref(value);
     }
 }
 
@@ -106,15 +111,17 @@ ipcam_network_msg_handler_read_pppoe(IpcamNetworkMsgHandler *handler, JsonBuilde
     g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
     static gchar *subitems[] = { "username", "password" };
     gint i;
+    GVariant *value = NULL;
 
     for (i = 0; i < ARRAY_SIZE(subitems); i++)
     {
-        gchar *value = ipcam_iconfig_get_network_pppoe(iconfig, subitems[i]);
-
-        json_builder_set_member_name(builder, subitems[i]);
-        json_builder_add_string_value(builder, value);
-
-        g_free(value);
+        value = ipcam_iconfig_read(iconfig, IPCAM_NETWORK_PPPOE_TYPE, subitems[i], "value");
+        if (value)
+        {
+            json_builder_set_member_name(builder, subitems[i]);
+            json_builder_add_string_value(builder, g_variant_get_string(value, NULL));
+            g_variant_unref(value);
+        }
     }
 }
 
@@ -125,13 +132,18 @@ ipcam_network_msg_handler_read_port(IpcamNetworkMsgHandler *handler, JsonBuilder
     g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
     static gchar *subitems[] = { "http", "ftp", "rtsp" };
     gint i;
+    GVariant *value = NULL;
 
     for (i = 0; i < ARRAY_SIZE(subitems); i++)
     {
-        gint value = ipcam_iconfig_get_network_port(iconfig, subitems[i]);
+        value = ipcam_iconfig_read(iconfig, IPCAM_NETWORK_PORT_TYPE, subitems[i], "value");
 
-        json_builder_set_member_name(builder, subitems[i]);
-        json_builder_add_int_value(builder, value);
+        if (value)
+        {
+            json_builder_set_member_name(builder, subitems[i]);
+            json_builder_add_int_value(builder, g_variant_get_uint32(value));
+            g_variant_unref(value);
+        }
     }
 }
 
@@ -192,12 +204,15 @@ ipcam_network_msg_handler_update_address(IpcamNetworkMsgHandler *handler, JsonOb
     };
 
     int i;
+    GVariant *value = NULL;
     for (i = 0; i < ARRAY_SIZE(kv); i++)
     {
         if (json_object_has_member(value_obj, kv[i].key))
         {
             *kv[i].pval = json_object_get_string_member(value_obj, kv[i].key);
-            ipcam_iconfig_set_network_static(iconfig, kv[i].key, (gchar *)*kv[i].pval);
+            value = g_variant_new_string(*kv[i].pval);
+            ipcam_iconfig_update(iconfig, IPCAM_NETWORK_STATIC_TYPE, kv[i].key, "value", value);
+            g_variant_unref(value);
         }
     }
 
@@ -235,8 +250,11 @@ ipcam_network_msg_handler_update_pppoe(IpcamNetworkMsgHandler *handler, JsonObje
     {
         gchar *name = l->data;
         gchar *value = (gchar *)json_object_get_string_member(value_obj, name);
+        GVariant *val = NULL;
 
-        ipcam_iconfig_set_network_pppoe(iconfig, name, value);
+        val = g_variant_new_string(value);
+        ipcam_iconfig_update(iconfig, IPCAM_NETWORK_PPPOE_TYPE, name, "value", val);
+        g_variant_unref(val);
     }
     g_list_free(items);
 }
@@ -253,8 +271,11 @@ ipcam_network_msg_handler_update_port(IpcamNetworkMsgHandler *handler, JsonObjec
     {
         gchar *name = l->data;
         gint value = json_object_get_int_member(value_obj, name);
+        GVariant *val = NULL;
 
-        ipcam_iconfig_set_network_port (iconfig, name, value);
+        val = g_variant_new_uint32(value);
+        ipcam_iconfig_update (iconfig, IPCAM_NETWORK_PORT_TYPE, name, "value", val);
+        g_variant_unref(val);
     }
     g_list_free(items);
 }
@@ -268,7 +289,9 @@ ipcam_network_msg_handler_update_param(IpcamNetworkMsgHandler *handler, const gc
     if (g_str_equal(name, "method"))
     {
         const gchar *method = json_object_get_string_member(value_obj, "method");
-        ipcam_iconfig_set_network(iconfig, "method", method);
+        GVariant *value = g_variant_new_string(method);
+        ipcam_iconfig_update(iconfig, IPCAM_NETWORK_TYPE, "method", "value", value);
+        g_variant_unref(value);
     }
     else if (g_str_equal(name, "address"))
     {
