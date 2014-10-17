@@ -1,13 +1,22 @@
 #include "generic_action_handler.h"
 #include "messages.h"
 #include "iconfig.h"
+#include "../msg-handler/ipcam-misc-handler.h"
 #include "../msg-handler/ipcam-base-info-handler.h"
-#include "../msg-handler/ipcam-osd-handler.h"
+#include "../msg-handler/ipcam-users-handler.h"
+#include "../msg-handler/ipcam-datetime-handler.h"
 #include "../msg-handler/ipcam-video-handler.h"
 #include "../msg-handler/ipcam-image-handler.h"
+#include "../msg-handler/ipcam-privacy-block-handler.h"
+#include "../msg-handler/ipcam-day-night-mode-handler.h"
+#include "../msg-handler/ipcam-osd-handler.h"
+#include "../msg-handler/ipcam-szyc-handler.h"
 #include "../msg-handler/ipcam-network-handler.h"
-#include "../msg-handler/ipcam-datetime-handler.h"
-#include "../msg-handler/ipcam-users-handler.h"
+#include "../msg-handler/ipcam-event-input-handler.h"
+#include "../msg-handler/ipcam-event-output-handler.h"
+#include "../msg-handler/ipcam-event-motion-handler.h"
+#include "../msg-handler/ipcam-event-cover-handler.h"
+#include "../msg-handler/ipcam-event-proc-handler.h"
 
 typedef struct _IpcamGenericActionHandlerPrivate
 {
@@ -51,15 +60,29 @@ static void ipcam_generic_action_handler_init(IpcamGenericActionHandler *self)
     priv->action_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, g_free);
 
 #define _(...)       msg_handler_hash_value_init(__VA_ARGS__)
+    g_hash_table_insert(priv->action_hash, "get_misc", 
+                        _(ACT_GET, IPCAM_TYPE_MISC_MSG_HANDLER));
+    g_hash_table_insert(priv->action_hash, "set_misc", 
+                        _(ACT_SET, IPCAM_TYPE_MISC_MSG_HANDLER));
+    
     g_hash_table_insert(priv->action_hash, "get_base_info", 
                         _(ACT_GET, IPCAM_TYPE_BASE_INFO_MSG_HANDLER));
     g_hash_table_insert(priv->action_hash, "set_base_info", 
                         _(ACT_SET, IPCAM_TYPE_BASE_INFO_MSG_HANDLER));
 
-    g_hash_table_insert(priv->action_hash, "get_osd", 
-                        _(ACT_GET, IPCAM_TYPE_OSD_MSG_HANDLER));
-    g_hash_table_insert(priv->action_hash, "set_osd", 
-                        _(ACT_SET, IPCAM_TYPE_OSD_MSG_HANDLER));
+    g_hash_table_insert(priv->action_hash, "get_users", 
+                        _(ACT_GET, IPCAM_TYPE_USERS_MSG_HANDLER));
+    g_hash_table_insert(priv->action_hash, "set_users", 
+                        _(ACT_SET, IPCAM_TYPE_USERS_MSG_HANDLER));
+    g_hash_table_insert(priv->action_hash, "add_users", 
+                        _(ACT_ADD, IPCAM_TYPE_USERS_MSG_HANDLER));
+    g_hash_table_insert(priv->action_hash, "del_users", 
+                        _(ACT_DEL, IPCAM_TYPE_USERS_MSG_HANDLER));
+
+    g_hash_table_insert(priv->action_hash, "get_datetime", 
+                        _(ACT_GET, IPCAM_TYPE_DATETIME_MSG_HANDLER));
+    g_hash_table_insert(priv->action_hash, "set_datetime", 
+                        _(ACT_SET, IPCAM_TYPE_DATETIME_MSG_HANDLER));
 
     g_hash_table_insert(priv->action_hash, "get_video", 
                         _(ACT_GET, IPCAM_TYPE_VIDEO_MSG_HANDLER));
@@ -71,24 +94,56 @@ static void ipcam_generic_action_handler_init(IpcamGenericActionHandler *self)
     g_hash_table_insert(priv->action_hash, "set_image", 
                         _(ACT_SET, IPCAM_TYPE_IMAGE_MSG_HANDLER));
 
+    g_hash_table_insert(priv->action_hash, "get_privacy_block", 
+                        _(ACT_GET, IPCAM_TYPE_PRIVACY_BLOCK_MSG_HANDLER));
+    g_hash_table_insert(priv->action_hash, "set_privacy_block", 
+                        _(ACT_SET, IPCAM_TYPE_PRIVACY_BLOCK_MSG_HANDLER));
+
+    g_hash_table_insert(priv->action_hash, "get_day_night_mode", 
+                        _(ACT_GET, IPCAM_TYPE_DAY_NIGHT_MODE_MSG_HANDLER));
+    g_hash_table_insert(priv->action_hash, "set_day_night_mode", 
+                        _(ACT_SET, IPCAM_TYPE_DAY_NIGHT_MODE_MSG_HANDLER));
+    
+    g_hash_table_insert(priv->action_hash, "get_osd", 
+                        _(ACT_GET, IPCAM_TYPE_OSD_MSG_HANDLER));
+    g_hash_table_insert(priv->action_hash, "set_osd", 
+                        _(ACT_SET, IPCAM_TYPE_OSD_MSG_HANDLER));
+
+    g_hash_table_insert(priv->action_hash, "get_szyc", 
+                        _(ACT_GET, IPCAM_TYPE_SZYC_MSG_HANDLER));
+    g_hash_table_insert(priv->action_hash, "set_szyc", 
+                        _(ACT_SET, IPCAM_TYPE_SZYC_MSG_HANDLER));
+
     g_hash_table_insert(priv->action_hash, "get_network", 
                         _(ACT_GET, IPCAM_TYPE_NETWORK_MSG_HANDLER));
     g_hash_table_insert(priv->action_hash, "set_network", 
                         _(ACT_SET, IPCAM_TYPE_NETWORK_MSG_HANDLER));
 
-    g_hash_table_insert(priv->action_hash, "get_datetime", 
-                        _(ACT_GET, IPCAM_TYPE_DATETIME_MSG_HANDLER));
-    g_hash_table_insert(priv->action_hash, "set_datetime", 
-                        _(ACT_SET, IPCAM_TYPE_DATETIME_MSG_HANDLER));
+    g_hash_table_insert(priv->action_hash, "get_event_input", 
+                        _(ACT_GET, IPCAM_TYPE_EVENT_INPUT_MSG_HANDLER));
+    g_hash_table_insert(priv->action_hash, "set_event_input", 
+                        _(ACT_SET, IPCAM_TYPE_EVENT_INPUT_MSG_HANDLER));
 
-    g_hash_table_insert(priv->action_hash, "get_users", 
-                        _(ACT_GET, IPCAM_TYPE_USERS_MSG_HANDLER));
-    g_hash_table_insert(priv->action_hash, "set_users", 
-                        _(ACT_SET, IPCAM_TYPE_USERS_MSG_HANDLER));
-    g_hash_table_insert(priv->action_hash, "add_users", 
-                        _(ACT_ADD, IPCAM_TYPE_USERS_MSG_HANDLER));
-    g_hash_table_insert(priv->action_hash, "del_users", 
-                        _(ACT_DEL, IPCAM_TYPE_USERS_MSG_HANDLER));
+    g_hash_table_insert(priv->action_hash, "get_event_output", 
+                        _(ACT_GET, IPCAM_TYPE_EVENT_OUTPUT_MSG_HANDLER));
+    g_hash_table_insert(priv->action_hash, "set_event_output", 
+                        _(ACT_SET, IPCAM_TYPE_EVENT_OUTPUT_MSG_HANDLER));
+
+    g_hash_table_insert(priv->action_hash, "get_event_motion", 
+                        _(ACT_GET, IPCAM_TYPE_EVENT_MOTION_MSG_HANDLER));
+    g_hash_table_insert(priv->action_hash, "set_event_motion", 
+                        _(ACT_SET, IPCAM_TYPE_EVENT_MOTION_MSG_HANDLER));
+
+    g_hash_table_insert(priv->action_hash, "get_event_cover", 
+                        _(ACT_GET, IPCAM_TYPE_EVENT_COVER_MSG_HANDLER));
+    g_hash_table_insert(priv->action_hash, "set_event_cover", 
+                        _(ACT_SET, IPCAM_TYPE_EVENT_COVER_MSG_HANDLER));
+
+    g_hash_table_insert(priv->action_hash, "get_event_proc", 
+                        _(ACT_GET, IPCAM_TYPE_EVENT_PROC_MSG_HANDLER));
+    g_hash_table_insert(priv->action_hash, "set_event_proc", 
+                        _(ACT_SET, IPCAM_TYPE_EVENT_PROC_MSG_HANDLER));
+
 #undef _
 }
 
@@ -98,6 +153,7 @@ static void ipcam_generic_action_handler_finalize(GObject *gobject)
     IpcamGenericActionHandlerPrivate *priv = ipcam_generic_action_handler_get_instance_private(self);
 
     g_hash_table_destroy (priv->action_hash);
+    G_OBJECT_CLASS(ipcam_generic_action_handler_parent_class)->finalize(gobject);
 }
 
 static void ipcam_generic_action_handler_class_init(IpcamGenericActionHandlerClass *klass)
