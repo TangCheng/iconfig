@@ -15,5 +15,4 @@ AM_CFLAGS =\
 
 conf_datadir = $(prefix)/iconfig/config
 conf_data_DATA = \
-	app.yml \
-	ajax.tmpl
+	app.yml

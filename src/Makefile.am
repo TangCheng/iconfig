@@ -39,33 +39,9 @@ iconfig_SOURCES = \
 	database/event_motion.c \
 	database/event_cover.c \
 	database/event_proc.c \
-	ajax/http_response.c \
-	ajax/http_request.c \
-	ajax/http_query_string_parser.c \
-	ajax/http_request_handler.c \
-	ajax/http_base_info_handler.c \
-	ajax/http_proc.c \
-	ajax/http_parser.c \
-	ajax/ajax.c \
-	ctemplate.c \
 	iconfig.c \
 	common.c \
 	main.c \
-	ajax/http_osd_handler.c \
-	ajax/http_video_handler.c \
-	ajax/http_image_handler.c \
-	ajax/http_network_handler.c \
-	ajax/http_datetime_handler.c \
-	ajax/http_users_handler.c \
-	ajax/http_misc_handler.c \
-	ajax/http_privacy_block_handler.c \
-	ajax/http_day_night_mode_handler.c \
-	ajax/http_szyc_handler.c \
-	ajax/http_event_input_handler.c \
-	ajax/http_event_output_handler.c \
-	ajax/http_event_motion_handler.c \
-	ajax/http_event_cover_handler.c \
-	ajax/http_event_proc_handler.c \
 	msg-handler/ipcam-message-handler.c \
 	msg-handler/ipcam-base-info-handler.c \
 	msg-handler/ipcam-osd-handler.c \
@@ -88,7 +64,7 @@ iconfig_SOURCES = \
 
 iconfig_LDFLAGS = 
 
-iconfig_LDADD = $(ICONFIG_LIBS) -lhttp_parser
+iconfig_LDADD = $(ICONFIG_LIBS)
 
 
 SUBDIRS = \
