@@ -1,9 +1,9 @@
 token: iconfig_token
 netif: eth0
 bind:
-  iconfig: tcp://127.0.0.1:3000
+  iconfig: tcp://127.0.0.1:65400
 publish:
-  iconfig_pub: tcp://127.0.0.1:3010
+  iconfig_pub: tcp://127.0.0.1:65401
 ajax:
   address: 127.0.0.1
-  port: 3001
+  port: 65535
