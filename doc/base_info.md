@@ -1,58 +1,8 @@
 # API Reference (1.0)
 ---
 
-## 1. base_info（ajax）
-
-### url
-http://x.x.x.x/api/1.0/base_info.json
-
-### 支持格式
-JSON
-
-### HTTP请求方式
-GET  
-PUT
-
-### 是否需要登录
-是
-
-### 请求参数
- 请求|参数|必选|类型及范围|说明
----|---|:-:|---|---|---
-GET|items|是|array: ['device_name', 'location', 'comment', 'manufacturer', 'model', 'serial', 'firmware', 'hardware', 'hwaddr']|需要查询的基本信息的名称
-PUT|items|是|object: {'device_name':'ipcam','location':'China','comment':'my content'}|要设置的基本信息的名值对
-
-### 注意事项
-仅device_name，location，comment三项可写，其余项为只读。
-
-### 调用样例
-GET http://x.x.x.x/api/1.0/base_info.json?items[]=device_name&items[]=comment  
-PUT http://x.x.x.x/api/1.0/base_info.json json_data
-
-### 返回结果
-JSON示例  
-GET
-
-	{
-		'items': {
-			“device_name”: "ipcam",
-			"location": "China",
-			"comment": "my content",
-			"manufacturer": "IPNC",
-			"model": "IPNC-100",
-			"serial": "12345678",
-			"firmware": "V1.0.0",
-			"hardware": "Rev1",
-			"hwaddr": "xx:xx:xx:xx:xx:xx"
-		}
-	}
-	
-PUT
-
-	{'success': 'true' | 'false'}
-	
-### 返回字段说明
-返回值字段|字段类型|字段说明
+### 字段说明
+字段|字段类型|字段说明
 ---|---|---
 device_name|string|设备名称
 comment|string|用户自定义说明
@@ -64,20 +14,30 @@ firmware|string|设备软件版本
 hardware|string|设备硬件版本
 hwaddr|string|设备MAC地址
 
-## 2. base_info（message）
-
-### 2.1 get_base_info
+### 1 get_base_info
 #### request
+
     {
 		'head': {
             'action': 'get_base_info',
             'version': '1.0'
 		},
         'body': {
-            'items': ['device_name', 'comment', 'location', 'manufacturer', 'model', 'serial', 'firmware', 'hardware']
+            'items': [
+				'device_name',
+				'comment',
+				'location',
+				'manufacturer',
+				'model',
+				'serial',
+				'firmware',
+				'hardware'
+			]
         }
     }
+
 #### response
+
     {
 		'head': {
             'action': 'get_base_info',
@@ -97,9 +57,11 @@ hwaddr|string|设备MAC地址
 			}
         }
     }
+
 ---
-### 2.2 set_base_info
+### 2 set_base_info
 #### request
+
     {
 		'head': {
             'action': 'set_base_info',
@@ -113,7 +75,9 @@ hwaddr|string|设备MAC地址
 			}
 		}
     }
+
 #### response
+
     {
 		'head': {
             'action': 'set_base_info',
@@ -121,5 +85,27 @@ hwaddr|string|设备MAC地址
 			'code': '0'
 		},
         'body': {
+			'items': {
+                'device_name': 'device_name',
+                'comment': 'comment'
+                'location': 'China'
+			}
+		}
+    }
+
+---
+### 3 notice
+
+	{
+		'head': {
+            'event': 'set_base_info',
+            'version': '1.0',
+		},
+        'body': {
+			'items': {
+                'device_name': 'device_name',
+                'comment': 'comment'
+                'location': 'China'
+			}
 		}
     }

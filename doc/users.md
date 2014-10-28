@@ -1,198 +1,224 @@
 # API Reference (1.0)
 ---
-
-## 1. users（ajax）
-
-### url
-http://x.x.x.x/api/1.0/users.json
-
-### 支持格式
-JSON
-
-### HTTP请求方式
-GET  
-PUT  
-POST  
-DELETE  
-
-### 是否需要登录
-是
-
-### 请求参数
- 请求|参数|必选|类型及范围|说明
----|---|:-:|---|---|---
-GET|items|是|array: ['password', 'role]|是否需要返回用户密码和特权级
-PUT|items|是|object array: [ {'username':'username', 'password':'password', 'role:'user'}]|修改用户的密码和角色信息，需要设置用户的用户名，密码，角色的数组，允许一次调用设置多个用户
-POST|items|是|object array: [ {'username':'username', 'password':'password', 'role:'user'}]|新增用户
-DELETE|items|是|object array: [ { 'username':'user1' }, { 'username':'user2' } ]|需要被删除的用户名，可以一次删除多个
-
-### 注意事项
-无
-
-### 调用样例
-GET http://x.x.x.x/api/1.0/users.json&items[]=password&items[]=role  
-PUT http://x.x.x.x/api/1.0/users.json json_data  
-POST http://x.x.x.x/api/1.0/users.json json_data  
-DELETE http://x.x.x.x/api/1.0/users.json json_data  
-
-### 返回结果
-JSON示例
-GET
-
-	{
-		'items': [
-			{
-				'username': 'admin',
-				'password': 'passwd',
-				'role': 'administrator'
-			},
-			{
-				'username': 'guest',
-				'password': 'passwd',
-				'role': 'user'
-			}
-		]
-	}
 	
-PUT
-
-	{'success': 'true' | 'false'}
-	
-### 返回字段说明
-返回值字段|字段类型|字段说明
+### 字段说明
+字段|字段类型|字段说明
 ---|---|---
 username|string|用户名
 password|string|密码
 role|string|用户角色
 
-## 2. users（message）
-
-### 2.1 get_users
-#### request
-    {
-		'head': {
-        	'action': 'get_users',
-            'version': '1.0'
-		},
-        'body': {
-            'items': [
-                'password',
-                'privilege'
-            ]
-        }
-    }
-#### response
-    {
-		'head': {
-            'action': 'get_users',
-            'version': '1.0',
-		    'code': '0'
-		},
-        'body': {
-		    'items': [
-                {
-                    'username':'admin',
-                    'password':'passwd',
-                    'privilege':1
-                }
-                {
-                    'username':'guest',
-                    'password':'passwd',
-                    'privilege':0
-                }
-            ]
-        }
-    }
 ---
-### 2.2 set_users
+### 1 get_users
 #### request
-    {
+
+	{
 		'head': {
-		    'action': 'set_users',
-            'version': '1.0'
-        },
-        'body': {
+			'action': 'get_users',
+			'version': '1.0'
+		},
+		'body': {
 			'items': [
-                {
-                    'username':'user1',
-                    'password':'passwd',
-                    'privilege':0
-                },
-                {
-                    'username':'user2',
-                    'password':'passwd',
-                    'privilege':0
-                }
+				'password',
+				'role'
 			]
 		}
-    }
+	}
+
 #### response
-    {
+
+	{
 		'head': {
-    		'action': 'set_users',
-            'version': '1.0',
+			'action': 'get_users',
+			'version': '1.0',
 			'code': '0'
 		},
-        'body': {
-		}
-    }
-### 2.3 add_users
-#### request
-    {
-		'head': {
-		    'action': 'add_users',
-            'version': '1.0'
-        },
-        'body': {
+		'body': {
 			'items': [
-                {
-                    'username':'user1',
-                    'password':'passwd',
-                    'privilege':0
-                },
-                {
-                    'username':'user2',
-                    'password':'passwd',
-                    'privilege':0
-                }
+				{
+					'username': 'admin',
+					'password': 'passwd',
+					'role': 'administrator'
+				},
+				{
+					'username': 'guest',
+					'password': 'passwd',
+					'role': 'user'
+				}
 			]
 		}
-    }
-#### response
-    {
-		'head': {
-    		'action': 'add_users',
-            'version': '1.0',
-			'code': '0'
-		},
-        'body': {
-		}
-    }
-### 2.4 del_users
+	}
+
+---
+### 2 set_users
 #### request
-    {
+
+	{
 		'head': {
-		    'action': 'del_users',
-            'version': '1.0'
-        },
-        'body': {
+			'action': 'set_users',
+			'version': '1.0'
+		},
+		'body': {
 			'items': [
-                {
-                    'username':'user1',
-                },
-                {
-                    'username':'user2',
-                }
+				{
+					'username': 'admin',
+					'password': 'passwd',
+					'role': 'administrator'
+				}
 			]
 		}
-    }
+	}
+
 #### response
-    {
+
+	{
 		'head': {
-    		'action': 'del_users',
-            'version': '1.0',
+			'action': 'set_users',
+			'version': '1.0',
 			'code': '0'
 		},
-        'body': {
+		'body': {
+			'items': [
+				{
+					'username': 'admin',
+					'password': 'passwd',
+					'role': 'administrator'
+				}
+			]
 		}
-    }
+	}
+
+---
+### 3 add_users
+#### request
+
+	{
+		'head': {
+			'action': 'add_users',
+			'version': '1.0'
+		},
+		'body': {
+			'items': [
+				{
+					'username': 'user1',
+					'password': 'passwd',
+					'role': 'user'
+				},
+				{
+					'username': 'user2',
+					'password': 'passwd',
+					'role':  'user'
+				}
+			]
+		}
+	}
+
+#### response
+
+	{
+		'head': {
+			'action': 'add_users',
+			'version': '1.0',
+			'code': '0'
+		},
+		'body': {
+			'items': [
+				{
+					'username': 'user1',
+					'password': 'passwd',
+					'role': 'user'
+				},
+				{
+					'username': 'user2',
+					'password': 'passwd',
+					'role':  'user'
+				}
+			]
+		}
+	}
+
+---
+### 4 del_users
+#### request
+
+	{
+		'head': {
+			'action': 'del_users',
+			'version': '1.0'
+		},
+		'body': {
+			'items': [
+				'user1',
+				'user2'
+			]
+		}
+	}
+
+#### response
+
+	{
+		'head': {
+			'action': 'del_users',
+			'version': '1.0',
+			'code': '0'
+		},
+		'body': {
+			'items': [
+				'user1',
+				'user2'
+			]
+		}
+	}
+
+---
+### 5 notice
+
+	{
+		'head': {
+			'event': 'set_users',
+			'version': '1.0'
+		},
+		'body': {
+			'items': [
+				{
+					'username': 'admin',
+					'password': 'passwd',
+					'role': 'administrator'
+				}
+			]
+		}
+	}
+
+	{
+		'head': {
+			'event': 'add_users',
+			'version': '1.0'
+		},
+		'body': {
+			'items': [
+				{
+					'username': 'user1',
+					'password': 'passwd',
+					'role': 'user'
+				},
+				{
+					'username': 'user2',
+					'password': 'passwd',
+					'role':  'user'
+				}
+			]
+		}
+	}
+
+	{
+		'head': {
+			'event': 'del_users',
+			'version': '1.0'
+		},
+		'body': {
+			'items': [
+				'user1',
+				'user2'
+			]
+		}
+	}
