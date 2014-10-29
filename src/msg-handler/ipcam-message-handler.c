@@ -197,10 +197,12 @@ ipcam_message_handler_do_post (IpcamMessageHandler *self, const gchar *action,
 
     g_return_val_if_fail (IPCAM_IS_MESSAGE_HANDLER(self), FALSE);
 
-    IPCAM_MESSAGE_HANDLER_GET_CLASS(self)->post_action(self, request, response);
+    ret = IPCAM_MESSAGE_HANDLER_GET_CLASS(self)->post_action(self, request, response);
 
     if (ret && response && *response)
+    {
         ipcam_message_handler_send_notify(self, action, json_node_copy(*response));
+    }
 
     return ret;
 }
@@ -213,10 +215,12 @@ ipcam_message_handler_do_delete (IpcamMessageHandler *self, const gchar *action,
 
     g_return_val_if_fail (IPCAM_IS_MESSAGE_HANDLER(self), FALSE);
 
-    IPCAM_MESSAGE_HANDLER_GET_CLASS(self)->delete_action(self, request, response);
+    ret = IPCAM_MESSAGE_HANDLER_GET_CLASS(self)->delete_action(self, request, response);
 
     if (ret && response && *response)
+    {
         ipcam_message_handler_send_notify(self, action, json_node_copy(*response));
+    }
 
     return ret;
 }
