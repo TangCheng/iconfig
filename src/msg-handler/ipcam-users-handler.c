@@ -289,7 +289,10 @@ ipcam_users_msg_handler_delete_action_impl(IpcamMessageHandler *handler, JsonNod
             {
                 if (ipcam_users_msg_handler_delete_param(IPCAM_USERS_MSG_HANDLER(handler), username))
                 {
+                    json_builder_begin_object(builder);
+                    json_builder_set_member_name(builder, "username");
                     json_builder_add_string_value (builder, username);
+                    json_builder_end_object(builder);
                 }
             }
         }
