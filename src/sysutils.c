@@ -71,6 +71,7 @@ gboolean sysutils_datetime_set_datetime(gchar *str_value)
         return FALSE;
 
     tm.tm_year -= 1900;
+    tm.tm_mon--;
     timer = mktime(&tm);
     if (timer == (time_t)-1)
         return FALSE;
