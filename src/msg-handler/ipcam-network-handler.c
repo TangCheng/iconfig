@@ -101,6 +101,11 @@ ipcam_network_msg_handler_read_address(IpcamNetworkMsgHandler *handler, JsonBuil
 
             g_free(*kv[i].pval);
         }
+        else
+        {
+            json_builder_set_member_name(builder, kv[i].key);
+            json_builder_add_string_value(builder, "");
+        }
     }
 }
 
