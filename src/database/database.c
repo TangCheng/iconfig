@@ -77,7 +77,7 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "vtype    TEXT NOT NULL"
                      ");");
         EXEC_OR_FAIL("INSERT INTO misc (name, value, vtype) "
-                     "VALUES ('language', '中文', 'STRING');");
+                     "VALUES ('language', '简体中文', 'STRING');");
         EXEC_OR_FAIL("INSERT INTO misc (name, value, vtype) "
                      "VALUES ('rtsp_auth', '0', 'BOOLEAN');");
         /************************************************
@@ -100,7 +100,7 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
         EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
                      "VALUES ('model', 'NCD108-1-L', 0);");
         EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
-                     "VALUES ('firmware', 'V1.0.0', 0);");
+                     "VALUES ('firmware', '1.0.0', 0);");
         EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
                      "VALUES ('serial', 'NCD1081A16000001', 0);");
         EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
@@ -158,7 +158,7 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
         EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
                      "VALUES ('master:bit_rate_value', '4096', 'INTEGER');");
         EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('master:resolution', 'UXGA', 'STRING');");
+                     "VALUES ('master:resolution', '1080P', 'STRING');");
         EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
                      "VALUES ('master:stream_path', 'main_stream', 'STRING');");
         /* Sub profile */
@@ -354,7 +354,7 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "period   INTEGER NOT NULL"
                      ");");
         EXEC_OR_FAIL("INSERT INTO event_output (name, normal, period) "
-                     "VALUES ('output1', 'open', 0);");
+                     "VALUES ('output1', 'open', 10);");
         /************************************************
          * event_motion table                           *
          ************************************************/
