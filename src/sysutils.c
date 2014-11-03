@@ -373,8 +373,8 @@ int sysutils_network_get_gateway(const char *ifname, char **gwaddr)
             ret = 0;
             break;
         }
-        pclose(fp);
     }
+    pclose(fp);
 
     return ret;
 }
