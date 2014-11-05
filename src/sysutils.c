@@ -38,7 +38,7 @@
 #include <errno.h>
 #include "sysutils.h"
 
-gboolean sysutils_datetime_get_datetime(gchar **str_value)
+gboolean sysutils_get_datetime(gchar **str_value)
 {
     time_t t;
     struct tm tm1;
@@ -58,10 +58,11 @@ gboolean sysutils_datetime_get_datetime(gchar **str_value)
     return FALSE;
 }
 
-gboolean sysutils_datetime_set_datetime(gchar *str_value)
+gboolean sysutils_set_datetime(gchar *str_value)
 {
     time_t timer;
     struct tm tm;
+    FILE * fp;
 
     timer = time(NULL);
     localtime_r(&timer, &tm);
@@ -76,7 +77,21 @@ gboolean sysutils_datetime_set_datetime(gchar *str_value)
     if (timer == (time_t)-1)
         return FALSE;
 
-    return(stime(&timer) == 0);
+    if (stime(&timer) == 0)
+    {
+        fp = popen("hwclock -w -u", "w");
+        if (fp != NULL)
+        {
+            pclose(fp);
+            return TRUE;
+        }
+        else
+        {
+            perror("error set rtc time");
+        }
+    }
+
+    return FALSE;
 }
 
 

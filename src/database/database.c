@@ -5,12 +5,7 @@
 #include <sysutils.h>
 #include "database.h"
 #include "common.h"
-#include "base_info.h"
 #include "users.h"
-#include "datetime.h"
-#include "video.h"
-#include "image.h"
-#include "misc.h"
 
 #define DATABASE_PATH "/data"
 #define DATABASE_NAME "configuration.sqlite3"
@@ -67,44 +62,439 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
         g_object_unref(c);                                  \
     } G_STMT_END
     if (version == 1) {
-        /************************************************
-         * misc table                                   *
-         ************************************************/
-        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS misc ("
+        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS params ("
                      "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name     TEXT UNIQUE NOT NULL,"
-                     "value    TEXT,"
-                     "vtype    TEXT NOT NULL"
+                     "value    TEXT NOT NULL DEFAULT '',"
+                     "vtype    TEXT NOT NULL DEFAULT 'STRING',"
+                     "rw       INTEGER NOT NULL DEFAULT 1"
                      ");");
+        /* misc */
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('misc:language', '简体中文', 'STRING');");
         EXEC_OR_FAIL("INSERT INTO misc (name, value, vtype) "
-                     "VALUES ('language', '简体中文', 'STRING');");
-        EXEC_OR_FAIL("INSERT INTO misc (name, value, vtype) "
-                     "VALUES ('rtsp_auth', '0', 'BOOLEAN');");
-        /************************************************
-         * base_info table                              *
-         ************************************************/
-        EXEC_OR_FAIL("CREATE   TABLE IF NOT EXISTS base_info ("
-                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name     TEXT UNIQUE NOT NULL,"
-                     "value    TEXT NOT NULL,"
-                     "rw       INTEGER"
-                     ");");
-        EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
-                     "VALUES ('device_name', 'ipcam', 1);");
-		EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
-		             "VALUES ('location', 'China', 1);");
-        EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
-                     "VALUES ('comment', '', 1);");
-        EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
-                     "VALUES ('manufacturer', 'YXG Electronic Ltd.', 0);");
-        EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
-                     "VALUES ('model', 'NCD108-1-L', 0);");
-        EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
-                     "VALUES ('firmware', '1.0.0', 0);");
-        EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
-                     "VALUES ('serial', 'NCD1081A16000001', 0);");
-        EXEC_OR_FAIL("INSERT INTO base_info (name, value, rw) "
-                     "VALUES ('hardware', 'Rev.1', 0);");
+                     "VALUES ('misc:rtsp_auth', '0', 'BOOLEAN');");
+        /* base_info */
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('base_info:device_name', 'ipcam', 'STRING');");
+		EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+		             "VALUES ('base_info:location', 'China', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('base_info:comment', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype, rw) "
+                     "VALUES ('base_info:manufacturer', 'EasyWay', 'STRING', 0);");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype, rw) "
+                     "VALUES ('base_info:model', 'NCD108-1-L', 'STRING', 0);");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype, rw) "
+                     "VALUES ('base_info:firmware', '1.0.0', 'STRING', 0);");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype, rw) "
+                     "VALUES ('base_info:serial', 'NCD1081A16000001', 'STRING', 0);");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype, rw) "
+                     "VALUES ('base_info:hardware', 'Rev.1', 'STRING', 0);");
+        /* datetime */
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('datetime:timezone', '(GMT+08:00) Beijing', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('datetime:use_ntp', '0', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('datetime:ntp_server', 'pool.ntp.org', 'STRING');");
+        /* video */
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('video:flip', '0', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('video:mirror', '0', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('video:profile', 'baseline', 'STRING');");
+        /* Main profile */
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('video:master:frame_rate', '25', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('video:master:bit_rate', 'CBR', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('video:master:bit_rate_value', '4096', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('video:master:resolution', '1080P', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('video:master:stream_path', 'main_stream', 'STRING');");
+        /* Sub profile */
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('video:slave:frame_rate', '25', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('video:slave:bit_rate', 'CBR', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('video:slave:bit_rate_value', '1024', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('video:slave:resolution', 'D1', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('video:slave:stream_path', 'sub_stream', 'STRING');");
+        /* image */
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('image:watermark', '0', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('image:3ddnr', '0', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('image:brightness', '128', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('image:chrominance', '128', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('image:contrast', '128', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('image:saturation', '128', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('image:scenario', '50Hz', 'STRING');");
+        /* privacy_block */
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('privacy_block:region1:enable', '0', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('privacy_block:region1:rect:left', '0', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('privacy_block:region1:rect:top', '0', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('privacy_block:region1:rect:width', '67', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('privacy_block:region1:rect:height', '90', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('privacy_block:region1:color', '0', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('privacy_block:region2:enable', '0', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('privacy_block:region2:rect:left', '0', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('privacy_block:region2:rect:top', '0', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('privacy_block:region2:rect:width', '67', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('privacy_block:region2:rect:height', '90', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('privacy_block:region2:color', '0', 'INTEGER');");
+        /* day_night_mode */
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('day_night_mode:force_night_mode', '0', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('day_night_mode:night_mode_threshold', '50', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('day_night_mode:ir_intensity', '80', 'INTEGER');");
+        /* osd */
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('osd:master:datetime:isshow', '1', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('osd:master:datetime:size', '20', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('osd:master:datetime:left', '10', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('osd:master:datetime:top', '35', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('osd:master:datetime:color', '0', 'INTEGER');");
+
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('osd:master:device_name:isshow', '1', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('osd:master:device_name:size', '20', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('osd:master:device_name:left', '10', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('osd:master:device_name:top', '10', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('osd:master:device_name:color', '0', 'INTEGER');");
+        
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('osd:master:comment:isshow', '1', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('osd:master:comment:size', '20', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('osd:master:comment:left', '800', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('osd:master:comment:top', '10', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('osd:master:comment:color', '0', 'INTEGER');");
+        
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('osd:master:frame_rate:isshow', '1', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('osd:master:frame_rate:size', '20', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('osd:master:frame_rate:left', '10', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('osd:master:frame_rate:top', '945', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('osd:master:frame_rate:color', '0', 'INTEGER');");
+
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('osd:master:bit_rate:isshow', '1', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('osd:master:bit_rate:size', '20', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('osd:master:bit_rate:left', '10', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('osd:master:bit_rate:top', '970', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('osd:master:bit_rate:color', '0', 'INTEGER');");
+        
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                          
+                     "VALUES ('osd:slave:datetime:isshow', '1', 'BOOLEAN');");           
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                          
+                     "VALUES ('osd:slave:datetime:size', '20', 'INTEGER');");            
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                          
+                     "VALUES ('osd:slave:datetime:left', '10', 'INTEGER');");            
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                          
+                     "VALUES ('osd:slave:datetime:top', '35', 'INTEGER');");             
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                          
+                     "VALUES ('osd:slave:datetime:color', '0', 'INTEGER');");           
+                                                                                         
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                          
+                     "VALUES ('osd:slave:device_name:isshow', '1', 'BOOLEAN');");       
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                          
+                     "VALUES ('osd:slave:device_name:size', '20', 'INTEGER');");        
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                          
+                     "VALUES ('osd:slave:device_name:left', '10', 'INTEGER');");        
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                          
+                     "VALUES ('osd:slave:device_name:top', '10', 'INTEGER');");         
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                          
+                     "VALUES ('osd:slave:device_name:color', '0', 'INTEGER');");        
+                                                                                         
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                          
+                     "VALUES ('osd:slave:comment:isshow', '1', 'BOOLEAN');");           
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                          
+                     "VALUES ('osd:slave:comment:size', '20', 'INTEGER');");            
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                          
+                     "VALUES ('osd:slave:comment:left', '800', 'INTEGER');");           
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                          
+                     "VALUES ('osd:slave:comment:top', '10', 'INTEGER');");             
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                          
+                     "VALUES ('osd:slave:comment:color', '0', 'INTEGER');");            
+                                                                                         
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                          
+                     "VALUES ('osd:slave:frame_rate:isshow', '1', 'BOOLEAN');");        
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                          
+                     "VALUES ('osd:slave:frame_rate:size', '20', 'INTEGER');");         
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                          
+                     "VALUES ('osd:slave:frame_rate:left', '10', 'INTEGER');");         
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                          
+                     "VALUES ('osd:slave:frame_rate:top', '945', 'INTEGER');");         
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                          
+                     "VALUES ('osd:slave:frame_rate:color', '0', 'INTEGER');");         
+                                                                                         
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                          
+                     "VALUES ('osd:slave:bit_rate:isshow', '1', 'BOOLEAN');");          
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                          
+                     "VALUES ('osd:slave:bit_rate:size', '20', 'INTEGER');");           
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                          
+                     "VALUES ('osd:slave:bit_rate:left', '10', 'INTEGER');");           
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                          
+                     "VALUES ('osd:slave:bit_rate:top', '970', 'INTEGER');");           
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                          
+                     "VALUES ('osd:slave:bit_rate:color', '0', 'INTEGER');");           
+        /* szyc */
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('szyc:train_num', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('szyc:carriage_num', '1', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('szyc:position_num', '1', 'STRING');");
+        /* network */
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('network:method', 'static', 'STRING');");
+        /* network_static */
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('network:address:ipaddr', '192.168.1.217, 'STRING'');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('network:address:netmask', '255.255.255.0', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('network:address:gateway', '192.168.1.1', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('network:address:dns1', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('network:address:dns2', '', 'STRING');");
+        /* network_pppoe */
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('network:pppoe:username', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value) "
+                     "VALUES ('network:pppoe:password', '', STRING);");
+        /* network_port */
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('network:port:http', '80', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('network:port:ftp', '21', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('network:prot:rtsp', '554', 'INTEGER');");
+        /* event_input */
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_input:input1:enable', '0', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_input:input1:schedules:mon', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_input:input1:schedules:tue', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_input:input1:schedules:wed', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_input:input1:schedules:thu', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_input:input1:schedules:fri', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_input:input1:schedules:sat', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_input:input1:schedules:sun', '', 'STRING');");
+        /* event_output */
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_output:output1:normal', 'open', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_putput:output1:period', '10', 'INTEGER');");
+        /* event_motion */
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_motion:region1:enable', '0', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_motion:region1:sensitivity', '50', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_motion:region1:rect:left', '0', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_motion:region1:rect:top', '0', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_motion:region1:rect:width', '67', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_motion:region1:rect:height', '90', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_motion:region1:schedules:mon', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_motion:region1:schedules:tue', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_motion:region1:schedules:wed', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_motion:region:schedules1:thu', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_motion:region1:schedules:fri', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_motion:region1:schedules:sat', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_motion:region1:schedules:sun', '', 'STRING');");
+
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_motion:region2:enable', '0', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_motion:region2:sensitivity', '50', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_motion:region2:rect:left', '0', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_motion:region2:rect:top', '0', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_motion:region2:rect:width', '67', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_motion:region2:rect:height', '90', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_motion:region2:schedules:mon', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_motion:region2:schedules:tue', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_motion:region2:schedules:wed', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_motion:region2:schedules:thu', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_motion:region2:schedules:fri', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_motion:region2:schedules:sat', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_motion:region2:schedules:sun', '', 'STRING');");
+        /* event_cover */
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_cover:region1:enable', '0', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_cover:region1:sensitivity', '50', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_cover:region1:rect:left', '0', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_cover:region1:rect:top', '0', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_cover:region1:rect:width', '67', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_cover:region1:rect:height', '90', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_cover:region1:schedules:mon', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_cover:region1:schedules:tue', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_cover:region1:schedules:wed', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_cover:region1:schedules:thu', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_cover:region1:schedules:fri', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_cover:region1:schedules:sat', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_cover:region1:schedules:sun', '', 'STRING');");
+                                                              
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                       
+                     "VALUES ('event_cover:region2:enable', '0', 'BOOLEAN');");      
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                       
+                     "VALUES ('event_cover:region2:sensitivity', '50', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                       
+                     "VALUES ('event_cover:region2:rect:left', '0', 'INTEGER');");        
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                       
+                     "VALUES ('event_cover:region2:rect:top', '0', 'INTEGER');");         
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                       
+                     "VALUES ('event_cover:region2:rect:width', '67', 'INTEGER');");      
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                       
+                     "VALUES ('event_cover:region2:rect:height', '90', 'INTEGER');");     
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                       
+                     "VALUES ('event_cover:region2:schedules:mon', '', 'STRING');");           
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                       
+                     "VALUES ('event_cover:region2:schedules:tue', '', 'STRING');");           
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                       
+                     "VALUES ('event_cover:region2:schedules:wed', '', 'STRING');");           
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                       
+                     "VALUES ('event_cover:region2:schedules:thu', '', 'STRING');");           
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                       
+                     "VALUES ('event_cover:region2:schedules:fri', '', 'STRING');");           
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                       
+                     "VALUES ('event_cover:region2:schedules:sat', '', 'STRING');");           
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "                       
+                     "VALUES ('event_cover:region2:schedules:sun', '', 'STRING');");
+        /* event_proc */
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_proc:input1:record', '0', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_proc:input1:sound', '0', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_proc:input1:output1', '0', 'BOOLEAN');");
+
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_proc:motion:record', '0', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_proc:motion:sound', '0', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_proc:motion:output1', '0', 'BOOLEAN');");
+
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_proc:cover:record', '0', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_proc:cover:sound', '0', 'BOOLEAN');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('event_proc:cover:output1', '0', 'BOOLEAN');");
+        /* record_schedule */
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('record_schedules:mon', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('record_schedules:tue', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('record_schedules:wed', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('record_schedules:thu', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('record_schedules:fri', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('record_schedules:sat', '', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('record_schedules:sun', '', 'STRING');");
+        /* record_strategy */
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('record_strategy:nr_file_switch', 'size', 'STRING');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('record_strategy:nr_file_size', '50', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('record_strategy:nr_file_period', '10', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('record_strategy:er_file_period', '10', 'INTEGER');");
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
+                     "VALUES ('record_strategy:storage_full', 'stop', 'STRING');");
+        
         /************************************************
          * users table                                  *
          ************************************************/
@@ -120,339 +510,6 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "VALUES ('operator', 'operator', 'operator');");
         EXEC_OR_FAIL("INSERT INTO users (name, password, role) "
                      "VALUES ('user', 'user', 'user');");
-        /************************************************
-         * datetime table                               *
-         ************************************************/
-        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS datetime ("
-                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name     TEXT UNIQUE NOT NULL,"
-                     "value    TEXT,"
-                     "vtype    TEXT NOT NULL"
-                     ");");
-        EXEC_OR_FAIL("INSERT INTO datetime (name, value, vtype) "
-                     "VALUES ('timezone', '(GMT+08:00) Beijing', 'STRING');");
-        EXEC_OR_FAIL("INSERT INTO datetime (name, value, vtype) "
-                     "VALUES ('use_ntp', '0', 'BOOLEAN');");
-        EXEC_OR_FAIL("INSERT INTO datetime (name, value, vtype) "
-                     "VALUES ('ntp_server', 'pool.ntp.org', 'STRING');");
-        /************************************************
-         * video table                                  *
-         ************************************************/
-        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS video ("
-                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name     TEXT UNIQUE NOT NULL,"
-                     "value    TEXT,"
-                     "vtype    TEXT NOT NULL"
-                     ");");
-        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('flip', '0', 'BOOLEAN');");
-        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('mirror', '0', 'BOOLEAN');");
-        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('profile', 'baseline', 'STRING');");
-        /* Main profile */
-        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('master:frame_rate', '25', 'INTEGER');");
-        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('master:bit_rate', 'CBR', 'STRING');");
-        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('master:bit_rate_value', '4096', 'INTEGER');");
-        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('master:resolution', '1080P', 'STRING');");
-        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('master:stream_path', 'main_stream', 'STRING');");
-        /* Sub profile */
-        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('slave:frame_rate', '25', 'INTEGER');");
-        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('slave:bit_rate', 'CBR', 'STRING');");
-        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('slave:bit_rate_value', '1024', 'INTEGER');");
-        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('slave:resolution', 'D1', 'STRING');");
-        EXEC_OR_FAIL("INSERT INTO video (name, value, vtype) "
-                     "VALUES ('slave:stream_path', 'sub_stream', 'STRING');");
-        /************************************************
-         * image table                                  *
-         ************************************************/
-        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS image ("
-                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name     TEXT UNIQUE NOT NULL,"
-                     "value    TEXT,"
-                     "vtype    TEXT NOT NULL"
-                     ");");
-        EXEC_OR_FAIL("INSERT INTO image (name, value, vtype) "
-                     "VALUES ('watermark', '0', 'BOOLEAN');");
-        EXEC_OR_FAIL("INSERT INTO image (name, value, vtype) "
-                     "VALUES ('3ddnr', '0', 'BOOLEAN');");
-        EXEC_OR_FAIL("INSERT INTO image (name, value, vtype) "
-                     "VALUES ('brightness', '128', 'INTEGER');");
-        EXEC_OR_FAIL("INSERT INTO image (name, value, vtype) "
-                     "VALUES ('chrominance', '128', 'INTEGER');");
-        EXEC_OR_FAIL("INSERT INTO image (name, value, vtype) "
-                     "VALUES ('contrast', '128', 'INTEGER');");
-        EXEC_OR_FAIL("INSERT INTO image (name, value, vtype) "
-                     "VALUES ('saturation', '128', 'INTEGER');");
-        EXEC_OR_FAIL("INSERT INTO image (name, value, vtype) "
-                     "VALUES ('scenario', '50Hz', 'STRING');");
-        /************************************************
-         * privacy_block table                          *
-         ************************************************/
-        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS privacy_block ("
-                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name     TEXT UNIQUE NOT NULL,"
-                     "enable   INTEGER NOT NULL,"
-                     "left     INTEGER NOT NULL,"
-                     "top      INTEGER NOT NULL,"
-                     "width    INTEGER NOT NULL,"
-                     "height   INTEGER NOT NULL,"
-                     "color    INTEGER NOT NULL"
-                     ");");
-        EXEC_OR_FAIL("INSERT INTO privacy_block (name, enable, left, top, width, height, color) "
-                     "VALUES ('region1', 0, 0, 0, 67, 90, 0);");
-        EXEC_OR_FAIL("INSERT INTO privacy_block (name, enable, left, top, width, height, color) "
-                     "VALUES ('region2', 0, 0, 0, 67, 90, 0);");
-        /************************************************
-         * day_night_mode table                         *
-         ************************************************/
-        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS day_night_mode ("
-                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name     TEXT UNIQUE NOT NULL,"
-                     "value    INTEGER NOT NULL"
-                     ");");
-        EXEC_OR_FAIL("INSERT INTO day_night_mode (name, value) "
-                     "VALUES ('force_night_mode', 0);");
-        EXEC_OR_FAIL("INSERT INTO day_night_mode (name, value) "
-                     "VALUES ('night_mode_threshold', 50);");
-        EXEC_OR_FAIL("INSERT INTO day_night_mode (name, value) "
-                     "VALUES ('ir_intensity', 80);");
-        /************************************************
-         * osd table                                    *
-         ************************************************/
-        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS osd ("
-                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name     TEXT UNIQUE NOT NULL,"
-                     "isshow   BOOLEAN,"
-                     "size     INTEGER,"
-                     "left     INTEGER,"
-                     "top      INTEGER,"
-                     "color    INTEGER"
-                     ");");
-        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, left, top, color) "
-                     "VALUES ('master:datetime', 1, 20, 10, 35, 0);");
-        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, left, top, color) "
-                     "VALUES ('master:device_name', 1, 20, 10, 10, 0);");
-        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, left, top, color) "
-                     "VALUES ('master:comment', 1, 20, 800, 10, 0);");
-        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, left, top, color) "
-                     "VALUES ('master:frame_rate', 1, 20, 10, 945, 0);");
-        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, left, top, color) "
-                     "VALUES ('master:bit_rate', 1, 20, 10, 970, 0);");
-        
-        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, left, top, color) "
-                     "VALUES ('slave:datetime', 1, 20, 10, 35, 0);");
-        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, left, top, color) "
-                     "VALUES ('slave:device_name', 1, 20, 10, 10, 0);");
-        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, left, top, color) "
-                     "VALUES ('slave:comment', 1, 20, 800, 10, 0);");
-        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, left, top, color) "
-                     "VALUES ('slave:frame_rate', 1, 20, 10, 945, 0);");
-        EXEC_OR_FAIL("INSERT INTO osd (name, isshow, size, left, top, color) "
-                     "VALUES ('slave:bit_rate', 1, 20, 10, 970, 0);");
-        /************************************************
-         * szyc table                               *
-         ************************************************/
-        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS szyc ("
-                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name     TEXT UNIQUE NOT NULL,"
-                     "value    TEXT"
-                     ");");
-        EXEC_OR_FAIL("INSERT INTO szyc (name, value) "
-                     "VALUES ('train_num', '');");
-        EXEC_OR_FAIL("INSERT INTO szyc (name, value) "
-                     "VALUES ('carriage_num', '');");
-        EXEC_OR_FAIL("INSERT INTO szyc (name, value) "
-                     "VALUES ('position_num', '');");
-        /************************************************
-         * network table                                *
-         ************************************************/
-        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS network ("
-                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name     TEXT UNIQUE NOT NULL,"
-                     "value    TEXT NOT NULL"
-                     ");");
-        EXEC_OR_FAIL("INSERT INTO network (name, value) "
-                     "VALUES ('method', 'static');");
-        /************************************************
-         * network_static table                         *
-         ************************************************/
-        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS network_static ("
-                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name     TEXT UNIQUE NOT NULL,"
-                     "value    TEXT"
-                     ");");
-        EXEC_OR_FAIL("INSERT INTO network_static (name, value) "
-                     "VALUES ('ipaddr', '192.168.1.217');");
-        EXEC_OR_FAIL("INSERT INTO network_static (name, value) "
-                     "VALUES ('netmask', '255.255.255.0');");
-        EXEC_OR_FAIL("INSERT INTO network_static (name, value) "
-                     "VALUES ('gateway', '192.168.1.1');");
-        EXEC_OR_FAIL("INSERT INTO network_static (name, value) "
-                     "VALUES ('dns1', '');");
-        EXEC_OR_FAIL("INSERT INTO network_static (name, value) "
-                     "VALUES ('dns2', '');");
-        /************************************************
-         * network_pppoe table                          *
-         ************************************************/
-        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS network_pppoe ("
-                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name     TEXT UNIQUE NOT NULL,"
-                     "value    TEXT"
-                     ");");
-        EXEC_OR_FAIL("INSERT INTO network_pppoe (name, value) "
-                     "VALUES ('username', '');");
-        EXEC_OR_FAIL("INSERT INTO network_pppoe (name, value) "
-                     "VALUES ('password', '');");
-        /************************************************
-         * network_port table                           *
-         ************************************************/
-        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS network_port ("
-                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name     TEXT UNIQUE NOT NULL,"
-                     "value    INTEGER UNIQUE NOT NULL"
-                     ");");
-        EXEC_OR_FAIL("INSERT INTO network_port (name, value) "
-                     "VALUES ('http', 80);");
-        EXEC_OR_FAIL("INSERT INTO network_port (name, value) "
-                     "VALUES ('ftp', 21);");
-        EXEC_OR_FAIL("INSERT INTO network_port (name, value) "
-                     "VALUES ('rtsp', 554);");
-        /************************************************
-         * event_input table                            *
-         ************************************************/
-        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS event_input ("
-                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name     TEXT UNIQUE NOT NULL,"
-                     "enable   INTEGER NOT NULL,"
-                     "mon      TEXT NOT NULL,"
-                     "tue      TEXT NOT NULL,"
-                     "wed      TEXT NOT NULL,"
-                     "thu      TEXT NOT NULL,"
-                     "fri      TEXT NOT NULL,"
-                     "sat      TEXT NOT NULL,"
-                     "sun      TEXT NOT NULL"
-                     ");");
-        EXEC_OR_FAIL("INSERT INTO event_input (name, enable, mon, tue, wed, thu, fri, sat, sun) "
-                     "VALUES ('input1', 0, '', '', '', '', '', '', '');");
-        /************************************************
-         * event_output table                           *
-         ************************************************/
-        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS event_output ("
-                     "id       INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name     TEXT UNIQUE NOT NULL,"
-                     "normal   TEXT NOT NULL,"
-                     "period   INTEGER NOT NULL"
-                     ");");
-        EXEC_OR_FAIL("INSERT INTO event_output (name, normal, period) "
-                     "VALUES ('output1', 'open', 10);");
-        /************************************************
-         * event_motion table                           *
-         ************************************************/
-        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS event_motion ("
-                     "id            INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name          TEXT UNIQUE NOT NULL,"
-                     "enable        INTEGER NOT NULL,"
-                     "sensitivity   INTEGER NOT NULL,"
-                     "left          INTEGER NOT NULL,"
-                     "top           INTEGER NOT NULL,"
-                     "width         INTEGER NOT NULL,"
-                     "height        INTEGER NOT NULL,"
-                     "mon           TEXT NOT NULL,"
-                     "tue           TEXT NOT NULL,"
-                     "wed           TEXT NOT NULL,"
-                     "thu           TEXT NOT NULL,"
-                     "fri           TEXT NOT NULL,"
-                     "sat           TEXT NOT NULL,"
-                     "sun           TEXT NOT NULL"
-                     ");");
-        EXEC_OR_FAIL("INSERT INTO event_motion (name, enable, sensitivity, left, top, width, height, mon, tue, wed, thu, fri, sat, sun) "
-                     "VALUES ('region1', 0, 50, 0, 0, 67, 90, '', '', '', '', '', '', '');");
-        EXEC_OR_FAIL("INSERT INTO event_motion (name, enable, sensitivity, left, top, width, height, mon, tue, wed, thu, fri, sat, sun) "
-                     "VALUES ('region2', 0, 50, 0, 0, 67, 90, '', '', '', '', '', '', '');");
-        /************************************************
-         * event_cover table                            *
-         ************************************************/
-        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS event_cover ("
-                     "id            INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name          TEXT UNIQUE NOT NULL,"
-                     "enable        INTEGER NOT NULL,"
-                     "sensitivity   INTEGER NOT NULL,"
-                     "left          INTEGER NOT NULL,"
-                     "top           INTEGER NOT NULL,"
-                     "width         INTEGER NOT NULL,"
-                     "height        INTEGER NOT NULL,"
-                     "mon           TEXT NOT NULL,"
-                     "tue           TEXT NOT NULL,"
-                     "wed           TEXT NOT NULL,"
-                     "thu           TEXT NOT NULL,"
-                     "fri           TEXT NOT NULL,"
-                     "sat           TEXT NOT NULL,"
-                     "sun           TEXT NOT NULL"
-                     ");");
-        EXEC_OR_FAIL("INSERT INTO event_cover (name, enable, sensitivity, left, top, width, height, mon, tue, wed, thu, fri, sat, sun) "
-                     "VALUES ('region1', 0, 50, 0, 0, 67, 90, '', '', '', '', '', '', '');");
-        EXEC_OR_FAIL("INSERT INTO event_cover (name, enable, sensitivity, left, top, width, height, mon, tue, wed, thu, fri, sat, sun) "
-                     "VALUES ('region2', 0, 50, 0, 0, 67, 90, '', '', '', '', '', '', '');");
-        /************************************************
-         * event_proc table                             *
-         ************************************************/
-        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS event_proc ("
-                     "id            INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name          TEXT UNIQUE NOT NULL,"
-                     "record        INTEGER NOT NULL,"
-                     "sound         INTEGER NOT NULL,"
-                     "output1       INTEGER NOT NULL"
-                     ");");
-        EXEC_OR_FAIL("INSERT INTO event_proc (name, record, sound, output1) "
-                     "VALUES ('input1', 0, 0, 0);");
-        EXEC_OR_FAIL("INSERT INTO event_proc (name, record, sound, output1) "
-                     "VALUES ('motion', 0, 0, 0);");
-        EXEC_OR_FAIL("INSERT INTO event_proc (name, record, sound, output1) "
-                     "VALUES ('cover', 0, 0, 0);");
-        /************************************************
-         * record_schedule table                        *
-         ************************************************/
-        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS record_schedule ("
-                     "id            INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "mon           TEXT NOT NULL,"
-                     "tue           TEXT NOT NULL,"
-                     "wed           TEXT NOT NULL,"
-                     "thu           TEXT NOT NULL,"
-                     "fri           TEXT NOT NULL,"
-                     "sat           TEXT NOT NULL,"
-                     "sun           TEXT NOT NULL"
-                     ");");
-        EXEC_OR_FAIL("INSERT INTO record_schedule (mon, tue, wed, thu, fri, sat, sun) "
-                     "VALUES ('', '', '', '', '', '', '');");
-        /************************************************
-         * record_strategy table                        *
-         ************************************************/
-        EXEC_OR_FAIL("CREATE TABLE IF NOT EXISTS record_strategy ("
-                     "id            INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "name          TEXT UNIQUE NOT NULL,"
-                     "value         TEXT,"
-                     "vtype         TEXT NOT NULL"
-                     ");");
-        EXEC_OR_FAIL("INSERT INTO record_strategy (name, value, vtype) "
-                     "VALUES ('nr_file_switch', 'size', 'STRING');");
-        EXEC_OR_FAIL("INSERT INTO record_strategy (name, value, vtype) "
-                     "VALUES ('nr_file_size', '50', 'INTEGER');");
-        EXEC_OR_FAIL("INSERT INTO record_strategy (name, value, vtype) "
-                     "VALUES ('nr_file_period', '10', 'INTEGER');");
-        EXEC_OR_FAIL("INSERT INTO record_strategy (name, value, vtype) "
-                     "VALUES ('er_file_period', '10', 'INTEGER');");
-        EXEC_OR_FAIL("INSERT INTO record_strategy (name, value, vtype) "
-                     "VALUES ('storage_full', 'stop', 'STRING');");
         
         return TRUE;
     }
@@ -725,48 +782,7 @@ gboolean ipcam_database_del_user(IpcamDatabase *database, const gchar *username)
     return TRUE;
 }
 
-static void ipcam_database_set_schedules(IpcamDatabase *database, GVariant *value)
-{
-    IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);
-    Schedules *sche = NULL;
-    if (IS_64BIT_MACHINE)
-    {
-        sche = GSIZE_TO_POINTER(g_variant_get_uint64(value));
-    }
-    else
-    {
-        sche = GSIZE_TO_POINTER(g_variant_get_uint32(value));
-    }
-    g_object_set(priv->resource,
-                 "mon", sche->schedule[ENUM_MON],
-                 "tue", sche->schedule[ENUM_TUE],
-                 "wed", sche->schedule[ENUM_WED],
-                 "thu", sche->schedule[ENUM_THU],
-                 "fri", sche->schedule[ENUM_FRI],
-                 "sat", sche->schedule[ENUM_SAT],
-                 "sun", sche->schedule[ENUM_SUN],
-                 NULL);
-}
-static void ipcam_database_set_rect(IpcamDatabase *database, GVariant *value)
-{
-    IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);
-    Rect *rect = NULL;
-    if (IS_64BIT_MACHINE)
-    {
-        rect = GSIZE_TO_POINTER(g_variant_get_uint64(value));
-    }
-    else
-    {
-        rect = GSIZE_TO_POINTER(g_variant_get_uint32(value));
-    }
-    g_object_set(priv->resource,
-                 "left", rect->x,
-                 "top", rect->y,
-                 "width", rect->width,
-                 "height", rect->height,
-                 NULL);
-}
-static gboolean ipcam_database_update_fuzzy_value(IpcamDatabase *database, const gchar *sub_name, GVariant *value)
+static gboolean ipcam_database_update_value(IpcamDatabase *database, const gchar *sub_name, GVariant *value)
 {
     IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);
     GError *error = NULL;
@@ -809,52 +825,6 @@ static gboolean ipcam_database_update_fuzzy_value(IpcamDatabase *database, const
 
     return ret;
 }
-static gboolean ipcam_database_update_value(IpcamDatabase *database, const gchar *sub_name, GVariant *value)
-{
-    IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);
-    GError *error = NULL;
-    gboolean ret = TRUE;
-
-    if (g_str_equal(sub_name, "schedules"))
-    {
-        ipcam_database_set_schedules(database, value);
-    }
-    else if (g_str_equal(sub_name, "rect"))
-    {
-        ipcam_database_set_rect(database, value);
-    }
-    else
-    {
-        if (g_variant_is_of_type(value, G_VARIANT_TYPE_STRING))
-        {
-            g_object_set(priv->resource, sub_name, g_variant_get_string(value, NULL), NULL);
-        }
-        else if (g_variant_is_of_type(value, G_VARIANT_TYPE_BOOLEAN))
-        {
-            g_object_set(priv->resource, sub_name, g_variant_get_boolean(value), NULL);
-        }
-        else if (g_variant_is_of_type(value, G_VARIANT_TYPE_UINT32))
-        {
-            g_object_set(priv->resource, sub_name, g_variant_get_uint32(value), NULL);
-        }
-        else
-        {
-            g_warn_if_reached();
-            ret = FALSE;
-        }
-    }
-    
-    gom_resource_save_sync(priv->resource, &error);
-
-    if (error)
-    {
-        g_print("set record failed: %s\n", error->message);
-        g_error_free(error);
-        ret = FALSE;
-    }
-
-    return ret;
-}
 gboolean ipcam_database_update(IpcamDatabase *database, GType table, const gchar *name, const gchar *sub_name, GVariant *value)
 {
     g_return_val_if_fail(IPCAM_IS_DATABASE(database), FALSE);
@@ -864,21 +834,11 @@ gboolean ipcam_database_update(IpcamDatabase *database, GType table, const gchar
     priv->resource = ipcam_database_get_resource(database, table, name);
     if (priv->resource)
     {
-        if (table == IPCAM_BASE_INFO_TYPE)
+        guint rw;
+        g_object_get(priv->resource, "rw", &rw, NULL);
+        if (0 == rw)
         {
-            guint rw;
-            g_object_get(priv->resource, "rw", &rw, NULL);
-            if (0 == rw)
-            {
-                g_warning("Attempt to set read-only property '%s'\n", name);
-                g_object_unref(priv->resource);
-                return ret;
-            }
-        }
-        if (table == IPCAM_DATETIME_TYPE || table == IPCAM_IMAGE_TYPE ||
-            table == IPCAM_MISC_TYPE || table == IPCAM_VIDEO_TYPE)
-        {
-            ret = ipcam_database_update_fuzzy_value(database, sub_name, value);
+            g_warning("Attempt to set read-only property '%s'\n", name);
         }
         else
         {
@@ -890,54 +850,7 @@ gboolean ipcam_database_update(IpcamDatabase *database, GType table, const gchar
     }
     return ret;
 }
-GVariant *ipcam_database_get_schedules(IpcamDatabase *database)
-{
-    IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);
-    GVariant *value;
-
-    Schedules *sche = g_new0(Schedules, 1);
-    g_object_get(priv->resource,
-                 "mon", &sche->schedule[ENUM_MON],
-                 "tue", &sche->schedule[ENUM_TUE],
-                 "wed", &sche->schedule[ENUM_WED],
-                 "thu", &sche->schedule[ENUM_THU],
-                 "fri", &sche->schedule[ENUM_FRI],
-                 "sat", &sche->schedule[ENUM_SAT],
-                 "sun", &sche->schedule[ENUM_SUN],
-                 NULL);
-    if (IS_64BIT_MACHINE)
-    {
-        value = g_variant_new_uint64(GPOINTER_TO_SIZE(sche));
-    }
-    else
-    {
-        value = g_variant_new_uint32(GPOINTER_TO_SIZE(sche));
-    }
-    return value;
-}
-GVariant *ipcam_database_get_rect(IpcamDatabase *database)
-{
-    IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);
-    GVariant *value;
-
-    Rect *rect = g_new0(Rect, 1);
-    g_object_get(priv->resource,
-                 "left", &rect->x,
-                 "top", &rect->y,
-                 "width", &rect->width,
-                 "height", &rect->height,
-                 NULL);
-    if (IS_64BIT_MACHINE)
-    {
-        value = g_variant_new_uint64(GPOINTER_TO_SIZE(rect));
-    }
-    else
-    {
-        value = g_variant_new_uint32(GPOINTER_TO_SIZE(rect));
-    }
-    return value;
-}
-GVariant *ipcam_database_read_fuzzy_value(IpcamDatabase *database, const gchar *sub_name)
+GVariant *ipcam_database_read_value(IpcamDatabase *database, const gchar *sub_name)
 {
     IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);
     GVariant *value = NULL;
@@ -965,49 +878,6 @@ GVariant *ipcam_database_read_fuzzy_value(IpcamDatabase *database, const gchar *
 
     return value;
 }
-GVariant *ipcam_database_read_value(IpcamDatabase *database, const gchar *sub_name)
-{
-    IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);
-    GParamSpec *param_spec = NULL;
-    GVariant *value = NULL;
-    guint ival;
-    gchar *sval;
-    gboolean bval;
-
-    if (g_str_equal(sub_name, "schedules"))
-    {
-        value = ipcam_database_get_schedules(database);
-    }
-    else if (g_str_equal(sub_name, "rect"))
-    {
-        value = ipcam_database_get_rect(database);
-    }
-    else
-    {
-        param_spec = g_object_class_find_property(G_OBJECT_GET_CLASS(priv->resource), sub_name);
-        switch (G_PARAM_SPEC_VALUE_TYPE(param_spec))
-        {
-        case G_TYPE_UINT:
-            g_object_get(priv->resource, sub_name, &ival, NULL);
-            value = g_variant_new_uint32(ival);
-            break;
-        case G_TYPE_STRING:
-            g_object_get(priv->resource, sub_name, &sval, NULL);
-            value = g_variant_new_string(sval);
-            g_free(sval);
-            break;
-        case G_TYPE_BOOLEAN:
-            g_object_get(priv->resource, sub_name, &bval, NULL);
-            value = g_variant_new_boolean(bval);
-            break;
-        default:
-            g_warn_if_reached();
-            break;
-        }
-    }    
-
-    return value;
-}
 GVariant *ipcam_database_read(IpcamDatabase *database, GType table, const gchar *name, const gchar *sub_name)
 {
     g_return_val_if_fail(IPCAM_IS_DATABASE(database), NULL);
@@ -1017,15 +887,8 @@ GVariant *ipcam_database_read(IpcamDatabase *database, GType table, const gchar 
     priv->resource = ipcam_database_get_resource(database, table, name);
     if (priv->resource)
     {
-        if (table == IPCAM_DATETIME_TYPE || table == IPCAM_IMAGE_TYPE ||
-            table == IPCAM_MISC_TYPE || table == IPCAM_VIDEO_TYPE)
-        {
-            value = ipcam_database_read_fuzzy_value(database, sub_name);
-        }
-        else
-        {
-            value = ipcam_database_read_value(database, sub_name);
-        }
+        value = ipcam_database_read_value(database, sub_name);
+
         g_object_unref(priv->resource);
         priv->resource = NULL;
     }

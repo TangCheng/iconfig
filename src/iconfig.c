@@ -47,40 +47,12 @@ static void ipcam_iconfig_before_start(IpcamBaseService *base_service)
     /* Message Handler */
     const gchar *name[] =
     {
-        "get_misc",
-        "set_misc",    
-        "get_base_info",
-        "set_base_info",
         "get_users",
         "set_users",
         "add_users",
         "del_users",
-        "get_datetime",
-        "set_datetime",
-        "get_video",
-        "set_video",
-        "get_image",
-        "set_image",
-        "get_privacy_block",
-        "set_privacy_block",
-        "get_day_night_mode",
-        "set_day_night_mode",
-        "get_osd",
-        "set_osd",
-        "get_szyc",
-        "set_szyc",
-        "get_network",
-        "set_network",
-        "get_event_input",
-        "set_event_input",
-        "get_event_output",
-        "set_event_output",
-        "get_event_motion",
-        "set_event_motion",
-        "get_event_cover",
-        "set_event_cover",
-        "get_event_proc",
-        "set_event_proc"
+        "get_params",
+        "set_params",
     };
 
     gint i = 0;

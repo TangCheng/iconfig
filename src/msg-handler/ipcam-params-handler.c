@@ -19,26 +19,26 @@
 
 #include <glib.h>
 #include <glib/gprintf.h>
-#include "ipcam-datetime-handler.h"
+#include "ipcam-params-handler.h"
 #include "iconfig.h"
 #include "sysutils.h"
-#include "database/datetime.h"
+#include "database/params.h"
 
-G_DEFINE_TYPE (IpcamDatetimeMsgHandler, ipcam_datetime_msg_handler, IPCAM_TYPE_MESSAGE_HANDLER);
+G_DEFINE_TYPE (IpcamParamsMsgHandler, ipcam_params_msg_handler, IPCAM_TYPE_MESSAGE_HANDLER);
 
 static void
-ipcam_datetime_msg_handler_init (IpcamDatetimeMsgHandler *ipcam_datetime_msg_handler)
+ipcam_params_msg_handler_init (IpcamParamsMsgHandler *ipcam_params_msg_handler)
 {
 }
 
 static void
-ipcam_datetime_msg_handler_finalize (GObject *object)
+ipcam_params_msg_handler_finalize (GObject *object)
 {
-    G_OBJECT_CLASS (ipcam_datetime_msg_handler_parent_class)->finalize (object);
+    G_OBJECT_CLASS (ipcam_params_msg_handler_parent_class)->finalize (object);
 }
 
 static gboolean
-ipcam_datetime_msg_handler_read_param(IpcamDatetimeMsgHandler *handler, JsonBuilder *builder, const gchar *name)
+ipcam_params_msg_handler_read_param(IpcamParamsMsgHandler *handler, JsonBuilder *builder, const gchar *name)
 {
     IpcamIConfig *iconfig;
     g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
@@ -47,11 +47,11 @@ ipcam_datetime_msg_handler_read_param(IpcamDatetimeMsgHandler *handler, JsonBuil
 
     if (g_str_equal(name, "datetime"))
     {
-        sysutils_datetime_get_datetime(&datetime);
+        sysutils_get_datetime(&datetime);
     }
     else
     {
-        value = ipcam_iconfig_read(iconfig, IPCAM_DATETIME_TYPE, name, "value");
+        value = ipcam_iconfig_read(iconfig, IPCAM_PARAMS_TYPE, name, "value");
     }
 
     if (datetime)
@@ -87,7 +87,7 @@ ipcam_datetime_msg_handler_read_param(IpcamDatetimeMsgHandler *handler, JsonBuil
 }
 
 static gboolean
-ipcam_datetime_msg_handler_update_param(IpcamDatetimeMsgHandler *handler, const gchar *name, JsonNode *node)
+ipcam_params_msg_handler_update_param(IpcamParamsMsgHandler *handler, const gchar *name, JsonNode *node)
 {
     IpcamIConfig *iconfig;
     g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
@@ -95,7 +95,7 @@ ipcam_datetime_msg_handler_update_param(IpcamDatetimeMsgHandler *handler, const 
 
     if (g_strcmp0 (name, "datetime") == 0)
     {
-        sysutils_datetime_set_datetime((gchar *)json_node_get_string(node));
+        sysutils_set_datetime((gchar *)json_node_get_string(node));
     }
     else
     {
@@ -113,7 +113,7 @@ ipcam_datetime_msg_handler_update_param(IpcamDatetimeMsgHandler *handler, const 
         }
         if (value)
         {
-            ipcam_iconfig_update(iconfig, IPCAM_DATETIME_TYPE, name, "value", value);
+            ipcam_iconfig_update(iconfig, IPCAM_PARAMS_TYPE, name, "value", value);
             g_variant_unref(value);
         }
     }
@@ -122,7 +122,7 @@ ipcam_datetime_msg_handler_update_param(IpcamDatetimeMsgHandler *handler, const 
 }
 
 static gboolean
-ipcam_datetime_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode *request, JsonNode **response)
+ipcam_params_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode *request, JsonNode **response)
 {
     JsonBuilder *builder = json_builder_new();
     JsonArray *req_array;
@@ -136,7 +136,7 @@ ipcam_datetime_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNod
     for (i = 0; i < json_array_get_length(req_array); i++)
     {
         const gchar *name = json_array_get_string_element(req_array, i);
-        ipcam_datetime_msg_handler_read_param(IPCAM_DATETIME_MSG_HANDLER(handler), builder, name);
+        ipcam_params_msg_handler_read_param(IPCAM_PARAMS_MSG_HANDLER(handler), builder, name);
     }
     json_builder_end_object(builder);
     json_builder_end_object(builder);
@@ -149,7 +149,7 @@ ipcam_datetime_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNod
 }
 
 static gboolean
-ipcam_datetime_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode *request, JsonNode **response)
+ipcam_params_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode *request, JsonNode **response)
 {
     JsonBuilder *builder = json_builder_new();
     JsonObject *req_obj;
@@ -167,8 +167,8 @@ ipcam_datetime_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNod
         const gchar *name = item->data;
 
         val_node = json_object_get_member (req_obj, name);
-        ipcam_datetime_msg_handler_update_param(IPCAM_DATETIME_MSG_HANDLER(handler), name, val_node);
-        ipcam_datetime_msg_handler_read_param(IPCAM_DATETIME_MSG_HANDLER(handler), builder, name);
+        ipcam_params_msg_handler_update_param(IPCAM_PARAMS_MSG_HANDLER(handler), name, val_node);
+        ipcam_params_msg_handler_read_param(IPCAM_PARAMS_MSG_HANDLER(handler), builder, name);
     }
     json_builder_end_object(builder);
     json_builder_end_object(builder);
@@ -183,15 +183,15 @@ ipcam_datetime_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNod
 }
 
 static void
-ipcam_datetime_msg_handler_class_init (IpcamDatetimeMsgHandlerClass *klass)
+ipcam_params_msg_handler_class_init (IpcamParamsMsgHandlerClass *klass)
 {
     GObjectClass* object_class = G_OBJECT_CLASS (klass);
     IpcamMessageHandlerClass *parent_class = IPCAM_MESSAGE_HANDLER_CLASS(klass);
 
-    object_class->finalize = ipcam_datetime_msg_handler_finalize;
+    object_class->finalize = ipcam_params_msg_handler_finalize;
 
-    parent_class->get_action = ipcam_datetime_msg_handler_get_action_impl;
-    parent_class->put_action = ipcam_datetime_msg_handler_put_action_impl;
+    parent_class->get_action = ipcam_params_msg_handler_get_action_impl;
+    parent_class->put_action = ipcam_params_msg_handler_put_action_impl;
 }
 
 
