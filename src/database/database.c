@@ -72,7 +72,7 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
         /* misc */
         EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
                      "VALUES ('misc:language', '简体中文', 'STRING');");
-        EXEC_OR_FAIL("INSERT INTO misc (name, value, vtype) "
+        EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
                      "VALUES ('misc:rtsp_auth', '0', 'BOOLEAN');");
         /* base_info */
         EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
