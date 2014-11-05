@@ -296,7 +296,7 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
                      "VALUES ('network:method', 'static', 'STRING');");
         /* network_static */
         EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
-                     "VALUES ('network:address:ipaddr', '192.168.1.217, 'STRING');");
+                     "VALUES ('network:address:ipaddr', '192.168.1.217', 'STRING');");
         EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
                      "VALUES ('network:address:netmask', '255.255.255.0', 'STRING');");
         EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
