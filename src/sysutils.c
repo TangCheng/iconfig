@@ -58,11 +58,29 @@ gboolean sysutils_get_datetime(gchar **str_value)
     return FALSE;
 }
 
+gpointer set_hardware_clock(void)
+{
+    FILE *fp;
+    fp = popen("hwclock -w -u", "w");
+    if (fp != NULL)
+    {
+        pclose(fp);
+        return TRUE;
+    }
+    else
+    {
+        perror("error set rtc time");
+    }
+
+    g_thread_exit(0);
+    return NULL;
+}
+
 gboolean sysutils_set_datetime(gchar *str_value)
 {
     time_t timer;
     struct tm tm;
-    FILE * fp;
+    GThread *thread;
 
     timer = time(NULL);
     localtime_r(&timer, &tm);
@@ -79,16 +97,9 @@ gboolean sysutils_set_datetime(gchar *str_value)
 
     if (stime(&timer) == 0)
     {
-        fp = popen("hwclock -w -u", "w");
-        if (fp != NULL)
-        {
-            pclose(fp);
-            return TRUE;
-        }
-        else
-        {
-            perror("error set rtc time");
-        }
+        thread = g_thread_new("set_hardware_clock", set_hardware_clock, NULL);
+        g_thread_unref(thread);
+        return TRUE;
     }
 
     return FALSE;
