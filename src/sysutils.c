@@ -58,14 +58,13 @@ gboolean sysutils_get_datetime(gchar **str_value)
     return FALSE;
 }
 
-gpointer set_hardware_clock(void)
+gpointer set_hardware_clock(gpointer data)
 {
     FILE *fp;
     fp = popen("hwclock -w -u", "w");
     if (fp != NULL)
     {
         pclose(fp);
-        return TRUE;
     }
     else
     {
