@@ -309,7 +309,7 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
         EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
                      "VALUES ('network:pppoe:username', '', 'STRING');");
         EXEC_OR_FAIL("INSERT INTO params (name, value) "
-                     "VALUES ('network:pppoe:password', '', STRING);");
+                     "VALUES ('network:pppoe:password', '', 'STRING');");
         /* network_port */
         EXEC_OR_FAIL("INSERT INTO params (name, value, vtype) "
                      "VALUES ('network:port:http', '80', 'INTEGER');");
