@@ -17,6 +17,7 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdlib.h>
 #include <glib.h>
 #include <glib/gprintf.h>
 #include <base_app.h>
@@ -159,6 +160,17 @@ ipcam_network_msg_handler_read_param(IpcamNetworkMsgHandler *handler, JsonBuilde
     {
         ipcam_network_msg_handler_read_method(handler, builder);
     }
+    else if (g_str_equal(name, "hostname"))
+    {
+        const char *hostname = NULL;
+        if (sysutils_network_get_hostname(&hostname) == 0)
+        {
+            json_builder_set_member_name(builder, "hostname");
+            json_builder_add_string_value(builder, hostname);
+
+            free(hostname);
+        }
+    }
     else if (g_str_equal(name, "address"))
     {
         json_builder_set_member_name(builder, "address");
@@ -298,6 +310,10 @@ ipcam_network_msg_handler_update_param(IpcamNetworkMsgHandler *handler, const gc
         ipcam_iconfig_update(iconfig, IPCAM_NETWORK_TYPE, "method", "value", value);
         g_variant_unref(value);
     }
+    else if (g_str_equal(name, "hostname")) {
+        const char *hostname = json_object_get_string_member(value_obj, "hostname");
+        sysutils_network_set_hostname(hostname);
+    }
     else if (g_str_equal(name, "address"))
     {
         ipcam_network_msg_handler_update_address(handler, value_obj);
@@ -362,13 +378,14 @@ ipcam_network_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode
     {
         const gchar *name = item->data;
         JsonObject *value_obj = NULL;
-        if (g_str_equal(name, "method"))
+        if (json_node_get_node_type(json_object_get_member(req_obj, name))
+            == JSON_NODE_OBJECT)
         {
-            value_obj = req_obj;
+            value_obj = json_object_get_object_member(req_obj, name);
         }
         else
         {
-            value_obj = json_object_get_object_member(req_obj, name);
+            value_obj = req_obj;
         }
         ipcam_network_msg_handler_update_param(IPCAM_NETWORK_MSG_HANDLER(handler), name, value_obj);
         ipcam_network_msg_handler_read_param(IPCAM_NETWORK_MSG_HANDLER(handler), builder, name);
