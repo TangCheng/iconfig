@@ -232,7 +232,7 @@ ipcam_network_msg_handler_update_address(IpcamNetworkMsgHandler *handler, JsonOb
             g_variant_unref(value);
         }
     }
-
+#if 0
     /* Apply the change of network configuration. */
     const gchar *netif = ipcam_base_app_get_config(IPCAM_BASE_APP(iconfig), "netif");
     if (netif)
@@ -253,6 +253,7 @@ ipcam_network_msg_handler_update_address(IpcamNetworkMsgHandler *handler, JsonOb
             sysutils_network_set_dns(netif, dns, 2);
         }
     }
+#endif
 }
 
 static void
