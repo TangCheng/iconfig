@@ -162,10 +162,10 @@ ipcam_video_msg_handler_update_param(IpcamVideoMsgHandler *handler, const gchar 
                 ipcam_iconfig_update(iconfig, IPCAM_VIDEO_TYPE, key, "value", value);
                 g_variant_unref(value);
             }
-            else if (g_type_is_a(json_node_get_value_type(node), G_TYPE_UINT))
+            else if (g_type_is_a(json_node_get_value_type(node), G_TYPE_INT64))
             {
-                gint intval = json_node_get_int(node);
-                value = g_variant_new_uint32(intval);
+                gint64 intval = json_node_get_int(node);
+                value = g_variant_new_uint32((gint32)intval);
                 ipcam_iconfig_update(iconfig, IPCAM_VIDEO_TYPE, key, "value", value);
                 g_variant_unref(value);
             }
