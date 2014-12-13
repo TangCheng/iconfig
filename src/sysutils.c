@@ -76,7 +76,12 @@ gboolean sysutils_datetime_set_datetime(gchar *str_value)
     if (timer == (time_t)-1)
         return FALSE;
 
-    return(stime(&timer) == 0);
+    if (stime(&timer) == 0) {
+        signal(SIGCHLD, SIG_IGN);
+        if (fork() == 0) {
+            execl("/sbin/hwclock", "/sbin/hwclock", "-w", "-u", NULL);
+        }
+    }
 }
 
 
