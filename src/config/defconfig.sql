@@ -117,13 +117,13 @@ INSERT INTO image (name, value, vtype)
 INSERT INTO image (name, value, vtype) 
         VALUES ('3ddnr', '0', 'BOOLEAN');
 INSERT INTO image (name, value, vtype) 
-        VALUES ('brightness', '128', 'INTEGER');
+        VALUES ('brightness', '50', 'INTEGER');
 INSERT INTO image (name, value, vtype) 
-        VALUES ('chrominance', '128', 'INTEGER');
+        VALUES ('chrominance', '50', 'INTEGER');
 INSERT INTO image (name, value, vtype) 
-        VALUES ('contrast', '128', 'INTEGER');
+        VALUES ('contrast', '50', 'INTEGER');
 INSERT INTO image (name, value, vtype) 
-        VALUES ('saturation', '128', 'INTEGER');
+        VALUES ('saturation', '50', 'INTEGER');
 INSERT INTO image (name, value, vtype) 
         VALUES ('scenario', '50Hz', 'STRING');
 /************************************************
