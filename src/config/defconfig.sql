@@ -14,7 +14,7 @@ INSERT INTO misc (name, value, vtype)
 /************************************************
  * base_info table                              *
  ************************************************/
-CREATE   TABLE IF NOT EXISTS base_info (
+CREATE TABLE IF NOT EXISTS base_info (
         id       INTEGER PRIMARY KEY AUTOINCREMENT,
         name     TEXT UNIQUE NOT NULL,
         value    TEXT NOT NULL,
@@ -83,7 +83,7 @@ INSERT INTO video (name, value, vtype)
         VALUES ('profile', 'baseline', 'STRING');
 /* Main profile */
 INSERT INTO video (name, value, vtype) 
-        VALUES ('master:frame_rate', '15', 'INTEGER');
+        VALUES ('master:frame_rate', '10', 'INTEGER');
 INSERT INTO video (name, value, vtype) 
         VALUES ('master:bit_rate', 'CBR', 'STRING');
 INSERT INTO video (name, value, vtype) 
@@ -94,7 +94,7 @@ INSERT INTO video (name, value, vtype)
         VALUES ('master:stream_path', '0', 'STRING');
 /* Sub profile */
 INSERT INTO video (name, value, vtype) 
-        VALUES ('slave:frame_rate', '15', 'INTEGER');
+        VALUES ('slave:frame_rate', '10', 'INTEGER');
 INSERT INTO video (name, value, vtype) 
         VALUES ('slave:bit_rate', 'CBR', 'STRING');
 INSERT INTO video (name, value, vtype) 
@@ -170,23 +170,23 @@ CREATE TABLE IF NOT EXISTS osd (
         color    INTEGER
         );
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('master:datetime', 1, 20, 10, 35, 0);
+        VALUES ('master:datetime', 1, 28, 750, 10, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('master:device_name', 1, 20, 10, 10, 0);
+        VALUES ('master:device_name', 1, 28, 10, 10, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('master:comment', 1, 20, 800, 10, 0);
+        VALUES ('master:comment', 1, 28, 800, 960, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('master:frame_rate', 1, 20, 10, 945, 0);
+        VALUES ('master:frame_rate', 1, 28, 10, 930, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('master:bit_rate', 1, 20, 10, 970, 0);
+        VALUES ('master:bit_rate', 1, 28, 10, 960, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('slave:datetime', 1, 12, 10, 35, 0);
+        VALUES ('slave:datetime', 1, 12, 750, 10, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
         VALUES ('slave:device_name', 1, 12, 10, 10, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('slave:comment', 1, 12, 800, 10, 0);
+        VALUES ('slave:comment', 1, 12, 800, 960, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('slave:frame_rate', 1, 12, 10, 945, 0);
+        VALUES ('slave:frame_rate', 1, 12, 10, 940, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
         VALUES ('slave:bit_rate', 1, 12, 10, 970, 0);
 /************************************************
@@ -198,11 +198,11 @@ CREATE TABLE IF NOT EXISTS szyc (
         value    TEXT
         );
 INSERT INTO szyc (name, value) 
-        VALUES ('train_num', '');
+        VALUES ('train_num', 'DJ55085');
 INSERT INTO szyc (name, value) 
-        VALUES ('carriage_num', '');
+        VALUES ('carriage_num', '1');
 INSERT INTO szyc (name, value) 
-        VALUES ('position_num', '');
+        VALUES ('position_num', '1');
 /************************************************
  * network table                                *
  ************************************************/
@@ -224,11 +224,11 @@ CREATE TABLE IF NOT EXISTS network_static (
 INSERT INTO network_static (name, value) 
         VALUES ('ipaddr', '192.168.101.71');
 INSERT INTO network_static (name, value) 
-        VALUES ('netmask', '255.255.255.0');
+        VALUES ('netmask', '255.255.0.0');
 INSERT INTO network_static (name, value) 
-        VALUES ('gateway', '192.168.101.1');
+        VALUES ('gateway', '192.168.0.1');
 INSERT INTO network_static (name, value) 
-        VALUES ('dns1', '192.168.101.1');
+        VALUES ('dns1', '192.168.0.1');
 INSERT INTO network_static (name, value) 
         VALUES ('dns2', '');
 /************************************************

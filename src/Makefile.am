@@ -69,3 +69,5 @@ iconfig_LDADD = $(ICONFIG_LIBS)
 
 SUBDIRS = \
 	config
+
+bin_SCRIPTS = hard-reset.sh soft-reset.sh

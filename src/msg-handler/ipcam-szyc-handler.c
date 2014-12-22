@@ -17,9 +17,11 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdlib.h>
 #include <glib.h>
 #include <glib/gprintf.h>
 #include <base_app.h>
+#include "ipcam-network-handler.h"
 #include "ipcam-szyc-handler.h"
 #include "iconfig.h"
 #include "database/szyc.h"
@@ -101,11 +103,86 @@ ipcam_szyc_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNode *r
 }
 
 static gboolean
+ipcam_szyc_msg_handler_apply_network_change(IpcamMessageHandler *handler, JsonNode *request)
+{
+    IpcamIConfig *iconfig;
+    JsonObject *req_obj;
+    JsonNode *net_req, *net_resp;
+    GVariant *value;
+    const gchar *carriage_num, *position_num;
+    JsonBuilder *builder;
+
+    g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
+
+    req_obj = json_object_get_object_member(json_node_get_object(request), "items");
+    if (!json_object_has_member(req_obj, "carriage_num")
+        && !json_object_has_member(req_obj, "position_num"))
+    {
+        return FALSE;
+    }
+
+    value = ipcam_iconfig_read(iconfig, IPCAM_SZYC_TYPE, "carriage_num", "value");
+    if (value) {
+        carriage_num = g_variant_get_string (value, NULL);
+        g_variant_unref (value);
+    }
+    value = ipcam_iconfig_read(iconfig, IPCAM_SZYC_TYPE, "position_num", "value");
+    if (value) {
+        position_num = g_variant_get_string (value, NULL);
+        g_variant_unref (value);
+    }
+
+    if (json_object_has_member (req_obj, "carriage_num"))
+        carriage_num = json_object_get_string_member (req_obj, "carriage_num");
+    if (json_object_has_member (req_obj, "position_num"))
+        position_num = json_object_get_string_member (req_obj, "position_num");
+
+    guint carriage = (strtoul(carriage_num, NULL, 0) + 100) & 0xFF;
+    guint position = (strtoul(position_num, NULL, 0) + 70) & 0xFF;
+    gchar ipaddr[32];
+    snprintf(ipaddr, sizeof(ipaddr), "%d.%d.%d.%d", 192, 168, carriage, position);
+
+    builder = json_builder_new();
+    json_builder_begin_object(builder);
+    json_builder_set_member_name (builder, "items");
+    json_builder_begin_object (builder);
+    json_builder_set_member_name (builder, "method");
+    json_builder_add_string_value(builder, "static");
+    json_builder_set_member_name (builder, "address");
+    json_builder_begin_object (builder);
+    json_builder_set_member_name (builder, "ipaddr");
+    json_builder_add_string_value (builder, ipaddr);
+    json_builder_set_member_name (builder, "netmask");
+    json_builder_add_string_value (builder, "255.255.0.0");
+    json_builder_end_object (builder);
+    json_builder_end_object (builder);
+    json_builder_end_object (builder);
+
+    net_req = json_builder_get_root(builder);
+
+    g_object_unref(builder);
+
+    IpcamMessageHandler *net_handler = g_object_new(IPCAM_TYPE_NETWORK_MSG_HANDLER, "app", iconfig, NULL);
+    if (net_handler) {
+        ipcam_message_handler_do_put(net_handler, "set_network", net_req, &net_resp);
+
+        if (net_resp)
+            json_node_free(net_resp);
+        g_object_unref(net_handler);
+
+        return TRUE;
+    }
+    return FALSE;
+}
+
+static gboolean
 ipcam_szyc_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode *request, JsonNode **response)
 {
     JsonBuilder *builder = json_builder_new();
     JsonObject *req_obj;
     GList *members, *item;
+
+    ipcam_szyc_msg_handler_apply_network_change (handler, request);
 
     req_obj = json_object_get_object_member(json_node_get_object(request), "items");
     members = json_object_get_members(req_obj);
