@@ -25,6 +25,8 @@
     s/INSERT[[:blank:]]+INTO[[:blank:]]+base_info[[:blank:]]*[(].*0[[:blank:]]*[)][[:blank:]]*;//g
     #Remove the network record insertion sentense
     s/INSERT[[:blank:]]+INTO[[:blank:]]+network[^(]*[(].*[[:blank:]]*[)][[:blank:]]*;//g
+    #Remove the szyc record insertion sentense
+    s/INSERT[[:blank:]]+INTO[[:blank:]]+szyc[[:blank:]]*[(].*[[:blank:]]*[)][[:blank:]]*;//g
 }
 
 # use "REPLACE INTO" instead of "INSERT INTO"
