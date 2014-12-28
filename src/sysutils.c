@@ -275,7 +275,10 @@ int sysutils_network_get_hwaddr(const char *ifname, char **hwaddr)
         return ret;
 
     *hwaddr = calloc(18, sizeof(char));
-    ret = fread(*hwaddr, sizeof(char), 17, fp);
+    if (fread(*hwaddr, sizeof(char), 17, fp) < 17)
+        free(*hwaddr);
+    else
+        ret = 0;
     pclose(fp);
     
     return ret;

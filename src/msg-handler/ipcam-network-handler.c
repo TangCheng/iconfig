@@ -64,13 +64,14 @@ ipcam_network_msg_handler_read_address(IpcamNetworkMsgHandler *handler, JsonBuil
 {
     IpcamIConfig *iconfig;
     g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
-    gchar *ipaddr = NULL, *netmask = NULL, *gateway = NULL;
+    gchar *hwaddr = NULL, *ipaddr = NULL, *netmask = NULL, *gateway = NULL;
     char *dns[2] = { [0 ... (ARRAY_SIZE(dns) - 1)] = NULL };
     int nr_dns = 2;
     struct __key_val {
         gchar *key;
         gchar **pval;
     } kv[] = {
+        { "hwaddr",  &hwaddr },
         { "ipaddr",  &ipaddr },
         { "netmask", &netmask },
         { "gateway", &gateway },
@@ -79,6 +80,10 @@ ipcam_network_msg_handler_read_address(IpcamNetworkMsgHandler *handler, JsonBuil
     };
     const gchar *netif = ipcam_base_app_get_config(IPCAM_BASE_APP(iconfig), "netif");
 
+    if (sysutils_network_get_hwaddr(netif, &hwaddr) != 0)
+    {
+        perror("error get mac address: ");
+    }
     if (sysutils_network_get_address(netif, &ipaddr, &netmask, NULL) != 0)
     {
         perror("error get network address: ");
