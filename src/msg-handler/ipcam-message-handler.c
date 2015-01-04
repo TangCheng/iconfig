@@ -37,6 +37,8 @@ enum
 };
 
 
+#undef SEND_NOTIFY_AFTER_ACTION
+
 
 G_DEFINE_TYPE_WITH_PRIVATE (IpcamMessageHandler, ipcam_message_handler, G_TYPE_OBJECT);
 
@@ -181,10 +183,18 @@ ipcam_message_handler_do_put (IpcamMessageHandler *self, const gchar *action,
     gboolean ret = FALSE;
 
     g_return_val_if_fail (IPCAM_IS_MESSAGE_HANDLER(self), FALSE);
+
+#if !defined(SEND_NOTIFY_AFTER_ACTION)
+    if (request)
+        ipcam_message_handler_send_notify(self, action, json_node_copy(request));
+#endif
+
     ret = IPCAM_MESSAGE_HANDLER_GET_CLASS(self)->put_action(self, request, response);
 
+#if defined(SEND_NOTIFY_AFTER_ACTION)
     if (ret && response && *response)
         ipcam_message_handler_send_notify(self, action, json_node_copy(*response));
+#endif
 
     return ret;
 }
@@ -197,12 +207,19 @@ ipcam_message_handler_do_post (IpcamMessageHandler *self, const gchar *action,
 
     g_return_val_if_fail (IPCAM_IS_MESSAGE_HANDLER(self), FALSE);
 
+#if !defined(SEND_NOTIFY_AFTER_ACTION)
+    if (request)
+        ipcam_message_handler_send_notify(self, action, json_node_copy(request));
+#endif
+
     ret = IPCAM_MESSAGE_HANDLER_GET_CLASS(self)->post_action(self, request, response);
 
+#if defined(SEND_NOTIFY_AFTER_ACTION)
     if (ret && response && *response)
     {
         ipcam_message_handler_send_notify(self, action, json_node_copy(*response));
     }
+#endif
 
     return ret;
 }
@@ -215,12 +232,19 @@ ipcam_message_handler_do_delete (IpcamMessageHandler *self, const gchar *action,
 
     g_return_val_if_fail (IPCAM_IS_MESSAGE_HANDLER(self), FALSE);
 
+#if !defined(SEND_NOTIFY_AFTER_ACTION)
+    if (request)
+        ipcam_message_handler_send_notify(self, action, json_node_copy(request));
+#endif
+
     ret = IPCAM_MESSAGE_HANDLER_GET_CLASS(self)->delete_action(self, request, response);
 
+#if defined(SEND_NOTIFY_AFTER_ACTION)
     if (ret && response && *response)
     {
         ipcam_message_handler_send_notify(self, action, json_node_copy(*response));
     }
+#endif
 
     return ret;
 }
