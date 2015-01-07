@@ -36,6 +36,9 @@ INSERT INTO base_info (name, value, rw)
         VALUES ('serial', 'NCD1081A16000001', 0);
 INSERT INTO base_info (name, value, rw) 
         VALUES ('hardware', 'Rev.1', 0);
+INSERT INTO base_info (name, value, rw) 
+        VALUES ('device_type', '0', 0);
+
 /************************************************
  * users table                                  *
  ************************************************/
