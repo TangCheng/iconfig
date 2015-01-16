@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS misc (
 INSERT INTO misc (name, value, vtype) 
         VALUES ('language', '简体中文', 'STRING');
 INSERT INTO misc (name, value, vtype) 
-        VALUES ('rtsp_auth', '1', 'BOOLEAN');
+        VALUES ('rtsp_auth', '0', 'BOOLEAN');
 /************************************************
  * base_info table                              *
  ************************************************/
