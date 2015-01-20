@@ -21,6 +21,7 @@
 #include <glib.h>
 #include <glib/gprintf.h>
 #include <base_app.h>
+#include <notice_message.h>
 #include "ipcam-network-handler.h"
 #include "iconfig.h"
 #include "sysutils.h"
@@ -86,11 +87,15 @@ ipcam_network_msg_handler_read_address(IpcamNetworkMsgHandler *handler, JsonBuil
     }
     if (sysutils_network_get_address(netif, &ipaddr, &netmask, NULL) != 0)
     {
-        perror("error get network address: ");
+        ipaddr = g_strdup(ipcam_iconfig_read(iconfig, IPCAM_NETWORK_STATIC_TYPE, "ipaddr", "value"));
+        if (!ipaddr)
+             perror("error get network address: ");
     }
     if (sysutils_network_get_gateway(netif, &gateway) != 0)
     {
-        perror("error get gateway: ");
+        gateway = g_strdup(ipcam_iconfig_read(iconfig, IPCAM_NETWORK_STATIC_TYPE, "gateway", "value"));
+        if (!gateway)
+            perror("error get gateway: ");
     }
     if (sysutils_network_get_dns(netif, dns, &nr_dns) != 0)
     {
@@ -237,6 +242,44 @@ ipcam_network_msg_handler_update_address(IpcamNetworkMsgHandler *handler, JsonOb
             g_variant_unref(value);
         }
     }
+
+    /* Send SZYC notifications */
+    if (ipaddr) {
+        IpcamMessage *notice_msg;
+        JsonBuilder *builder;
+        JsonNode *notice_body;
+        guint32 carriage_num, position_num;
+
+        if (sscanf(ipaddr, "%*u.%*u.%u.%u", &carriage_num, &position_num) == 2) {
+            carriage_num = carriage_num > 100 ? carriage_num - 100 : 0;
+            position_num = position_num > 70 ? position_num - 70 : 0;
+            char buf[16];
+            builder = json_builder_new();
+            json_builder_begin_object(builder);
+            json_builder_set_member_name(builder, "items");
+            json_builder_begin_object(builder);
+            json_builder_set_member_name(builder, "carriage_num");
+            snprintf(buf, sizeof(buf), "%u", carriage_num);
+            json_builder_add_string_value(builder, buf);
+            json_builder_set_member_name(builder, "position_num");
+            snprintf(buf, sizeof(buf), "%u", position_num);
+            json_builder_add_string_value(builder, buf);
+            json_builder_end_object(builder);
+            json_builder_end_object(builder);
+
+            notice_body = json_builder_get_root(builder);
+            g_object_unref(builder);
+
+            notice_msg = g_object_new(IPCAM_NOTICE_MESSAGE_TYPE,
+                                      "event", "set_szyc",
+                                      "body", notice_body, NULL);
+            ipcam_base_app_broadcast_notice_message(IPCAM_BASE_APP(iconfig),
+                                                    notice_msg, "iconfig_token");
+
+            g_object_unref(notice_msg);
+        }
+    }
+
 #if 0
     /* Apply the change of network configuration. */
     const gchar *netif = ipcam_base_app_get_config(IPCAM_BASE_APP(iconfig), "netif");

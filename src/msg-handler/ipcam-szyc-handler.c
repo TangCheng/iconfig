@@ -44,16 +44,41 @@ ipcam_szyc_msg_handler_read_param(IpcamSzycMsgHandler *handler, JsonBuilder *bui
 {
     IpcamIConfig *iconfig;
     g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
-    GVariant *value = NULL;
     gboolean ret = FALSE;
 
-    value = ipcam_iconfig_read(iconfig, IPCAM_SZYC_TYPE, name, "value");
-    if (value)
-    {
-        json_builder_set_member_name(builder, name);
-        json_builder_add_string_value(builder, g_variant_get_string(value, NULL));
-        g_variant_unref(value);
-        ret = TRUE;
+    if (g_str_equal(name, "carriage_num") || g_str_equal(name, "position_num")) {
+        gchar *ipaddr = NULL, *netmask = NULL;
+        char buf[16];
+        guint32 carriage_num = 0;
+        guint32 position_num = 0;
+        const gchar *netif = ipcam_base_app_get_config(IPCAM_BASE_APP(iconfig), "netif");
+
+        if (sysutils_network_get_address(netif, &ipaddr, &netmask, NULL) == 0) {
+            if (sscanf(ipaddr, "%*u.%*u.%u.%u", &carriage_num, &position_num) == 2) {
+                json_builder_set_member_name(builder, name);
+                if (g_str_equal(name, "carriage_num")) {
+                    carriage_num = carriage_num > 100 ? carriage_num - 100 : 0;
+                    snprintf(buf, sizeof(buf), "%d", carriage_num);
+                }
+                else if(g_str_equal(name, "position_num")) {
+                    position_num = position_num > 70 ? position_num - 70 : 0;
+                    snprintf(buf, sizeof(buf), "%d", position_num);
+                }
+                json_builder_add_string_value(builder, buf);
+            }
+            g_free(ipaddr);
+            g_free(netmask);
+        }
+    }
+    else {
+        GVariant *value = ipcam_iconfig_read(iconfig, IPCAM_SZYC_TYPE, name, "value");
+        if (value)
+        {
+            json_builder_set_member_name(builder, name);
+            json_builder_add_string_value(builder, g_variant_get_string(value, NULL));
+            g_variant_unref(value);
+            ret = TRUE;
+        }
     }
 
     return ret;
@@ -63,15 +88,17 @@ static gboolean
 ipcam_szyc_msg_handler_update_param(IpcamSzycMsgHandler *handler, const gchar *name, const gchar *value)
 {
     IpcamIConfig *iconfig;
-    g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
-    GVariant *val = g_variant_new_string(value);
 
-    if (val)
-    {
-        ipcam_iconfig_update(iconfig, IPCAM_SZYC_TYPE, name, "value", val);
-        g_variant_unref(val);
+    if (g_str_equal(name, "train_num")) {
+        g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
+        GVariant *val = g_variant_new_string(value);
+        if (val)
+        {
+            ipcam_iconfig_update(iconfig, IPCAM_SZYC_TYPE, name, "value", val);
+            g_variant_unref(val);
+        }
     }
-    
+
     return TRUE;
 }
 
