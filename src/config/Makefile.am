@@ -18,4 +18,6 @@ conf_data_DATA = \
 	app.yml \
 	defconfig.sql \
 	hard-reset.sed \
-	soft-reset.sed
+	soft-reset.sed \
+	defconfig.DCTX-001.sql \
+	defconfig.DCTX-002.sql
