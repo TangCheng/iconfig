@@ -79,9 +79,9 @@ CREATE TABLE IF NOT EXISTS video (
         vtype    TEXT NOT NULL
         );
 INSERT INTO video (name, value, vtype) 
-        VALUES ('flip', '0', 'BOOLEAN');
+        VALUES ('flip', '1', 'BOOLEAN');
 INSERT INTO video (name, value, vtype) 
-        VALUES ('mirror', '0', 'BOOLEAN');
+        VALUES ('mirror', '1', 'BOOLEAN');
 INSERT INTO video (name, value, vtype) 
         VALUES ('profile', 'baseline', 'STRING');
 /* Main profile */
