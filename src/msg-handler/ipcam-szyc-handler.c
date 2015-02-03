@@ -25,6 +25,7 @@
 #include "ipcam-szyc-handler.h"
 #include "iconfig.h"
 #include "database/szyc.h"
+#include "sysutils.h"
 
 G_DEFINE_TYPE (IpcamSzycMsgHandler, ipcam_szyc_msg_handler, IPCAM_TYPE_MESSAGE_HANDLER);
 
@@ -196,9 +197,12 @@ ipcam_szyc_msg_handler_apply_network_change(IpcamMessageHandler *handler, JsonNo
         if (net_resp)
             json_node_free(net_resp);
         g_object_unref(net_handler);
+        json_node_free(net_req);
 
         return TRUE;
     }
+    json_node_free(net_req);
+
     return FALSE;
 }
 

@@ -51,11 +51,13 @@ static void ipcam_image_set_property(GObject      *object,
         break;
     case PROP_VALUE:
         {
+            g_free(priv->value);
             priv->value = g_value_dup_string(value);
         }
         break;
     case PROP_VTYPE:
         {
+            g_free(priv->vtype);
             priv->vtype = g_value_dup_string(value);
         }
         break;

@@ -48,6 +48,7 @@ static void ipcam_network_set_property(GObject      *object,
         break;
     case PROP_VALUE:
         {
+            g_free(priv->value);
             priv->value = g_value_dup_string(value);
         }
         break;

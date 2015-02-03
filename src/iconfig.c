@@ -148,7 +148,7 @@ gboolean ipcam_iconfig_add_user(IpcamIConfig *iconfig, const gchar *username,
 
 gboolean ipcam_iconfig_del_user(IpcamIConfig *iconfig, const gchar *username)
 {
-    g_return_if_fail(IPCAM_IS_ICONFIG(iconfig));
+    g_return_val_if_fail(IPCAM_IS_ICONFIG(iconfig), FALSE);
     IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
 
     return ipcam_database_del_user (priv->database, username);

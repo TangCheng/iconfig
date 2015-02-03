@@ -57,6 +57,7 @@ static void ipcam_users_set_property(GObject      *object,
         break;
     case PROP_ROLE:
         {
+            g_free(priv->role);
             priv->role = g_value_dup_string(value);
         }
         break;

@@ -64,6 +64,7 @@ ipcam_misc_msg_handler_read_param(IpcamMiscMsgHandler *handler, JsonBuilder *bui
         {
             g_warn_if_reached();
         }
+
         g_variant_unref(value);
     }
 

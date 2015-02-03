@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -56,7 +57,6 @@ static gchar *get_sql_command(char *buf, int size, FILE *fp)
     buf[0] = 0;
     do {
         char *s;
-        int len;
 
         if (fgets(line, sizeof(line), fp) <= 0)
             break;
@@ -121,7 +121,6 @@ static gboolean ipcam_database_migrator(GomRepository  *repository,
         return TRUE;
     }
 
-failure:
     return FALSE;
 }
 static void ipcam_database_migrate(IpcamDatabase *database)
@@ -626,6 +625,9 @@ GVariant *ipcam_database_read_fuzzy_value(IpcamDatabase *database, const gchar *
     {
         g_warn_if_reached();
     }
+
+    g_free(temp_value);
+    g_free(vtype);
 
     return value;
 }

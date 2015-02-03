@@ -87,13 +87,21 @@ ipcam_network_msg_handler_read_address(IpcamNetworkMsgHandler *handler, JsonBuil
     }
     if (sysutils_network_get_address(netif, &ipaddr, &netmask, NULL) != 0)
     {
-        ipaddr = g_strdup(ipcam_iconfig_read(iconfig, IPCAM_NETWORK_STATIC_TYPE, "ipaddr", "value"));
+        GVariant *value = ipcam_iconfig_read(iconfig, IPCAM_NETWORK_STATIC_TYPE, "ipaddr", "value");
+        if (value) {
+            ipaddr = g_strdup(g_variant_get_string(value, NULL));
+            g_variant_unref(value);
+        }
         if (!ipaddr)
              perror("error get network address: ");
     }
     if (sysutils_network_get_gateway(netif, &gateway) != 0)
     {
-        gateway = g_strdup(ipcam_iconfig_read(iconfig, IPCAM_NETWORK_STATIC_TYPE, "gateway", "value"));
+        GVariant *value = ipcam_iconfig_read(iconfig, IPCAM_NETWORK_STATIC_TYPE, "gateway", "value");
+        if (value) {
+            gateway = g_strdup(g_variant_get_string(value, NULL));
+            g_variant_unref(value);
+        }
         if (!gateway)
             perror("error get gateway: ");
     }
@@ -178,7 +186,7 @@ ipcam_network_msg_handler_read_param(IpcamNetworkMsgHandler *handler, JsonBuilde
             json_builder_set_member_name(builder, "hostname");
             json_builder_add_string_value(builder, hostname);
 
-            free(hostname);
+            free((gchar *)hostname);
         }
     }
     else if (g_str_equal(name, "address"))
