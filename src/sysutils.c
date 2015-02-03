@@ -276,6 +276,7 @@ int sysutils_network_get_hwaddr(const char *ifname, char **hwaddr)
     if (fp == NULL)
         return -1;
 
+    memset(buf, 0, sizeof(buf));
     if (fread(buf, sizeof(char), 17, fp) < 17) {
         pclose(fp);
         return -1;
