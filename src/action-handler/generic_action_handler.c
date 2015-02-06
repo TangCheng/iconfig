@@ -226,5 +226,6 @@ static void ipcam_generic_action_handler_run_impl(IpcamActionHandler *self,
 
     g_free((gchar *)action);
     g_object_unref(resp_msg);
+    g_object_unref(iconfig);
     g_free(token);
 }

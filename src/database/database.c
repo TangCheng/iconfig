@@ -28,16 +28,11 @@ typedef struct _IpcamDatabasePrivate
 G_DEFINE_TYPE_WITH_PRIVATE(IpcamDatabase, ipcam_database, G_TYPE_OBJECT);
 
 static void ipcam_database_open(IpcamDatabase *database);
+static void ipcam_database_close(IpcamDatabase *database);
 
 static void ipcam_database_finalize (GObject *object)
 {
-    IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(IPCAM_DATABASE(object));
-    g_object_unref(priv->repository);
-    g_object_unref(priv->adapter);
-    if (priv->resource)
-    {
-        g_object_unref(priv->resource);
-    }
+    ipcam_database_close(IPCAM_DATABASE(object));
     G_OBJECT_CLASS(ipcam_database_parent_class)->finalize(object);
 }
 static void ipcam_database_init(IpcamDatabase *self)
@@ -163,6 +158,17 @@ static void ipcam_database_open(IpcamDatabase *database)
     {
         g_print("open apater error: %s\n", error->message);
         g_error_free(error);
+    }
+}
+static void ipcam_database_close(IpcamDatabase *database)
+{
+    IpcamDatabasePrivate *priv = ipcam_database_get_instance_private(database);
+    g_object_unref(priv->repository);
+    gom_adapter_close_sync(priv->adapter, NULL);
+    g_object_unref(priv->adapter);
+    if (priv->resource)
+    {
+        g_object_unref(priv->resource);
     }
 }
 

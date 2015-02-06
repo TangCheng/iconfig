@@ -11,7 +11,10 @@ int main()
 {
 	IpcamIConfig *iconfig = g_object_new(IPCAM_ICONFIG_TYPE, "name", "iconfig", NULL);
 	ipcam_base_service_start(IPCAM_BASE_SERVICE(iconfig));
-	g_object_unref(iconfig);
+	ipcam_base_service_stop(IPCAM_BASE_SERVICE(iconfig));
+	g_object_run_dispose(G_OBJECT(iconfig));
+	g_object_unref(G_OBJECT(iconfig));
+
 	return (0);
 }
 
