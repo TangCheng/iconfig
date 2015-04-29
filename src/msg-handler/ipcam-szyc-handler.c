@@ -232,9 +232,12 @@ ipcam_szyc_msg_handler_apply_network_change(IpcamMessageHandler *handler, JsonNo
         if (net_resp)
             json_node_free(net_resp);
         g_object_unref(net_handler);
+        json_node_free(net_req);
 
         return TRUE;
     }
+    json_node_free(net_req);
+
     return FALSE;
 }
 

@@ -268,22 +268,25 @@ int sysutils_network_get_hwaddr(const char *ifname, char **hwaddr)
 {
     char *cmd;
     FILE *fp;
-    int ret = -1;
+    char buf[18];
 
     asprintf(&cmd, "ifconfig %s | grep HWaddr | awk \'{print $5}\'", ifname);
     fp = popen(cmd, "r");
     free(cmd);
     if (fp == NULL)
-        return ret;
+        return -1;
 
-    *hwaddr = calloc(18, sizeof(char));
-    if (fread(*hwaddr, sizeof(char), 17, fp) < 17)
-        free(*hwaddr);
-    else
-        ret = 0;
+    memset(buf, 0, sizeof(buf));
+    if (fread(buf, sizeof(char), 17, fp) < 17) {
+        pclose(fp);
+        return -1;
+    }
+
     pclose(fp);
+
+    *hwaddr = strdup(buf);
     
-    return ret;
+    return 0;
 }
 
 int sysutils_network_get_address(const char *ifname,
