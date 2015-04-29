@@ -82,6 +82,8 @@ gboolean sysutils_datetime_set_datetime(gchar *str_value)
             execl("/sbin/hwclock", "/sbin/hwclock", "-w", "-u", NULL);
         }
     }
+
+    return TRUE;
 }
 
 

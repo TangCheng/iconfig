@@ -17,6 +17,7 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <string.h>
 #include <stdlib.h>
 #include <glib.h>
 #include <glib/gprintf.h>
@@ -64,6 +65,7 @@ static void
 ipcam_network_msg_handler_read_address(IpcamNetworkMsgHandler *handler, JsonBuilder *builder)
 {
     IpcamIConfig *iconfig;
+    GVariant *value;
     g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
     gchar *hwaddr = NULL, *ipaddr = NULL, *netmask = NULL, *gateway = NULL;
     char *dns[2] = { [0 ... (ARRAY_SIZE(dns) - 1)] = NULL };
@@ -87,15 +89,23 @@ ipcam_network_msg_handler_read_address(IpcamNetworkMsgHandler *handler, JsonBuil
     }
     if (sysutils_network_get_address(netif, &ipaddr, &netmask, NULL) != 0)
     {
-        ipaddr = g_strdup(ipcam_iconfig_read(iconfig, IPCAM_NETWORK_STATIC_TYPE, "ipaddr", "value"));
-        if (!ipaddr)
-             perror("error get network address: ");
+        value = ipcam_iconfig_read(iconfig, IPCAM_NETWORK_STATIC_TYPE, "ipaddr", "value");
+        if (value) {
+            ipaddr = strdup(g_variant_get_string(value, NULL));
+            if (!ipaddr)
+                perror("error get network address: ");
+            g_variant_unref(value);
+        }
     }
     if (sysutils_network_get_gateway(netif, &gateway) != 0)
     {
-        gateway = g_strdup(ipcam_iconfig_read(iconfig, IPCAM_NETWORK_STATIC_TYPE, "gateway", "value"));
-        if (!gateway)
-            perror("error get gateway: ");
+        value = ipcam_iconfig_read(iconfig, IPCAM_NETWORK_STATIC_TYPE, "gateway", "value");
+        if (value) {
+            gateway = strdup(g_variant_get_string(value, NULL));
+            if (!gateway)
+                perror("error get gateway: ");
+            g_variant_unref(value);
+        }
     }
     if (sysutils_network_get_dns(netif, dns, &nr_dns) != 0)
     {
@@ -110,7 +120,7 @@ ipcam_network_msg_handler_read_address(IpcamNetworkMsgHandler *handler, JsonBuil
             json_builder_set_member_name(builder, kv[i].key);
             json_builder_add_string_value(builder, *kv[i].pval);
 
-            g_free(*kv[i].pval);
+            free(*kv[i].pval);
         }
         else
         {
@@ -178,7 +188,7 @@ ipcam_network_msg_handler_read_param(IpcamNetworkMsgHandler *handler, JsonBuilde
             json_builder_set_member_name(builder, "hostname");
             json_builder_add_string_value(builder, hostname);
 
-            free(hostname);
+            free((void *)hostname);
         }
     }
     else if (g_str_equal(name, "address"))
