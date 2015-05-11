@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS datetime (
         vtype    TEXT NOT NULL
         );
 INSERT INTO datetime (name, value, vtype) 
-        VALUES ('timezone', '(GMT+08:00) Beijing', 'STRING');
+        VALUES ('timezone', 'ChinaStandardTime-8', 'STRING');
 INSERT INTO datetime (name, value, vtype) 
         VALUES ('use_ntp', '0', 'BOOLEAN');
 INSERT INTO datetime (name, value, vtype) 
@@ -173,25 +173,25 @@ CREATE TABLE IF NOT EXISTS osd (
         color    INTEGER
         );
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('master:datetime', 1, 32, 10, 10, 0);
+        VALUES ('master:datetime', 1, 40, 10, 10, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('master:device_name', 0, 32, 10, 10, 0);
+        VALUES ('master:device_name', 0, 40, 10, 10, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('master:comment', 0, 32, 10, 42, 0);
+        VALUES ('master:comment', 0, 40, 10, 42, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('master:frame_rate', 0, 32, 10, 928, 0);
+        VALUES ('master:frame_rate', 0, 40, 10, 928, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('master:bit_rate', 0, 32, 10, 960, 0);
+        VALUES ('master:bit_rate', 0, 40, 10, 960, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('slave:datetime', 1, 18, 10, 10, 0);
+        VALUES ('slave:datetime', 1, 20, 10, 10, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('slave:device_name', 0, 18, 10, 10, 0);
+        VALUES ('slave:device_name', 0, 20, 10, 10, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('slave:comment', 0, 18, 10, 42, 0);
+        VALUES ('slave:comment', 0, 20, 10, 42, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('slave:frame_rate', 0, 16, 10, 928, 0);
+        VALUES ('slave:frame_rate', 0, 20, 10, 928, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('slave:bit_rate', 0, 16, 10, 960, 0);
+        VALUES ('slave:bit_rate', 0, 20, 10, 960, 0);
 /************************************************
  * szyc table                               *
  ************************************************/

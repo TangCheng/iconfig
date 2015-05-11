@@ -60,7 +60,9 @@ iconfig_SOURCES = \
 	msg-handler/ipcam-event-motion-handler.c \
 	msg-handler/ipcam-event-cover-handler.c \
 	msg-handler/ipcam-event-proc-handler.c \
-	sysutils.c
+	sysutils.c \
+	tz.c \
+	tz.h
 
 iconfig_LDFLAGS = 
 

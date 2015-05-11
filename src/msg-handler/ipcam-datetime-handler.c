@@ -17,11 +17,15 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define _GNU_SOURCE
+#include <stdio.h>
+#include <stdlib.h>
 #include <glib.h>
 #include <glib/gprintf.h>
 #include "ipcam-datetime-handler.h"
 #include "iconfig.h"
 #include "sysutils.h"
+#include "tz.h"
 #include "database/datetime.h"
 
 G_DEFINE_TYPE (IpcamDatetimeMsgHandler, ipcam_datetime_msg_handler, IPCAM_TYPE_MESSAGE_HANDLER);
@@ -93,11 +97,6 @@ ipcam_datetime_msg_handler_update_param(IpcamDatetimeMsgHandler *handler, const 
     g_object_get(G_OBJECT(handler), "app", &iconfig, NULL);
     GVariant *value = NULL;
 
-    if (g_strcmp0 (name, "datetime") == 0)
-    {
-        sysutils_datetime_set_datetime((gchar *)json_node_get_string(node));
-    }
-    else
     {
         switch (json_node_get_value_type(node))
         {
@@ -153,6 +152,8 @@ ipcam_datetime_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNod
 {
     JsonBuilder *builder = json_builder_new();
     JsonObject *req_obj;
+    const gchar *tzname = NULL;
+    const gchar *datetime = NULL;
     GList *members, *item;
 
     req_obj = json_object_get_object_member(json_node_get_object(request), "items");
@@ -161,13 +162,43 @@ ipcam_datetime_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNod
     json_builder_begin_object(builder);
     json_builder_set_member_name(builder, "items");
     json_builder_begin_object(builder);
+
+    if (json_object_has_member(req_obj, "timezone"))
+        tzname = json_object_get_string_member(req_obj, "timezone");
+    if (json_object_has_member(req_obj, "datetime"))
+        datetime = json_object_get_string_member(req_obj, "datetime");
+
+    if (tzname) {
+        tzinfo_t tzi = tz_lookup_by_name(tzname, TZ_FLAG_POSIX);
+        if (tzi) {
+            unsigned int minuteswest = tzinfo_minuteswest(tzi);
+            char *tzfile = NULL;
+            if (asprintf(&tzfile, "/usr/share/zoneinfo/Etc/GMT%+d", -(minuteswest/60)) > 0) {
+                if (access(tzfile, F_OK) == 0) {
+                    unlink("/etc/localtime");
+                    symlink(tzfile, "/etc/localtime");
+                }
+
+                free(tzfile);
+            }
+        }
+    }
+    else if (json_object_has_member(req_obj, "datetime")) {
+        const gchar *datetime_str;
+
+        datetime_str = json_object_get_string_member(req_obj, "datetime");
+        sysutils_datetime_set_datetime(datetime_str);
+    }
+
     for (item = g_list_first(members); item; item = g_list_next(item))
     {
         JsonNode *val_node;
         const gchar *name = item->data;
 
         val_node = json_object_get_member (req_obj, name);
-        ipcam_datetime_msg_handler_update_param(IPCAM_DATETIME_MSG_HANDLER(handler), name, val_node);
+        if (g_strcmp0 (name, "datetime") != 0) {
+            ipcam_datetime_msg_handler_update_param(IPCAM_DATETIME_MSG_HANDLER(handler), name, val_node);
+        }
         ipcam_datetime_msg_handler_read_param(IPCAM_DATETIME_MSG_HANDLER(handler), builder, name);
     }
     json_builder_end_object(builder);
