@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS misc (
         vtype    TEXT NOT NULL
         );
 INSERT INTO misc (name, value, vtype) 
-        VALUES ('language', '简体中文', 'STRING');
+        VALUES ('language', 'Chinese', 'STRING');
 INSERT INTO misc (name, value, vtype) 
         VALUES ('rtsp_auth', '0', 'BOOLEAN');
 /************************************************
@@ -37,7 +37,7 @@ INSERT INTO base_info (name, value, rw)
 INSERT INTO base_info (name, value, rw) 
         VALUES ('hardware', 'Rev.1', 0);
 INSERT INTO base_info (name, value, rw) 
-        VALUES ('device_type', '0', 0);
+        VALUES ('device_type', '1', 0);
 
 /************************************************
  * users table                                  *
@@ -79,9 +79,9 @@ CREATE TABLE IF NOT EXISTS video (
         vtype    TEXT NOT NULL
         );
 INSERT INTO video (name, value, vtype) 
-        VALUES ('flip', '1', 'BOOLEAN');
+        VALUES ('flip', '0', 'BOOLEAN');
 INSERT INTO video (name, value, vtype) 
-        VALUES ('mirror', '1', 'BOOLEAN');
+        VALUES ('mirror', '0', 'BOOLEAN');
 INSERT INTO video (name, value, vtype) 
         VALUES ('profile', 'baseline', 'STRING');
 /* Main profile */
@@ -90,9 +90,9 @@ INSERT INTO video (name, value, vtype)
 INSERT INTO video (name, value, vtype) 
         VALUES ('master:bit_rate', 'CBR', 'STRING');
 INSERT INTO video (name, value, vtype) 
-        VALUES ('master:bit_rate_value', '4096', 'INTEGER');
+        VALUES ('master:bit_rate_value', '2048', 'INTEGER');
 INSERT INTO video (name, value, vtype) 
-        VALUES ('master:resolution', '1080P', 'STRING');
+        VALUES ('master:resolution', '720P', 'STRING');
 INSERT INTO video (name, value, vtype) 
         VALUES ('master:stream_path', '0', 'STRING');
 /* Sub profile */
@@ -157,9 +157,9 @@ CREATE TABLE IF NOT EXISTS day_night_mode (
 INSERT INTO day_night_mode (name, value) 
         VALUES ('force_night_mode', 0);
 INSERT INTO day_night_mode (name, value) 
-        VALUES ('night_mode_threshold', 50);
+        VALUES ('night_mode_threshold', 30);
 INSERT INTO day_night_mode (name, value) 
-        VALUES ('ir_intensity', 80);
+        VALUES ('ir_intensity', 50);
 /************************************************
  * osd table                                    *
  ************************************************/
@@ -173,15 +173,15 @@ CREATE TABLE IF NOT EXISTS osd (
         color    INTEGER
         );
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('master:datetime', 1, 40, 10, 10, 0);
+        VALUES ('master:datetime', 1, 36, 10, 10, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('master:device_name', 0, 40, 10, 10, 0);
+        VALUES ('master:device_name', 0, 36, 10, 10, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('master:comment', 0, 40, 10, 42, 0);
+        VALUES ('master:comment', 0, 36, 10, 42, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('master:frame_rate', 0, 40, 10, 928, 0);
+        VALUES ('master:frame_rate', 0, 36, 10, 928, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('master:bit_rate', 0, 40, 10, 960, 0);
+        VALUES ('master:bit_rate', 0, 36, 10, 960, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
         VALUES ('slave:datetime', 1, 20, 10, 10, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
@@ -333,7 +333,7 @@ CREATE TABLE IF NOT EXISTS event_cover (
         sun           TEXT NOT NULL
         );
 INSERT INTO event_cover (name, enable, sensitivity, left, top, width, height, mon, tue, wed, thu, fri, sat, sun) 
-        VALUES ('region1', 0, 50, 0, 0, 67, 90, '', '', '', '', '', '', '');
+        VALUES ('region1', 1, 24, 0, 0, 1000, 1000, '', '', '', '', '', '', '');
 INSERT INTO event_cover (name, enable, sensitivity, left, top, width, height, mon, tue, wed, thu, fri, sat, sun) 
         VALUES ('region2', 0, 50, 0, 0, 67, 90, '', '', '', '', '', '', '');
 /************************************************
