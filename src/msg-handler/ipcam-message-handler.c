@@ -162,7 +162,12 @@ ipcam_message_handler_send_notify(IpcamMessageHandler *self, const gchar *action
 
     notice_msg = g_object_new(IPCAM_NOTICE_MESSAGE_TYPE, "event", action, "body", notice_body, NULL);
     iconfig = ipcam_message_handler_get_app(self);
-    ipcam_base_app_broadcast_notice_message(IPCAM_BASE_APP(iconfig), notice_msg, "iconfig_token");
+    ipcam_base_app_send_message(IPCAM_BASE_APP(iconfig),
+                                notice_msg,
+                                "iconfig_pub",
+                                "iconfig_token",
+                                NULL,
+                                0);
 
     g_object_unref(notice_msg);
 }

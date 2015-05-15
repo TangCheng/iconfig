@@ -283,8 +283,12 @@ ipcam_network_msg_handler_update_address(IpcamNetworkMsgHandler *handler, JsonOb
             notice_msg = g_object_new(IPCAM_NOTICE_MESSAGE_TYPE,
                                       "event", "set_szyc",
                                       "body", notice_body, NULL);
-            ipcam_base_app_broadcast_notice_message(IPCAM_BASE_APP(iconfig),
-                                                    notice_msg, "iconfig_token");
+            ipcam_base_app_send_message(IPCAM_BASE_APP(iconfig),
+                                        notice_msg,
+                                        "iconfig_pub",
+                                        "iconfig_token",
+                                        NULL,
+                                        0);
 
             g_object_unref(notice_msg);
         }
