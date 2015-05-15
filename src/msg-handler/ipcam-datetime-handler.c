@@ -25,7 +25,6 @@
 #include "ipcam-datetime-handler.h"
 #include "iconfig.h"
 #include "sysutils.h"
-#include "tz.h"
 #include "database/datetime.h"
 
 G_DEFINE_TYPE (IpcamDatetimeMsgHandler, ipcam_datetime_msg_handler, IPCAM_TYPE_MESSAGE_HANDLER);
@@ -152,6 +151,7 @@ ipcam_datetime_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNod
 {
     JsonBuilder *builder = json_builder_new();
     JsonObject *req_obj;
+    gboolean tz_ok = TRUE;
     const gchar *tzname = NULL;
     const gchar *datetime = NULL;
     GList *members, *item;
@@ -169,21 +169,37 @@ ipcam_datetime_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNod
         datetime = json_object_get_string_member(req_obj, "datetime");
 
     if (tzname) {
-        tzinfo_t tzi = tz_lookup_by_name(tzname, TZ_FLAG_POSIX);
-        if (tzi) {
-            unsigned int minuteswest = tzinfo_minuteswest(tzi);
-            char *tzfile = NULL;
-            if (asprintf(&tzfile, "/usr/share/zoneinfo/Etc/GMT%+d", -(minuteswest/60)) > 0) {
-                if (access(tzfile, F_OK) == 0) {
-                    unlink("/etc/localtime");
-                    symlink(tzfile, "/etc/localtime");
-                }
+        char std[32] = { 0 };
+        char off[32] = { 0 };
+        int  args = 0;
+        if (tzname[0] == '<') {
+            args = sscanf(tzname, "<%32[^>]>%32[\\+-:0-9]", std, off);
+        }
+        else {
+            args = sscanf(tzname, "%32[a-zA-Z]%32[\\+-:0-9]", std, off);
+        }
 
-                free(tzfile);
+        if (args >= 2) {
+            char buf[32];
+
+            snprintf(buf, sizeof(buf), "UTC%s\n", off);
+
+            FILE *fp = fopen("/etc/TZ", "w");
+            if (fp) {
+                if (fputs(buf, fp) == EOF) {
+                    tz_ok = FALSE;
+                }
+                fclose(fp);
+            }
+            else {
+                tz_ok = FALSE;
             }
         }
+        else {
+            tz_ok = FALSE;
+        }
     }
-    else if (json_object_has_member(req_obj, "datetime")) {
+    if (datetime && tz_ok) {
         const gchar *datetime_str;
 
         datetime_str = json_object_get_string_member(req_obj, "datetime");

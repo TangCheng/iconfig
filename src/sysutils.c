@@ -41,13 +41,13 @@
 gboolean sysutils_datetime_get_datetime(gchar **str_value)
 {
     time_t t;
-    struct tm tm1;
+    struct tm tm;
     gchar buf[32];
 
     if (str_value) {
         t = time(NULL);
-        if (localtime_r(&t, &tm1)) {
-            strftime(buf, sizeof(buf), "%F %T", &tm1);
+        if (gmtime_r(&t, &tm)) {
+            strftime(buf, sizeof(buf), "%F %T", &tm);
             *str_value = g_strdup(buf);
 
             return TRUE;
@@ -60,11 +60,11 @@ gboolean sysutils_datetime_get_datetime(gchar **str_value)
 
 gboolean sysutils_datetime_set_datetime(gchar *str_value)
 {
-    time_t timer;
+    time_t t;
     struct tm tm;
 
-    timer = time(NULL);
-    localtime_r(&timer, &tm);
+    t = time(NULL);
+    gmtime_r(&t, &tm);
     if (sscanf(str_value, "%d-%d-%d %d:%d:%d",
                &tm.tm_year, &tm.tm_mon, &tm.tm_mday,
                &tm.tm_hour, &tm.tm_min, &tm.tm_sec) < 6)
@@ -72,11 +72,13 @@ gboolean sysutils_datetime_set_datetime(gchar *str_value)
 
     tm.tm_year -= 1900;
     tm.tm_mon--;
-    timer = mktime(&tm);
-    if (timer == (time_t)-1)
+    setenv("TZ", "UTC", 1);
+    t = mktime(&tm);
+    unsetenv("TZ");
+    if (t == (time_t)-1)
         return FALSE;
 
-    if (stime(&timer) == 0) {
+    if (stime(&t) == 0) {
         signal(SIGCHLD, SIG_IGN);
         if (fork() == 0) {
             execl("/sbin/hwclock", "/sbin/hwclock", "-w", "-u", NULL);
