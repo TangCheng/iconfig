@@ -29,7 +29,7 @@ INSERT INTO base_info (name, value, rw)
 INSERT INTO base_info (name, value, rw) 
         VALUES ('manufacturer', 'SZYC', 0);
 INSERT INTO base_info (name, value, rw) 
-        VALUES ('model', 'DCTX-002', 0);
+        VALUES ('model', 'DCTX-003', 0);
 INSERT INTO base_info (name, value, rw) 
         VALUES ('firmware', '1.0.0', 0);
 INSERT INTO base_info (name, value, rw) 
@@ -37,7 +37,7 @@ INSERT INTO base_info (name, value, rw)
 INSERT INTO base_info (name, value, rw) 
         VALUES ('hardware', 'Rev.1', 0);
 INSERT INTO base_info (name, value, rw) 
-        VALUES ('device_type', '2', 0);
+        VALUES ('device_type', '3', 0);
 
 /************************************************
  * users table                                  *
@@ -183,7 +183,7 @@ INSERT INTO osd (name, isshow, size, left, top, color)
 INSERT INTO osd (name, isshow, size, left, top, color) 
         VALUES ('master:bit_rate', 0, 36, 10, 960, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('slave:datetime', 1, 20, 750, 10, 0);
+        VALUES ('slave:datetime', 1, 20, 10, 10, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
         VALUES ('slave:device_name', 0, 20, 10, 10, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
@@ -333,7 +333,7 @@ CREATE TABLE IF NOT EXISTS event_cover (
         sun           TEXT NOT NULL
         );
 INSERT INTO event_cover (name, enable, sensitivity, left, top, width, height, mon, tue, wed, thu, fri, sat, sun) 
-        VALUES ('region1', 1, 24, 0, 0, 1000, 1000, '', '', '', '', '', '', '');
+        VALUES ('region1', 1, 40, 0, 0, 1000, 1000, '', '', '', '', '', '', '');
 INSERT INTO event_cover (name, enable, sensitivity, left, top, width, height, mon, tue, wed, thu, fri, sat, sun) 
         VALUES ('region2', 0, 50, 0, 0, 67, 90, '', '', '', '', '', '', '');
 /************************************************
