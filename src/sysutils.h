@@ -20,8 +20,8 @@
 #ifndef _SYSUTILS_H_
 #define _SYSUTILS_H_
 
-int sysutils_datetime_get_datetime(gchar **str_value);
-int sysutils_datetime_set_datetime(gchar *str_value);
+int sysutils_datetime_get_datetime(gchar **const str_value);
+int sysutils_datetime_set_datetime(const gchar *str_value);
 
 int sysutils_make_directory(char *path, long mode);
 

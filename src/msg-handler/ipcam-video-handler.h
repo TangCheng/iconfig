@@ -34,6 +34,7 @@ G_BEGIN_DECLS
 
 typedef struct _IpcamVideoMsgHandlerClass IpcamVideoMsgHandlerClass;
 typedef struct _IpcamVideoMsgHandler IpcamVideoMsgHandler;
+typedef struct _IpcamVideoMsgHandlerPrivate IpcamVideoMsgHandlerPrivate;
 
 struct _IpcamVideoMsgHandlerClass
 {
@@ -43,6 +44,8 @@ struct _IpcamVideoMsgHandlerClass
 struct _IpcamVideoMsgHandler
 {
     IpcamMessageHandler parent_instance;
+
+    IpcamVideoMsgHandlerPrivate *priv;
 };
 
 GType ipcam_video_msg_handler_get_type (void) G_GNUC_CONST;

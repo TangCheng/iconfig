@@ -38,7 +38,7 @@
 #include <errno.h>
 #include "sysutils.h"
 
-gboolean sysutils_datetime_get_datetime(gchar **str_value)
+gboolean sysutils_datetime_get_datetime(gchar **const str_value)
 {
     time_t t;
     struct tm tm;
@@ -58,7 +58,7 @@ gboolean sysutils_datetime_get_datetime(gchar **str_value)
     return FALSE;
 }
 
-gboolean sysutils_datetime_set_datetime(gchar *str_value)
+gboolean sysutils_datetime_set_datetime(const gchar *str_value)
 {
     time_t t;
     struct tm tm;
