@@ -23,4 +23,5 @@ conf_data_DATA = \
 	defconfig.DCTX-002.sql \
 	defconfig.DTTX-001.sql \
 	defconfig.DTTX-002.sql \
-	defconfig.DTTX-003.sql
+	defconfig.DTTX-003.sql \
+	defconfig.CS-001.sql

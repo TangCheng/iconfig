@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS misc (
         vtype    TEXT NOT NULL
         );
 INSERT INTO misc (name, value, vtype) 
-        VALUES ('language', '简体中文', 'STRING');
+        VALUES ('language', 'Chinese', 'STRING');
 INSERT INTO misc (name, value, vtype) 
         VALUES ('rtsp_auth', '0', 'BOOLEAN');
 /************************************************

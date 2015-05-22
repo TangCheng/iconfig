@@ -183,15 +183,15 @@ INSERT INTO osd (name, isshow, size, left, top, color)
 INSERT INTO osd (name, isshow, size, left, top, color) 
         VALUES ('master:bit_rate', 0, 36, 10, 960, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('slave:datetime', 1, 20, 10, 10, 0);
+        VALUES ('slave:datetime', 1, 24, 10, 10, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('slave:device_name', 0, 20, 10, 10, 0);
+        VALUES ('slave:device_name', 0, 24, 10, 10, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('slave:comment', 0, 20, 10, 42, 0);
+        VALUES ('slave:comment', 0, 24, 10, 42, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('slave:frame_rate', 0, 20, 10, 928, 0);
+        VALUES ('slave:frame_rate', 0, 24, 10, 928, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('slave:bit_rate', 0, 20, 10, 960, 0);
+        VALUES ('slave:bit_rate', 0, 24, 10, 960, 0);
 /************************************************
  * szyc table                               *
  ************************************************/

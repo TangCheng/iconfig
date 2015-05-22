@@ -29,7 +29,7 @@ INSERT INTO base_info (name, value, rw)
 INSERT INTO base_info (name, value, rw) 
         VALUES ('manufacturer', 'SZYC', 0);
 INSERT INTO base_info (name, value, rw) 
-        VALUES ('model', 'DCTX-001', 0);
+        VALUES ('model', 'CS-001', 0);
 INSERT INTO base_info (name, value, rw) 
         VALUES ('firmware', '1.0.0', 0);
 INSERT INTO base_info (name, value, rw) 
@@ -94,7 +94,7 @@ INSERT INTO video (name, value, vtype)
 INSERT INTO video (name, value, vtype) 
         VALUES ('master:resolution', '720P', 'STRING');
 INSERT INTO video (name, value, vtype) 
-        VALUES ('master:stream_path', '0', 'STRING');
+        VALUES ('master:stream_path', '1/<resolution>', 'STRING');
 /* Sub profile */
 INSERT INTO video (name, value, vtype) 
         VALUES ('slave:frame_rate', '10', 'INTEGER');
@@ -105,7 +105,7 @@ INSERT INTO video (name, value, vtype)
 INSERT INTO video (name, value, vtype) 
         VALUES ('slave:resolution', 'D1', 'STRING');
 INSERT INTO video (name, value, vtype) 
-        VALUES ('slave:stream_path', '1', 'STRING');
+        VALUES ('slave:stream_path', '1/<resolution>', 'STRING');
 /************************************************
  * image table                                  *
  ************************************************/
@@ -225,13 +225,13 @@ CREATE TABLE IF NOT EXISTS network_static (
         value    TEXT
         );
 INSERT INTO network_static (name, value) 
-        VALUES ('ipaddr', '192.168.110.71');
+        VALUES ('ipaddr', '192.168.1.217');
 INSERT INTO network_static (name, value) 
-        VALUES ('netmask', '255.255.0.0');
+        VALUES ('netmask', '255.255.255.0');
 INSERT INTO network_static (name, value) 
-        VALUES ('gateway', '192.168.0.1');
+        VALUES ('gateway', '192.168.1.1');
 INSERT INTO network_static (name, value) 
-        VALUES ('dns1', '192.168.0.1');
+        VALUES ('dns1', '192.168.1.1');
 INSERT INTO network_static (name, value) 
         VALUES ('dns2', '');
 /************************************************
