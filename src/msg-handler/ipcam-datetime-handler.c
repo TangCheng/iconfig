@@ -147,10 +147,30 @@ ipcam_datetime_msg_handler_get_action_impl(IpcamMessageHandler *handler, JsonNod
 }
 
 static gboolean
+timezone_replace_cb(const GMatchInfo *info,
+                    GString          *res,
+                    gpointer         data)
+{
+    gchar *match;
+
+    match = g_match_info_fetch(info, 0);
+    if (match) {
+        if (g_str_equal(match, "DaylightTime"))
+            g_string_append(res, "DST");
+        else
+            g_string_append(res, "CST");
+        g_free(match);
+    }
+
+    return FALSE;
+}
+
+static gboolean
 ipcam_datetime_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNode *request, JsonNode **response)
 {
     JsonBuilder *builder = json_builder_new();
     JsonObject *req_obj;
+    gboolean use_ntp = FALSE;
     gboolean tz_ok = TRUE;
     const gchar *tzname = NULL;
     const gchar *datetime = NULL;
@@ -167,26 +187,26 @@ ipcam_datetime_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNod
         tzname = json_object_get_string_member(req_obj, "timezone");
     if (json_object_has_member(req_obj, "datetime"))
         datetime = json_object_get_string_member(req_obj, "datetime");
+    if (json_object_has_member(req_obj, "use_ntp"))
+        use_ntp = json_object_get_boolean_member(req_obj, "use_ntp");
 
     if (tzname) {
-        char std[32] = { 0 };
-        char off[32] = { 0 };
-        int  args = 0;
-        if (tzname[0] == '<') {
-            args = sscanf(tzname, "<%32[^>]>%32[\\+-:0-9]", std, off);
-        }
-        else {
-            args = sscanf(tzname, "%32[a-zA-Z]%32[\\+-:0-9]", std, off);
-        }
+        GRegex *regex;
+        gchar *result;
 
-        if (args >= 2) {
-            char buf[32];
+        regex = g_regex_new("^<[^>]*>|^[a-zA-Z]+|DaylightTime",
+                            G_REGEX_EXTENDED | G_REGEX_OPTIMIZE,
+                            0, NULL);
+        result = g_regex_replace_eval(regex, tzname, -1, 0, 0,
+                                  timezone_replace_cb, NULL, NULL);
 
-            snprintf(buf, sizeof(buf), "UTC%s\n", off);
-
+        if (result) {
             FILE *fp = fopen("/etc/TZ", "w");
             if (fp) {
-                if (fputs(buf, fp) == EOF) {
+                if (fputs(result, fp) == EOF) {
+                    tz_ok = FALSE;
+                }
+                if (fputs("\n", fp) == EOF) {
                     tz_ok = FALSE;
                 }
                 fclose(fp);
@@ -194,12 +214,11 @@ ipcam_datetime_msg_handler_put_action_impl(IpcamMessageHandler *handler, JsonNod
             else {
                 tz_ok = FALSE;
             }
-        }
-        else {
-            tz_ok = FALSE;
+
+            g_free(result);
         }
     }
-    if (datetime && tz_ok) {
+    if (datetime && tz_ok && !use_ntp) {
         const gchar *datetime_str;
 
         datetime_str = json_object_get_string_member(req_obj, "datetime");
