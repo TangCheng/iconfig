@@ -9,6 +9,8 @@ fuser -k ${db_file}
 
 model=$(sqlite3 ${db_file} "select value from base_info where name='model'")
 
+echo -e "model:\e[1m${model}\e[0m"
+
 defconfig="/apps/iconfig/config/defconfig.${model}.sql"
 if [ ! -f ${defconfig} ]; then
   defconfig="/apps/iconfig/config/defconfig.sql"
