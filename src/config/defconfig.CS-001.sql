@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS users (
         role     TEXT NOT NULL
         );
 INSERT INTO users (name, password, role) 
-        VALUES ('admin', '123456', 'administrator');
+        VALUES ('admin', 'admin', 'administrator');
 INSERT INTO users (name, password, role) 
         VALUES ('operator', '123456', 'operator');
 INSERT INTO users (name, password, role) 
@@ -79,14 +79,14 @@ CREATE TABLE IF NOT EXISTS video (
         vtype    TEXT NOT NULL
         );
 INSERT INTO video (name, value, vtype) 
-        VALUES ('flip', '0', 'BOOLEAN');
+        VALUES ('flip', '1', 'BOOLEAN');
 INSERT INTO video (name, value, vtype) 
-        VALUES ('mirror', '0', 'BOOLEAN');
+        VALUES ('mirror', '1', 'BOOLEAN');
 INSERT INTO video (name, value, vtype) 
         VALUES ('profile', 'baseline', 'STRING');
 /* Main profile */
 INSERT INTO video (name, value, vtype) 
-        VALUES ('master:frame_rate', '10', 'INTEGER');
+        VALUES ('master:frame_rate', '25', 'INTEGER');
 INSERT INTO video (name, value, vtype) 
         VALUES ('master:bit_rate', 'CBR', 'STRING');
 INSERT INTO video (name, value, vtype) 
@@ -97,7 +97,7 @@ INSERT INTO video (name, value, vtype)
         VALUES ('master:stream_path', '1/<resolution>', 'STRING');
 /* Sub profile */
 INSERT INTO video (name, value, vtype) 
-        VALUES ('slave:frame_rate', '10', 'INTEGER');
+        VALUES ('slave:frame_rate', '25', 'INTEGER');
 INSERT INTO video (name, value, vtype) 
         VALUES ('slave:bit_rate', 'CBR', 'STRING');
 INSERT INTO video (name, value, vtype) 
@@ -173,25 +173,25 @@ CREATE TABLE IF NOT EXISTS osd (
         color    INTEGER
         );
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('master:datetime', 1, 36, 10, 10, 0);
+        VALUES ('master:datetime', 1, 28, 10, 10, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('master:device_name', 0, 36, 10, 10, 0);
+        VALUES ('master:device_name', 1, 28, 10, 940, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('master:comment', 0, 36, 10, 42, 0);
+        VALUES ('master:comment', 0, 28, 10, 42, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('master:frame_rate', 0, 36, 10, 928, 0);
+        VALUES ('master:frame_rate', 1, 28, 10, 50, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('master:bit_rate', 0, 36, 10, 960, 0);
+        VALUES ('master:bit_rate', 1, 28, 80, 50, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
         VALUES ('slave:datetime', 1, 24, 10, 10, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('slave:device_name', 0, 24, 10, 10, 0);
+        VALUES ('slave:device_name', 1, 24, 10, 940, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
         VALUES ('slave:comment', 0, 24, 10, 42, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('slave:frame_rate', 0, 24, 10, 928, 0);
+        VALUES ('slave:frame_rate', 1, 24, 10, 55, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('slave:bit_rate', 0, 24, 10, 960, 0);
+        VALUES ('slave:bit_rate', 0, 24, 12.5, 55, 0);
 /************************************************
  * szyc table                               *
  ************************************************/
