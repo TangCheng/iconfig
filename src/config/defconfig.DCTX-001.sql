@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS datetime (
         vtype    TEXT NOT NULL
         );
 INSERT INTO datetime (name, value, vtype) 
-        VALUES ('timezone', '(GMT+08:00) Beijing', 'STRING');
+        VALUES ('timezone', 'ChinaStandardTime-8', 'STRING');
 INSERT INTO datetime (name, value, vtype) 
         VALUES ('use_ntp', '0', 'BOOLEAN');
 INSERT INTO datetime (name, value, vtype) 
@@ -120,13 +120,13 @@ INSERT INTO image (name, value, vtype)
 INSERT INTO image (name, value, vtype) 
         VALUES ('3ddnr', '0', 'BOOLEAN');
 INSERT INTO image (name, value, vtype) 
-        VALUES ('brightness', '50', 'INTEGER');
+        VALUES ('brightness', '128', 'INTEGER');
 INSERT INTO image (name, value, vtype) 
-        VALUES ('chrominance', '50', 'INTEGER');
+        VALUES ('chrominance', '128', 'INTEGER');
 INSERT INTO image (name, value, vtype) 
-        VALUES ('contrast', '50', 'INTEGER');
+        VALUES ('contrast', '128', 'INTEGER');
 INSERT INTO image (name, value, vtype) 
-        VALUES ('saturation', '50', 'INTEGER');
+        VALUES ('saturation', '128', 'INTEGER');
 INSERT INTO image (name, value, vtype) 
         VALUES ('scenario', '50Hz', 'STRING');
 /************************************************
@@ -173,25 +173,25 @@ CREATE TABLE IF NOT EXISTS osd (
         color    INTEGER
         );
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('master:datetime', 1, 28, 750, 10, 0);
+        VALUES ('master:datetime', 1, 36, 750, 10, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('master:device_name', 1, 28, 10, 10, 0);
+        VALUES ('master:device_name', 1, 36, 10, 10, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('master:comment', 1, 28, 10, 42, 0);
+        VALUES ('master:comment', 0, 36, 10, 60, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('master:frame_rate', 1, 28, 10, 928, 0);
+        VALUES ('master:frame_rate', 1, 36, 10, 920, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('master:bit_rate', 1, 28, 10, 960, 0);
+        VALUES ('master:bit_rate', 1, 36, 10, 960, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('slave:datetime', 1, 12, 750, 10, 0);
+        VALUES ('slave:datetime', 1, 18, 750, 10, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('slave:device_name', 1, 12, 10, 10, 0);
+        VALUES ('slave:device_name', 1, 18, 20, 10, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('slave:comment', 1, 12, 10, 42, 0);
+        VALUES ('slave:comment', 0, 18, 20, 60, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('slave:frame_rate', 1, 12, 10, 928, 0);
+        VALUES ('slave:frame_rate', 1, 18, 20, 900, 0);
 INSERT INTO osd (name, isshow, size, left, top, color) 
-        VALUES ('slave:bit_rate', 1, 12, 10, 960, 0);
+        VALUES ('slave:bit_rate', 1, 18, 20, 960, 0);
 /************************************************
  * szyc table                               *
  ************************************************/
