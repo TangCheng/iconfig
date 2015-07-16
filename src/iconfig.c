@@ -5,11 +5,13 @@
 #include "iconfig.h"
 #include "database/database.h"
 #include "action-handler/generic_action_handler.h"
+#include "database/base_info.h"
 #include "common.h"
 
 typedef struct _IpcamIConfigPrivate
 {
     IpcamDatabase *database;
+    gchar *model;
 } IpcamIConfigPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE(IpcamIConfig, ipcam_iconfig, IPCAM_BASE_APP_TYPE);
@@ -23,6 +25,7 @@ static void ipcam_iconfig_dispose(GObject *object)
     if (priv->database) {
         g_object_run_dispose(G_OBJECT(priv->database));
         g_clear_object(&priv->database);
+        g_free(priv->model);
     }
     G_OBJECT_CLASS(ipcam_iconfig_parent_class)->dispose(object);
 }
@@ -50,6 +53,7 @@ static void ipcam_iconfig_class_init(IpcamIConfigClass *klass)
 static void ipcam_iconfig_before_start(IpcamBaseService *base_service)
 {
     IpcamIConfig *iconfig = IPCAM_ICONFIG(base_service);
+    IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
 
     /* Message Handler */
     const gchar *name[] =
@@ -95,10 +99,24 @@ static void ipcam_iconfig_before_start(IpcamBaseService *base_service)
     {
         ipcam_base_app_register_request_handler(IPCAM_BASE_APP(iconfig), name[i], IPCAM_GENERIC_ACTION_HANDLER_TYPE);
     }
+    GVariant *value = NULL;
+    value = ipcam_iconfig_read(iconfig, IPCAM_BASE_INFO_TYPE, "model", "value");
+    if (value)
+    {
+        priv->model = g_strdup(g_variant_get_string(value, NULL));
+        g_variant_unref(value);
+    }
 }
 
 static void ipcam_iconfig_in_loop(IpcamBaseService *base_service)
 {
+}
+
+gchar *ipcam_iconfig_get_model(IpcamIConfig *iconfig)
+{
+    IpcamIConfigPrivate *priv = ipcam_iconfig_get_instance_private(iconfig);
+
+    return priv->model;
 }
 
 GList *ipcam_iconfig_get_users(IpcamIConfig *iconfig)

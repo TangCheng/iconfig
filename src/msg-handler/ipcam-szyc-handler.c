@@ -60,15 +60,19 @@ ipcam_szyc_msg_handler_read_param(IpcamSzycMsgHandler *handler, JsonBuilder *bui
         guint32 position_num = 0;
         const gchar *netif = ipcam_base_app_get_config(IPCAM_BASE_APP(iconfig), "netif");
 
+        gboolean is_cs;
+        is_cs = (strncmp(ipcam_iconfig_get_model(iconfig), "CS", 2) == 0);
         if (sysutils_network_get_address(netif, &ipaddr, &netmask, NULL) == 0) {
             if (sscanf(ipaddr, "%*u.%*u.%u.%u", &carriage_num, &position_num) == 2) {
                 json_builder_set_member_name(builder, name);
                 if (g_str_equal(name, "carriage_num")) {
-                    carriage_num = carriage_num > 100 ? carriage_num - 100 : 0;
+                    if (!is_cs)
+                        carriage_num = carriage_num > 100 ? carriage_num - 100 : 0;
                     snprintf(buf, sizeof(buf), "%d", carriage_num);
                 }
                 else if(g_str_equal(name, "position_num")) {
-                    position_num = position_num > 70 ? position_num - 70 : 0;
+                    if (!is_cs)
+                        position_num = position_num > 70 ? position_num - 70 : 0;
                     snprintf(buf, sizeof(buf), "%d", position_num);
                 }
                 json_builder_add_string_value(builder, buf);
@@ -176,13 +180,22 @@ ipcam_szyc_msg_handler_apply_network_change(IpcamMessageHandler *handler, JsonNo
 
     req_obj = json_object_get_object_member(json_node_get_object(request), "items");
 
+    gboolean is_cs;
+    is_cs = (strncmp(ipcam_iconfig_get_model(iconfig), "CS", 2) == 0);
+
     if (json_object_has_member (req_obj, "carriage_num")) {
         carriage_str = json_object_get_string_member (req_obj, "carriage_num");
-        ipaddr3 = (strtoul(carriage_str, NULL, 0) & 0xff) + 100;
+        if (is_cs)
+            ipaddr3 = (strtoul(carriage_str, NULL, 0) & 0xff);
+        else
+            ipaddr3 = (strtoul(carriage_str, NULL, 0) & 0xff) + 100;
     }
     if (json_object_has_member (req_obj, "position_num")) {
         position_str = json_object_get_string_member (req_obj, "position_num");
-        ipaddr4 = (strtoul(position_str, NULL, 0) & 0xff) + 70;
+        if (is_cs)
+            ipaddr4 = (strtoul(position_str, NULL, 0) & 0xff);
+        else
+            ipaddr4 = (strtoul(position_str, NULL, 0) & 0xff) + 70;
     }
 
     if (!carriage_str && !position_str)

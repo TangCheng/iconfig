@@ -25,6 +25,7 @@ struct _IpcamIConfigClass
 
 GType ipcam_iconfig_get_type(void);
 
+gchar *ipcam_iconfig_get_model(IpcamIConfig *iconfig);
 GList *ipcam_iconfig_get_users(IpcamIConfig *iconfig);
 void ipcam_iconfig_set_user_password(IpcamIConfig *iconfig, const gchar *username, gchar *password);
 gchar *ipcam_iconfig_get_user_password(IpcamIConfig *iconfig, const gchar *username);
