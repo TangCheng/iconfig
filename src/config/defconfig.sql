@@ -27,9 +27,9 @@ INSERT INTO base_info (name, value, rw)
 INSERT INTO base_info (name, value, rw) 
         VALUES ('comment', '', 1);
 INSERT INTO base_info (name, value, rw) 
-        VALUES ('manufacturer', 'SZYC', 0);
+        VALUES ('manufacturer', 'YXG-Tech', 0);
 INSERT INTO base_info (name, value, rw) 
-        VALUES ('model', 'DCTX-001', 0);
+        VALUES ('model', 'HD-IPCAM001', 0);
 INSERT INTO base_info (name, value, rw) 
         VALUES ('firmware', '1.0.0', 0);
 INSERT INTO base_info (name, value, rw) 
@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS datetime (
         vtype    TEXT NOT NULL
         );
 INSERT INTO datetime (name, value, vtype) 
-        VALUES ('timezone', '(GMT+08:00) Beijing', 'STRING');
+        VALUES ('timezone', 'ChinaStandardTime-8', 'STRING');
 INSERT INTO datetime (name, value, vtype) 
         VALUES ('use_ntp', '0', 'BOOLEAN');
 INSERT INTO datetime (name, value, vtype) 
@@ -86,7 +86,7 @@ INSERT INTO video (name, value, vtype)
         VALUES ('profile', 'baseline', 'STRING');
 /* Main profile */
 INSERT INTO video (name, value, vtype) 
-        VALUES ('master:frame_rate', '10', 'INTEGER');
+        VALUES ('master:frame_rate', '30', 'INTEGER');
 INSERT INTO video (name, value, vtype) 
         VALUES ('master:bit_rate', 'CBR', 'STRING');
 INSERT INTO video (name, value, vtype) 
@@ -120,13 +120,13 @@ INSERT INTO image (name, value, vtype)
 INSERT INTO image (name, value, vtype) 
         VALUES ('3ddnr', '0', 'BOOLEAN');
 INSERT INTO image (name, value, vtype) 
-        VALUES ('brightness', '50', 'INTEGER');
+        VALUES ('brightness', '128', 'INTEGER');
 INSERT INTO image (name, value, vtype) 
-        VALUES ('chrominance', '50', 'INTEGER');
+        VALUES ('chrominance', '128', 'INTEGER');
 INSERT INTO image (name, value, vtype) 
-        VALUES ('contrast', '50', 'INTEGER');
+        VALUES ('contrast', '128', 'INTEGER');
 INSERT INTO image (name, value, vtype) 
-        VALUES ('saturation', '50', 'INTEGER');
+        VALUES ('saturation', '128', 'INTEGER');
 INSERT INTO image (name, value, vtype) 
         VALUES ('scenario', '50Hz', 'STRING');
 /************************************************
@@ -157,9 +157,9 @@ CREATE TABLE IF NOT EXISTS day_night_mode (
 INSERT INTO day_night_mode (name, value) 
         VALUES ('force_night_mode', 0);
 INSERT INTO day_night_mode (name, value) 
-        VALUES ('night_mode_threshold', 50);
+        VALUES ('night_mode_threshold', 30);
 INSERT INTO day_night_mode (name, value) 
-        VALUES ('ir_intensity', 80);
+        VALUES ('ir_intensity', 50);
 /************************************************
  * osd table                                    *
  ************************************************/
@@ -201,7 +201,7 @@ CREATE TABLE IF NOT EXISTS szyc (
         value    TEXT
         );
 INSERT INTO szyc (name, value) 
-        VALUES ('train_num', 'DJ55085');
+        VALUES ('train_num', '000000');
 INSERT INTO szyc (name, value) 
         VALUES ('carriage_num', '1');
 INSERT INTO szyc (name, value) 
@@ -225,13 +225,13 @@ CREATE TABLE IF NOT EXISTS network_static (
         value    TEXT
         );
 INSERT INTO network_static (name, value) 
-        VALUES ('ipaddr', '192.168.101.71');
+        VALUES ('ipaddr', '192.168.1.217');
 INSERT INTO network_static (name, value) 
-        VALUES ('netmask', '255.255.0.0');
+        VALUES ('netmask', '255.255.255.0');
 INSERT INTO network_static (name, value) 
-        VALUES ('gateway', '192.168.0.1');
+        VALUES ('gateway', '192.168.1.1');
 INSERT INTO network_static (name, value) 
-        VALUES ('dns1', '192.168.0.1');
+        VALUES ('dns1', '192.168.1.1');
 INSERT INTO network_static (name, value) 
         VALUES ('dns2', '');
 /************************************************

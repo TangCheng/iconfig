@@ -60,18 +60,21 @@ ipcam_szyc_msg_handler_read_param(IpcamSzycMsgHandler *handler, JsonBuilder *bui
         guint32 position_num = 0;
         const gchar *netif = ipcam_base_app_get_config(IPCAM_BASE_APP(iconfig), "netif");
 
-        gboolean is_cs;
-        is_cs = (strncmp(ipcam_iconfig_get_model(iconfig), "CS", 2) == 0);
+        gboolean is_dctx;
+        const char *model = ipcam_iconfig_get_model(iconfig);
+        is_dctx = (!strncmp(model, "DTTX", 4)
+                   || !strncmp(model, "DCTX", 4));
+
         if (sysutils_network_get_address(netif, &ipaddr, &netmask, NULL) == 0) {
             if (sscanf(ipaddr, "%*u.%*u.%u.%u", &carriage_num, &position_num) == 2) {
                 json_builder_set_member_name(builder, name);
                 if (g_str_equal(name, "carriage_num")) {
-                    if (!is_cs)
+                    if (is_dctx)
                         carriage_num = carriage_num > 100 ? carriage_num - 100 : 0;
                     snprintf(buf, sizeof(buf), "%d", carriage_num);
                 }
                 else if(g_str_equal(name, "position_num")) {
-                    if (!is_cs)
+                    if (is_dctx)
                         position_num = position_num > 70 ? position_num - 70 : 0;
                     snprintf(buf, sizeof(buf), "%d", position_num);
                 }
@@ -180,22 +183,24 @@ ipcam_szyc_msg_handler_apply_network_change(IpcamMessageHandler *handler, JsonNo
 
     req_obj = json_object_get_object_member(json_node_get_object(request), "items");
 
-    gboolean is_cs;
-    is_cs = (strncmp(ipcam_iconfig_get_model(iconfig), "CS", 2) == 0);
+    gboolean is_dctx;
+    const char *model = ipcam_iconfig_get_model(iconfig);
+    is_dctx = (!strncmp(model, "DTTX", 4)
+               || !strncmp(model, "DCTX", 4));
 
     if (json_object_has_member (req_obj, "carriage_num")) {
         carriage_str = json_object_get_string_member (req_obj, "carriage_num");
-        if (is_cs)
-            ipaddr3 = (strtoul(carriage_str, NULL, 0) & 0xff);
-        else
+        if (is_dctx)
             ipaddr3 = (strtoul(carriage_str, NULL, 0) & 0xff) + 100;
+        else
+            ipaddr3 = (strtoul(carriage_str, NULL, 0) & 0xff);
     }
     if (json_object_has_member (req_obj, "position_num")) {
         position_str = json_object_get_string_member (req_obj, "position_num");
-        if (is_cs)
-            ipaddr4 = (strtoul(position_str, NULL, 0) & 0xff);
-        else
+        if (is_dctx)
             ipaddr4 = (strtoul(position_str, NULL, 0) & 0xff) + 70;
+        else
+            ipaddr4 = (strtoul(position_str, NULL, 0) & 0xff);
     }
 
     if (!carriage_str && !position_str)
