@@ -184,6 +184,8 @@ static void ipcam_generic_action_handler_run_impl(IpcamActionHandler *self,
     req_msg = IPCAM_MESSAGE(message);
     g_object_get(G_OBJECT(req_msg), "action", &action, "body", &req_body, NULL);
 
+    g_print("%s: action=%s\n", __func__, action);
+
     hash_val = g_hash_table_lookup(priv->action_hash, action);
     if (hash_val)
     {
