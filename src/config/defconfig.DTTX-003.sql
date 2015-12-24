@@ -333,7 +333,7 @@ CREATE TABLE IF NOT EXISTS event_cover (
         sun           TEXT NOT NULL
         );
 INSERT INTO event_cover (name, enable, sensitivity, left, top, width, height, mon, tue, wed, thu, fri, sat, sun) 
-        VALUES ('region1', 1, 40, 0, 0, 1000, 1000, '', '', '', '', '', '', '');
+        VALUES ('region1', 1, 24, 0, 0, 1000, 1000, '', '', '', '', '', '', '');
 INSERT INTO event_cover (name, enable, sensitivity, left, top, width, height, mon, tue, wed, thu, fri, sat, sun) 
         VALUES ('region2', 0, 50, 0, 0, 67, 90, '', '', '', '', '', '', '');
 /************************************************
